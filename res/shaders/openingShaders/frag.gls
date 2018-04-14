@@ -1,0 +1,38 @@
+#version 400 core
+
+in vec3 vertexPos;
+in vec2 texCoord;
+
+out vec4 color;
+
+uniform float time;
+uniform sampler2D textureSampler;
+uniform vec2 dims;
+
+void main() {
+    vec4 ocolor = vec4(0f, 0f, 1f, 1f);
+    bool xp = mod(vertexPos.x, 1f) < 0.05f || mod(vertexPos.x, 1f) > 0.95f;
+    bool yp = mod(vertexPos.y, 1f) < 0.05f || mod(vertexPos.y, 1f) > 0.95f;
+    bool zp = mod(vertexPos.z, 1f) < 0.05f || mod(vertexPos.z, 1f) > 0.95f;
+    int total = 0;
+    if (xp) {
+        total = total + 1;
+    }
+    if (yp) {
+        total = total + 1;
+    }
+    if (zp) {
+        total = total + 1;
+    }
+    if (total >= 2) {
+        ocolor.xyz = vec3(1f, 1f, 1f);
+    }else if (mod(gl_FragCoord.x/dims.x + gl_FragCoord.y/dims.x, 0.02f) < 0.005f) {
+        ocolor.xyz = vec3(0f, 0.25f, 0.6f);
+    }else {
+        float britness = (sin(100000000000f/(vertexPos.x+vertexPos.y)) + cos(100000000000f/(vertexPos.z+vertexPos.x)) + sin(100000000000f/(vertexPos.y+vertexPos.z)))/6f + 0.2f;
+        britness = mod(britness, 0.000000001f)/0.000000001f;
+        britness = mod(britness, 1f)/2 + 0.25f;
+        ocolor.xyz = vec3(britness, britness, britness);
+    }
+    color = ocolor;
+}
