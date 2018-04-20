@@ -44,6 +44,7 @@ public class EnigWindow {
 	public int framesSinceLastSecond = 0;
 	public int lastFrameCount = 0;
 	public long lastSecond;
+	//public long lastFrame = System.nanoTime();
 	
 	public static EnigWindow mainWindow;
 
@@ -241,6 +242,7 @@ public class EnigWindow {
 	}
 	
 	public void update() {
+		sync(60);
 		for (int i = 0; i < keys.length; i++) {
 			if (keys[i] == 1) {
 				++keys[i];
@@ -272,5 +274,53 @@ public class EnigWindow {
 		}
 		inputEnabled = !inputEnabled;
 		return inputEnabled;
+	}
+	
+	private long variableYieldTime, lastTime;
+	
+	/**
+	 * An accurate sync method that adapts automatically
+	 * to the system it runs on to provide reliable results.
+	 *
+	 * @param fps The desired frame rate, in frames per second
+	 * @author kappa (On the LWJGL Forums)
+	 */
+	private void sync(int fps) {
+		if (fps <= 0) return;
+		
+		long sleepTime = 1000000000 / fps; // nanoseconds to sleep this frame
+		// yieldTime + remainder micro & nano seconds if smaller than sleepTime
+		long yieldTime = Math.min(sleepTime, variableYieldTime + sleepTime % (1000*1000));
+		long overSleep = 0; // time the sync goes over by
+		
+		try {
+			while (true) {
+				long t = System.nanoTime() - lastTime;
+				
+				if (t < sleepTime - yieldTime) {
+					Thread.sleep(1);
+				}else if (t < sleepTime) {
+					// burn the last few CPU cycles to ensure accuracy
+					Thread.yield();
+				}else {
+					overSleep = t - sleepTime;
+					break; // exit while loop
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}finally{
+			lastTime = System.nanoTime() - Math.min(overSleep, sleepTime);
+			
+			// auto tune the time sync should yield
+			if (overSleep > variableYieldTime) {
+				// increase by 200 microseconds (1/5 a ms)
+				variableYieldTime = Math.min(variableYieldTime + 200*1000, sleepTime);
+			}
+			else if (overSleep < variableYieldTime - 200*1000) {
+				// decrease by 2 microseconds
+				variableYieldTime = Math.max(variableYieldTime - 2*1000, 0);
+			}
+		}
 	}
 }

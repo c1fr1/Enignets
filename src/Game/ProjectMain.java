@@ -16,52 +16,30 @@ public class ProjectMain {
 	
 	//project variables
 	
-	EnigFunction func;
-	PlatformSegment platform;
-	VAO platformModel;
-	GameObject platObj;
-	Camera mainCamera;
-	Program plattyproggy;
+	private EnigFunction func;
+	private PlatformSegment platform;
+	private VAO platformModel;
+	private GameObject platObj;
+	private Program plattyproggy;
+	private Player player;
 	
 	public void setup() {
 		//set variables here
 		func = new MountainFunction(0, 0, 5);
 		platform = new FunctionPlatform(func);
-		platformModel = platform.getSurfaceModel(-10, 10, -10, 10, 1000, 1000);
+		platformModel = platform.getSurfaceModel(-10, 10, -10, 10, 50, 50);
 		platObj = new GameObject(platformModel);
-		mainCamera = new Camera(70f, 0.1f, 1000f);
 		plattyproggy = new Program("res/shaders/platformShaders/vert.gls", "res/shaders/platformShaders/frag.gls");
 		EnigWindow.mainWindow.toggleCursorInput();
+		player = new Player(100, 100, 0.1f);
 	}
 	
 	public void gameLoop() {
 		//game here
-		
-		mainCamera.yaw(-(float) EnigWindow.mainWindow.cursorXOffset * UserControls.sensitivity);
-		mainCamera.pitch(-(float) EnigWindow.mainWindow.cursorYOffset * UserControls.sensitivity);
-		if (mainCamera.getPitch() > Math.PI/2) {
-			mainCamera.setPitch((float) Math.PI/2);
-		}else if (mainCamera.getPitch() < -Math.PI/2) {
-			mainCamera.setPitch((float) -Math.PI/2);
-		}
-		if (EnigWindow.mainWindow.keys[UserControls.up] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(0f, -1f, 0f, 0.1f));
-		}else if (EnigWindow.mainWindow.keys[UserControls.down] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(0f, 1f, 0f, 0.1f));
-		}
-		if (EnigWindow.mainWindow.keys[UserControls.forward] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(0f, 0f, 1f, 0.1f));
-		}else if (EnigWindow.mainWindow.keys[UserControls.backward] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(0f, 0f, -1f, 0.1f));
-		}
-		
-		if (EnigWindow.mainWindow.keys[UserControls.left] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(1f, 0f, 0f, 0.1f));
-		}else if (EnigWindow.mainWindow.keys[UserControls.right] > 0) {
-			mainCamera.translate(mainCamera.getRotatedVector(-1f, 0f, 0f, 0.1f));
-		}
+		player.updateRotations();
+		player.updatePosition(platform);
 		plattyproggy.enable();
-		platObj.render(mainCamera);
+		platObj.render(player.cam);
 		
 	}
 	

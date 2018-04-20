@@ -1,6 +1,7 @@
 package engine;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class EnigUtils {
@@ -122,6 +123,15 @@ public class EnigUtils {
 	
 	public static Vector3f resizeVector(Vector3f vec, float target) {
 		return vec.mul(target/vec.length());
+	}
+	
+	public static Vector2f resizeVector(Vector2f vec, float target) {
+		return vec.mul(target/vec.length());
+	}
+	
+	public static Vector2f resizeVector(float x, float z, float target) {
+		float length = (float) Math.sqrt(x*x + z*z);
+		return new Vector2f(x * target/length, z * target/length);
 	}
 }
 /*

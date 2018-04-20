@@ -266,8 +266,8 @@ public class Camera {
 	}
 	
 	public Vector2f getRotated2DVector(float x, float z, float s) {
-		Vector3f ret = new Vector3f(x, 0f, z).rotateX(-2*pitch).rotateY(-2*yaw).rotateZ(-2*roll).mul(s);
-		return new Vector2f(ret.x, ret.z);
+		Vector3f ret = new Vector3f(x, 0f, z).rotateY(-2*yaw);
+		return EnigUtils.resizeVector(ret.x, ret.z, s);
 	}
 }
 /*
