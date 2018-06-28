@@ -3,9 +3,20 @@ package engine.Functions;
 public abstract class EnigFunction {
 
 	int variableCount;
-
+	
+	/**
+	 * returns the value given the input variables
+	 * @param variables input variables
+	 * @return the value given the input variables
+	 */
 	public abstract float evaluate(float[] variables);
-
+	
+	/**
+	 * evaluate the partial derivative of the function given the input variables
+	 * @param variables input variables
+	 * @param variableIndex variable that you are taking a partial derivative
+	 * @return partial derivative given the input
+	 */
 	public abstract float evaluateDerivative(float[] variables, int variableIndex);
 }
 

@@ -1,4 +1,7 @@
-package engine;
+package engine.OpenGL;
+
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,28 +9,28 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-
-public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/dev/src/engine/graph/OBJLoader.java (which is based off of a tutorial I believe)
-
-	public static VAO loadVAO(String fileName) {
+public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/blob/dev/src/engine/graph/OBJLoader.java (which is based off of a tutorial I believe)
+	public float[] vertices;
+	public float[] textCoords;
+	public float[] normals;
+	public int[] indexArray;
+	public static OBJInformation getInfo(String fileName) {
 		List<String> lines = null;
 		try {
 			lines = readAllLines(fileName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		List<Vector3f> vertices = new ArrayList<>();
 		List<Vector2f> textures = new ArrayList<>();
 		List<Vector3f> normals = new ArrayList<>();
-		List<Face> faces = new ArrayList<>();
-
+		List<OBJInformation.Face> faces = new ArrayList<>();
+		
 		for (String line : lines) {
 			//split("\\s+") gets a string without whitespace
 			String[] tokens = line.split("\\s+");
-
+			
 			switch (tokens[0]) {
 				case "v":
 					// Geometric vertex
@@ -53,7 +56,7 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 					normals.add(vec3fNorm);
 					break;
 				case "f":
-					Face face = new Face(tokens[1], tokens[2], tokens[3]);
+					OBJInformation.Face face = new OBJInformation.Face(tokens[1], tokens[2], tokens[3]);
 					faces.add(face);
 					break;
 				default:
@@ -61,13 +64,13 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 					break;
 			}
 		}
-		return reorderLists(vertices, textures, normals, faces);
+		return new OBJInformation(vertices, textures, normals, faces);
 	}
-
+	
 	//reorders lists from obj's into usable form
-	private static VAO reorderLists(List<Vector3f> posList, List<Vector2f> textCoordList,
-									 List<Vector3f> normList, List<Face> facesList) {
-
+	private OBJInformation(List<Vector3f> posList, List<Vector2f> textCoordList,
+									List<Vector3f> normList, List<OBJInformation.Face> facesList) {
+		
 		List<Integer> indices = new ArrayList();
 		// Create position array in the order it has been declared
 		float[] posArr = new float[posList.size() * 3];
@@ -80,30 +83,29 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 		}
 		float[] textCoordArr = new float[posList.size() * 2];
 		float[] normArr = new float[posList.size() * 3];
-
-		for (Face face : facesList) {
-			IdxGroup[] faceVertexIndices = face.getFaceVertexIndices();
-			for (IdxGroup indValue : faceVertexIndices) {
+		
+		for (OBJInformation.Face face : facesList) {
+			OBJInformation.IdxGroup[] faceVertexIndices = face.getFaceVertexIndices();
+			for (OBJInformation.IdxGroup indValue : faceVertexIndices) {
 				processFaceVertex(indValue, textCoordList, normList,
 						indices, textCoordArr, normArr);
 			}
 		}
 		int[] indicesArr = new int[indices.size()];
 		indicesArr = indices.stream().mapToInt((Integer v) -> v).toArray();//positions, texturecoordinates, normals, indices;
-		VAO model = new VAO(posArr, indicesArr, 3);
-		model.addVBO(new VBO(textCoordArr, 2));
-		model.addVBO(new VBO(normArr, 3));
-		return model;
+		vertices = posArr;
+		indexArray = indicesArr;
+		textCoords = textCoordArr;
+		normals = normArr;
 	}
-
-	private static void processFaceVertex(IdxGroup indices, List<Vector2f> textCoordList,
+	private static void processFaceVertex(OBJInformation.IdxGroup indices, List<Vector2f> textCoordList,
 										  List<Vector3f> normList, List<Integer> indicesList,
 										  float[] texCoordArr, float[] normArr) {
-
+		
 		// Set index for vertex coordinates
 		int posIndex = indices.idxPos;
 		indicesList.add(posIndex);
-
+		
 		// Reorder texture coordinates
 		if (indices.idxTextCoord >= 0) {
 			Vector2f textCoord = textCoordList.get(indices.idxTextCoord);
@@ -118,25 +120,25 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 			normArr[posIndex * 3 + 2] = vecNorm.z;
 		}
 	}
-
+	
 	//class that defines a face with helper methods
 	protected static class Face {
 		/**
 		 * List of idxGroup groups for a face triangle (3 vertices per face).
 		 */
-		private IdxGroup[] idxGroups = new IdxGroup[3];
-
+		private OBJInformation.IdxGroup[] idxGroups = new OBJInformation.IdxGroup[3];
+		
 		public Face(String v1, String v2, String v3) {
-			idxGroups = new IdxGroup[3];
+			idxGroups = new OBJInformation.IdxGroup[3];
 			// Parse the lines
 			idxGroups[0] = parseLine(v1);
 			idxGroups[1] = parseLine(v2);
 			idxGroups[2] = parseLine(v3);
 		}
-
-		private IdxGroup parseLine(String line) {
-			IdxGroup idxGroup = new IdxGroup();
-
+		
+		private OBJInformation.IdxGroup parseLine(String line) {
+			OBJInformation.IdxGroup idxGroup = new OBJInformation.IdxGroup();
+			
 			String[] lineTokens = line.split("/");
 			int length = lineTokens.length;
 			//I subtract 1 since arrays start at 0 but OBJ file format assumes that they start at 1
@@ -145,7 +147,7 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 			if (length > 1){
 				// It can be empty if the obj does not define text coords
 				String textCoord = lineTokens[1];
-				idxGroup.idxTextCoord = textCoord.length() > 0 ? Integer.parseInt(textCoord) - 1 : IdxGroup.NO_VALUE;
+				idxGroup.idxTextCoord = textCoord.length() > 0 ? Integer.parseInt(textCoord) - 1 : OBJInformation.IdxGroup.NO_VALUE;
 				//if normals present
 				if (length > 2) {
 					idxGroup.idxVecNormal = Integer.parseInt(lineTokens[2]) - 1;
@@ -153,24 +155,24 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 			}
 			return idxGroup;
 		}
-
-		public IdxGroup[] getFaceVertexIndices() {
+		
+		public OBJInformation.IdxGroup[] getFaceVertexIndices() {
 			return idxGroups;
 		}
-
+		
 	}
-
+	
 	//inner class that holds the information for a group
 	protected static class IdxGroup {
-
+		
 		public static final int NO_VALUE = -1;
-
+		
 		public int idxPos;
-
+		
 		public int idxTextCoord;
-
+		
 		public int idxVecNormal;
-
+		
 		public IdxGroup(){
 			idxPos = NO_VALUE;
 			idxTextCoord = NO_VALUE;
@@ -179,7 +181,6 @@ public class OBJLoader {//based off of https://github.com/MCRewind/3DGame/blob/d
 	}
 	public static List<String> readAllLines(String fileName) throws Exception {
 		List<String> list = new ArrayList<>();
-		//System.out.println(fileName);
 		try (BufferedReader br = new BufferedReader(new FileReader(new File(fileName)))) {
 			String line;
 			while ((line = br.readLine()) != null) {

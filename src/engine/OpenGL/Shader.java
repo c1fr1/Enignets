@@ -1,4 +1,4 @@
-package engine;
+package engine.OpenGL;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,22 +9,22 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL20.*;
 
 public class Shader {
-
-	private int shaderID;
-
+	
+	public static ArrayList<Integer> shaderIDs = new ArrayList<>();
+	
+	private int id;
+	
 	public Attribute[] attributes;
 	public Uniform[] uniforms;
-
+	
 	/**
 	 * creates a new shader
-	 * @param path
-	 * path to the shader
-	 * @param stype
-	 * type of shader
+	 * @param path path to the shader
+	 * @param stype type of shader
 	 */
 	public Shader(String path, int stype) {
 		String shaderSource = "";
-
+		
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
 			String line;
@@ -107,7 +107,10 @@ public class Shader {
 						tempuniflist.add(new Uniform(name, vecSize));
 					}else if (type.startsWith("mat")) {
 						vecSize = Integer.parseInt(type.substring(3));
-						tempuniflist.add(new Uniform(name, vecSize, true));
+						tempuniflist.add(new Uniform(name, vecSize, 2));
+					}else if (type.startsWith("int")) {
+						vecSize = 1;
+						tempuniflist.add(new Uniform(name, vecSize, 1));
 					}
 				}
 				shaderSource += line + "\n";
@@ -123,19 +126,31 @@ public class Shader {
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
-		shaderID = glCreateShader(stype);
-		glShaderSource(shaderID, shaderSource);
-		glCompileShader(shaderID);
-		if(glGetShaderi(shaderID, GL_COMPILE_STATUS) != 1) {
-			throw new RuntimeException("Failed to compile shader: " + path + "! " + glGetShaderInfoLog(shaderID));
+		id = glCreateShader(stype);
+		glShaderSource(id, shaderSource);
+		glCompileShader(id);
+		if(glGetShaderi(id, GL_COMPILE_STATUS) != 1) {
+			throw new RuntimeException("Failed to compile shader: " + path + "! " + glGetShaderInfoLog(id));
 		}
 	}
-
+	
+	/**
+	 * get the shader handle
+	 * @return shader handle
+	 */
 	public int getID() {
-		return shaderID;
+		return id;
 	}
-
+	
+	/**
+	 * deletes the shader
+	 */
 	public void destroy() {
-		glDeleteShader(shaderID);
+		glDeleteShader(id);
+		for (int i = 0; i < shaderIDs.size(); ++i) {
+			if (shaderIDs.get(i) == id) {
+				shaderIDs.remove(i);
+			}
+		}
 	}
 }
