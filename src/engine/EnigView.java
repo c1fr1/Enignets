@@ -31,6 +31,26 @@ public abstract class EnigView {
 	}
 	
 	/**
+	 * creates a new main view
+	 * @param width width of the new window
+	 * @param height height of the new window
+	 */
+	public EnigView(int width, int height) {
+		window = new EnigWindow(width, height, getName());
+		setup();
+		while ( !glfwWindowShouldClose(EnigWindow.mainWindow.id) ) {
+			window.update();
+			++framesSinceStart;
+			if (loop()) {
+				cleanUp();
+				break;
+			}
+			cleanUp();
+		}
+		window.terminate();
+	}
+	
+	/**
 	 * creates a new view based on an existing window that can be not the main view
 	 * @param swindow window for the view to take place in
 	 * @param isMain wether or not the window should be terminated once the task ends
