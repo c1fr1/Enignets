@@ -2,8 +2,6 @@ package engine.OpenAL;
 
 import engine.Entities.Camera;
 import engine.Entities.PositionInfo;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;

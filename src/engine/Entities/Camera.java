@@ -356,7 +356,7 @@ public class Camera extends Vector3f {
 	 * @return new rotated vector
 	 */
 	public Vector2f getRotated2DVector(float x, float z, float s) {
-		Vector3f ret = new Vector3f(x, 0f, z).rotateY(-2*yaw);
+		Vector3f ret = new Vector3f(x, 0f, z).rotateY(-yaw);
 		return EnigUtils.resizeVector(ret.x, ret.z, s);
 	}
 }

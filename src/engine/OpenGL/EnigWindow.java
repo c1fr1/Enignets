@@ -24,9 +24,9 @@ import static org.lwjgl.openal.AL10.alDeleteSources;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.opengl.ARBImaging.GL_TABLE_TOO_LARGE;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_OUT_OF_MEMORY;
 import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL20.GL_SHADING_LANGUAGE_VERSION;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -36,8 +36,9 @@ public class EnigWindow {
 	
 	private int width;
 	private int height;
+	private float aspectRatio;
 	
-	public int fps = 60;
+	public int fps = 144;
 	
 	public float cursorXFloat;
 	public float cursorYFloat;
@@ -159,15 +160,20 @@ public class EnigWindow {
 		
 		// Configure GLFW
 		glfwDefaultWindowHints(); // optional, the current window hints are already the default
-		glfwWindowHint(GLFW_SAMPLES, 8);
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 		glfwWindowHint(GLFW_DECORATED, decorated ? 1 : 0);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 		
 		// Create the window
 		GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		width = vidMode.width();
 		height = vidMode.height();
+		setAspectRatio();
 		
 		id = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);//creates window
 		
@@ -202,7 +208,9 @@ public class EnigWindow {
 		});
 		
 		glfwSetMouseButtonCallback(id, (long window, int button, int action, int mods) -> {
-			mouseButtons[button] = action;
+			if (action >= 0) {
+				mouseButtons[button] = action;
+			}
 		});
 		
 		
@@ -238,6 +246,7 @@ public class EnigWindow {
 		glfwSetWindowSizeCallback(id, (long window, int w, int h) -> {
 			width = w;
 			height = h;
+			setAspectRatio();
 			glViewport(0, 0, width, height);
 		});
 		
@@ -274,15 +283,20 @@ public class EnigWindow {
 		
 		// Configure GLFW
 		glfwDefaultWindowHints(); // optional, the current window hints are already the default
-		glfwWindowHint(GLFW_SAMPLES, 8);
+		glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 		glfwWindowHint(GLFW_DECORATED, decorated ? 1 : 0);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 		
 		// Create the window
 		//GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		width = iw;
 		height = ih;
+		setAspectRatio();
 		
 		id = glfwCreateWindow(width, height, title, NULL, NULL);//fullscreen
 		
@@ -317,7 +331,9 @@ public class EnigWindow {
 		});
 		
 		glfwSetMouseButtonCallback(id, (long window, int button, int action, int mods) -> {
-			mouseButtons[button] = action;
+			if (action >= 0) {
+				mouseButtons[button] = action;
+			}
 		});
 		
 		
@@ -374,6 +390,8 @@ public class EnigWindow {
 	 * runs opening sequence
 	 */
 	public void runOpeningSequence() {
+		System.out.println("OpenGL Version " + glGetString(GL_VERSION));
+		System.out.println("GLSL   Version " + glGetString(GL_SHADING_LANGUAGE_VERSION));
 		int frame = 0;
 		ShaderProgram openingShader = new ShaderProgram("res/shaders/openingShaders/vert", "res/shaders/openingShaders/frag");
 		GameObject openingObject = new GameObject("res/enignets.obj");
@@ -499,6 +517,10 @@ public class EnigWindow {
 		}
 	}
 	
+	private void setAspectRatio() {
+		aspectRatio = (float) width / (float) height;
+	}
+	
 	/**
 	 * initializes openGL
 	 */
@@ -529,9 +551,14 @@ public class EnigWindow {
 	 */
 	public void update() {
 		sync(fps);
-		for (int i = 0; i < keys.length; i++) {
+		for (int i = 0; i < keys.length; ++i) {
 			if (keys[i] == 1) {
 				++keys[i];
+			}
+		}
+		for (int i = 0; i < mouseButtons.length; ++i) {
+			if (mouseButtons[i] == 1) {
+				++mouseButtons[i];
 			}
 		}
 	}
@@ -590,7 +617,7 @@ public class EnigWindow {
 				long t = System.nanoTime() - lastTime;
 				
 				if (t < sleepTime - yieldTime) {
-					Thread.sleep(1);
+					//Thread.sleep(1);
 				}else if (t < sleepTime) {
 					// burn the last few CPU cycles to ensure accuracy
 					Thread.yield();
@@ -599,8 +626,6 @@ public class EnigWindow {
 					break; // exit while loop
 				}
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}finally{
 			lastTime = System.nanoTime() - Math.min(overSleep, sleepTime);
 			
@@ -630,5 +655,9 @@ public class EnigWindow {
 	 */
 	public int getHeight() {
 		return height;
+	}
+	
+	public float getAspectRatio() {
+		return aspectRatio;
 	}
 }

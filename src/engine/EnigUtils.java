@@ -224,6 +224,17 @@ public class EnigUtils {
 		}
 		return ret;
 	}
+	
+	/**
+	 * clamps a float to a given range
+	 * @param val input
+	 * @param min minimum
+	 * @param max maximum
+	 * @return clamped value
+	 */
+	public static float clamp(float val, float min, float max) {
+		return Math.max(min, Math.min(max, val));
+	}
 }
 /*
 

@@ -3,8 +3,6 @@ package engine.OpenGL;
 import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
-import static org.lwjgl.opengl.GL20.glUseProgram;
 
 public class ShaderProgram {
 	

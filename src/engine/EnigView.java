@@ -3,73 +3,39 @@ package engine;
 import engine.OpenGL.EnigWindow;
 import engine.OpenGL.ShaderProgram;
 
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class EnigView {
 	public EnigWindow window;
 	
-	public long framesSinceStart = 0;
+	public float loopStartTime;
+	
+	public float deltaTime;
+	
+	public float frameStartTime;
 	
 	/**
 	 * creates a new main view
 	 */
-	public EnigView() {
-		window = new EnigWindow(getName());
-		setup();
-		while ( !glfwWindowShouldClose(EnigWindow.mainWindow.id) ) {
-			window.update();
-			++framesSinceStart;
-			if (loop()) {
-				cleanUp();
-				break;
-			}
-			cleanUp();
-		}
-		window.terminate();
-	}
-	
-	/**
-	 * creates a new main view
-	 * @param width width of the new window
-	 * @param height height of the new window
-	 */
-	public EnigView(int width, int height) {
-		window = new EnigWindow(width, height, getName());
-		setup();
-		while ( !glfwWindowShouldClose(EnigWindow.mainWindow.id) ) {
-			window.update();
-			++framesSinceStart;
-			if (loop()) {
-				cleanUp();
-				break;
-			}
-			cleanUp();
-		}
-		window.terminate();
-	}
-	
-	/**
-	 * creates a new view based on an existing window that can be not the main view
-	 * @param swindow window for the view to take place in
-	 * @param isMain wether or not the window should be terminated once the task ends
-	 */
-	public EnigView(EnigWindow swindow, boolean isMain) {
+	public EnigView(EnigWindow swindow) {
 		window = swindow;
-		setup();
-		while ( !glfwWindowShouldClose(EnigWindow.mainWindow.id) ) {
-			window.update();
-			++framesSinceStart;
+	}
+	
+	public void runLoop() {
+		loopStartTime = (float) System.nanoTime()/1e9f;
+		frameStartTime = loopStartTime;
+		while (!glfwWindowShouldClose(window.id)) {
+			float newTime = (float) System.nanoTime()/1e9f;
+			deltaTime = frameStartTime - newTime;
+			frameStartTime = newTime;
 			if (loop()) {
 				cleanUp();
 				break;
-			};
+			}
+			window.update();
 			cleanUp();
 		}
-		if (isMain) {
-			window.terminate();
-		}
+		setDown();
 	}
 	
 	/**
@@ -91,13 +57,7 @@ public abstract class EnigView {
 	public abstract boolean loop();
 	
 	/**
-	 * sets up the view
+	 * does any neccisary cleanup
 	 */
-	public abstract void setup();
-	
-	/**
-	 * gets the name of the window
-	 * @return name of the window
-	 */
-	public abstract String getName();
+	public void setDown() {};
 }

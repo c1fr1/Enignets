@@ -4,8 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,10 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 	public float[] textCoords;
 	public float[] normals;
 	public int[] indexArray;
-	public static OBJInformation getInfo(String fileName) {
+	public OBJInformation() {
+	
+	}
+	public OBJInformation getInfo(String fileName) {
 		List<String> lines = null;
 		try {
 			lines = readAllLines(fileName);
@@ -25,12 +27,12 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		List<Vector3f> vertices = new ArrayList<>();
 		List<Vector2f> textures = new ArrayList<>();
 		List<Vector3f> normals = new ArrayList<>();
-		List<OBJInformation.Face> faces = new ArrayList<>();
-		
+		List<Face> faces = new ArrayList<>();
+
 		for (String line : lines) {
 			//split("\\s+") gets a string without whitespace
 			String[] tokens = line.split("\\s+");
-			
+
 			switch (tokens[0]) {
 				case "v":
 					// Geometric vertex
@@ -66,11 +68,11 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		}
 		return new OBJInformation(vertices, textures, normals, faces);
 	}
-	
+
 	//reorders lists from obj's into usable form
 	private OBJInformation(List<Vector3f> posList, List<Vector2f> textCoordList,
-									List<Vector3f> normList, List<OBJInformation.Face> facesList) {
-		
+						   List<Vector3f> normList, List<Face> facesList) {
+
 		List<Integer> indices = new ArrayList();
 		// Create position array in the order it has been declared
 		float[] posArr = new float[posList.size() * 3];
@@ -83,7 +85,7 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		}
 		float[] textCoordArr = new float[posList.size() * 2];
 		float[] normArr = new float[posList.size() * 3];
-		
+
 		for (OBJInformation.Face face : facesList) {
 			OBJInformation.IdxGroup[] faceVertexIndices = face.getFaceVertexIndices();
 			for (OBJInformation.IdxGroup indValue : faceVertexIndices) {
@@ -101,11 +103,11 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 	private static void processFaceVertex(OBJInformation.IdxGroup indices, List<Vector2f> textCoordList,
 										  List<Vector3f> normList, List<Integer> indicesList,
 										  float[] texCoordArr, float[] normArr) {
-		
+
 		// Set index for vertex coordinates
 		int posIndex = indices.idxPos;
 		indicesList.add(posIndex);
-		
+
 		// Reorder texture coordinates
 		if (indices.idxTextCoord >= 0) {
 			Vector2f textCoord = textCoordList.get(indices.idxTextCoord);
@@ -120,14 +122,14 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 			normArr[posIndex * 3 + 2] = vecNorm.z;
 		}
 	}
-	
+
 	//class that defines a face with helper methods
 	protected static class Face {
 		/**
 		 * List of idxGroup groups for a face triangle (3 vertices per face).
 		 */
 		private OBJInformation.IdxGroup[] idxGroups = new OBJInformation.IdxGroup[3];
-		
+
 		public Face(String v1, String v2, String v3) {
 			idxGroups = new OBJInformation.IdxGroup[3];
 			// Parse the lines
@@ -135,10 +137,10 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 			idxGroups[1] = parseLine(v2);
 			idxGroups[2] = parseLine(v3);
 		}
-		
+
 		private OBJInformation.IdxGroup parseLine(String line) {
 			OBJInformation.IdxGroup idxGroup = new OBJInformation.IdxGroup();
-			
+
 			String[] lineTokens = line.split("/");
 			int length = lineTokens.length;
 			//I subtract 1 since arrays start at 0 but OBJ file format assumes that they start at 1
@@ -155,7 +157,6 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 			}
 			return idxGroup;
 		}
-		
 		public OBJInformation.IdxGroup[] getFaceVertexIndices() {
 			return idxGroups;
 		}
@@ -179,9 +180,9 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 			idxVecNormal = NO_VALUE;
 		}
 	}
-	public static List<String> readAllLines(String fileName) throws Exception {
+	public List<String> readAllLines(String fileName) throws Exception {
 		List<String> list = new ArrayList<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(fileName)))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(fileName)))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				list.add(line);

@@ -4,13 +4,9 @@ import com.sun.media.sound.WaveFileReader;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
@@ -32,7 +28,8 @@ public class Sound {
 		try {
 			id = alGenBuffers();
 			soundIDs.add(id);
-			InputStream url = new FileInputStream(new File(file));//Thread.currentThread().getContextClassLoader().getResource(file);
+			
+			InputStream url = getClass().getClassLoader().getResourceAsStream(file);
 			AudioInputStream ais = new WaveFileReader().getAudioInputStream(url);
 			AudioFormat format = ais.getFormat();
 			int channels = 0;

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL30.*;
 
 public class VAO {
@@ -162,7 +161,7 @@ public class VAO {
 	 * @param path path to the file
 	 */
 	public VAO(String path) {
-		OBJInformation info = OBJInformation.getInfo(path);
+		OBJInformation info = new OBJInformation().getInfo(path);
 		vbos = new VBO[1];
 		id = glGenVertexArrays();
 		vaoIDs.add(id);

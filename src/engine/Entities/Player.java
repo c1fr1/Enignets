@@ -1,18 +1,11 @@
 package engine.Entities;
 
-import Game.UserControls;
 import engine.EnigUtils;
 import engine.OpenGL.EnigWindow;
 import engine.Platform.PlatformSegment;
+import game.UserControls;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
-
-import java.util.Vector;
-
-import static org.lwjgl.openal.AL10.AL_POSITION;
-import static org.lwjgl.openal.AL10.AL_VELOCITY;
-import static org.lwjgl.openal.AL10.alListener3f;
 
 public class Player extends Camera {
 	public int health;
