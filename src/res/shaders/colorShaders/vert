@@ -10,7 +10,6 @@ out vec2 texCoord;
 uniform mat4 matrix;
 
 void main() {
-	gl_Position = matrix * vec4(vertices, 1f);
-	//gl_Position = projectionMatrix * viewMatrix * transformationMatrix * vec4(vertices, 1f);
+	gl_Position = matrix * vec4(vertices, 1);
 	texCoord = textCoords;
 }

@@ -81,7 +81,7 @@ public class FBO {
 	 */
 	public static void prepareDefaultRender() {
 		bindDefault();
-		glViewport(0, 0, EnigWindow.mainWindow.getWidth(), EnigWindow.mainWindow.getHeight());
+		EnigWindow.mainWindow.setViewport();
 		clearCurrentFrameBuffer();
 	}
 	

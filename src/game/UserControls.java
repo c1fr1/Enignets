@@ -97,7 +97,7 @@ public class UserControls {
 		}
 		return false;
 	}
-	
+}
 	
 	
 	
@@ -111,4 +111,3 @@ public class UserControls {
 	oh btw
 	this variable has been moved from this file, to the Camera file, so you can have different cameras with different types of cameras
 																																		 */
-}

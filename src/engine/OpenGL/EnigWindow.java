@@ -247,7 +247,7 @@ public class EnigWindow {
 			width = w;
 			height = h;
 			setAspectRatio();
-			glViewport(0, 0, width, height);
+			setViewport();
 		});
 		
 		initOpenGL();
@@ -261,7 +261,7 @@ public class EnigWindow {
 		
 		mainWindow = this;
 		
-		runOpeningSequence();
+		//runOpeningSequence();
 	}
 	
 	/**
@@ -369,7 +369,7 @@ public class EnigWindow {
 		glfwSetWindowSizeCallback(id, (long window, int w, int h) -> {
 			width = w;
 			height = h;
-			glViewport(0, 0, width, height);
+			setViewport();
 		});
 		
 		initOpenGL();
@@ -383,7 +383,7 @@ public class EnigWindow {
 		
 		mainWindow = this;
 		
-		runOpeningSequence();
+		//runOpeningSequence();
 	}
 	
 	/**
@@ -639,6 +639,13 @@ public class EnigWindow {
 				variableYieldTime = Math.max(variableYieldTime - 2*1000, 0);
 			}
 		}
+	}
+	
+	public void setViewport() {
+		int[] fbwidth = new int[1];
+		int[] fbheight = new int[1];
+		glfwGetFramebufferSize(id, fbwidth, fbheight);
+		glViewport(0, 0, fbwidth[0], fbheight[0]);
 	}
 	
 	/**
