@@ -4,7 +4,7 @@ import engine.OpenGL.EnigWindow;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class UserControls {
+public class TestUserControls {
 	public static int[] forward = new int[] {GLFW_KEY_W};
 	public static int[] backward = new int[] {GLFW_KEY_S};
 	public static int[] left = new int[] {GLFW_KEY_A};

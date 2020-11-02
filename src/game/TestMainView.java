@@ -2,7 +2,6 @@ package game;
 
 import engine.*;
 import engine.Entities.GameObject;
-import engine.Entities.Player;
 import engine.OpenAL.Sound;
 import engine.OpenAL.SoundSource;
 import engine.OpenGL.*;
@@ -14,8 +13,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_K;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_L;
 import static org.lwjgl.opengl.GL11.*;
 
-public class MainView extends EnigView {
-	public static MainView main;
+public class TestMainView extends EnigView {
+	public static TestMainView main;
 	
 	//project variables
 	
@@ -29,7 +28,7 @@ public class MainView extends EnigView {
 	private PlatformSegment platform;
 	private GameObject platObj;
 	private ShaderProgram plattyproggy;
-	private Player player;
+	private TestPlatformPlayer player;
 	
 	private VAO platformModel;
 	private VAO screen2;
@@ -42,14 +41,14 @@ public class MainView extends EnigView {
 	private SoundSource boxSource;
 	private Sound boxSound;
 
-	public MainView(EnigWindow window) {
+	public TestMainView(EnigWindow window) {
 		super(window);
 		EnigWindow.mainWindow.toggleCursorInput();
 		platformModel = new VAO("res/plat.obj");
 		platform = new ModelPlatform(platformModel);
 		platObj = new GameObject(platformModel);
 		plattyproggy = new ShaderProgram("platformShaders");
-		player = new Player(100, 100, 0.05f);
+		player = new TestPlatformPlayer(100, 100, 0.05f);
 		screen2 = new VAO(-1f, 0.5f, 0.5f, 0.5f);
 		screena = new VAO(-1f, -1f, 2f, 2f);
 		mainFBO = new FBO(new Texture(1920, 1080));
@@ -77,7 +76,7 @@ public class MainView extends EnigView {
 		plattyproggy.enable();
 		player.updateRotations();
 		player.updatePosition(platform, window);
-		if (UserControls.pause(window)) {
+		if (TestUserControls.pause(window)) {
 			window.toggleCursorInput();
 		}
 		platObj.render(player);
@@ -93,7 +92,7 @@ public class MainView extends EnigView {
 		screen2.fullRender();
 		boxSource.updateSourcePosition(player);
 		boxSource.setPos(boxModel);
-		if (UserControls.quit(window)) {
+		if (TestUserControls.quit(window)) {
 			return true;
 		}
 		return false;
@@ -101,7 +100,7 @@ public class MainView extends EnigView {
 	
 	public static void main(String[] args) {
 		EnigWindow window = new EnigWindow("Enignets game");
-		main = new MainView(window);
+		main = new TestMainView(window);
 		main.runLoop();
 	}
 }

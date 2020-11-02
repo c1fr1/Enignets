@@ -1,13 +1,14 @@
-package engine.Entities;
+package game;
 
 import engine.EnigUtils;
+import engine.Entities.Camera;
 import engine.OpenGL.EnigWindow;
 import engine.Platform.PlatformSegment;
-import game.UserControls;
+import game.TestUserControls;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-public class Player extends Camera {
+public class TestPlatformPlayer extends Camera {
 	public int health;
 	public int mana;
 	
@@ -21,7 +22,7 @@ public class Player extends Camera {
 	 * @param mna starting mana
 	 * @param sped speed that the player travels
 	 */
-	public Player(int hp, int mna, float sped) {
+	public TestPlatformPlayer(int hp, int mna, float sped) {
 		super(70f, 0.1f, 1000f);
 		health = hp;
 		mana = mna;
@@ -86,15 +87,15 @@ public class Player extends Camera {
 	 * @param w window to get controls
 	 */
 	public void updatePosition(PlatformSegment plane, EnigWindow w) {
-		if (UserControls.forward(w)) {
+		if (TestUserControls.forward(w)) {
 			moveAlongPlane(getRotated2DVector(0f, -1f, 1), plane);
-		}else if (UserControls.backward(w)) {
+		}else if (TestUserControls.backward(w)) {
 			moveAlongPlane(getRotated2DVector(0f, 1f, 1), plane);
 		}
 		
-		if (UserControls.left(w)) {
+		if (TestUserControls.left(w)) {
 			moveAlongPlane(getRotated2DVector(-1f, 0, 1), plane);
-		}else if (UserControls.right(w)) {
+		}else if (TestUserControls.right(w)) {
 			moveAlongPlane(getRotated2DVector(1f, 0f, 1), plane);
 		}
 	}
@@ -103,8 +104,8 @@ public class Player extends Camera {
 	 * updates the rotations of the player according to the change in cursor postion
 	 */
 	public void updateRotations() {
-		yaw(-(float) EnigWindow.mainWindow.cursorXOffset * UserControls.sensitivity);
-		pitch(-(float) EnigWindow.mainWindow.cursorYOffset * UserControls.sensitivity);
+		yaw(-(float) EnigWindow.mainWindow.cursorXOffset * TestUserControls.sensitivity);
+		pitch(-(float) EnigWindow.mainWindow.cursorYOffset * TestUserControls.sensitivity);
 		if (getPitch() > Math.PI/2) {
 			setPitch((float) Math.PI/2);
 		}else if (getPitch() < -Math.PI/2) {
