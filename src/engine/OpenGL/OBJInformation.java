@@ -1,5 +1,6 @@
 package engine.OpenGL;
 
+import engine.Platform.Simplex2v3d;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -14,7 +15,7 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 	public float[] normals;
 	public int[] indexArray;
 	public OBJInformation() {
-	
+
 	}
 	public OBJInformation getInfo(String fileName) {
 		List<String> lines = null;
@@ -23,7 +24,7 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		List<Vector3f> vertices = new ArrayList<>();
 		List<Vector2f> textures = new ArrayList<>();
 		List<Vector3f> normals = new ArrayList<>();
@@ -71,7 +72,7 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 
 	//reorders lists from obj's into usable form
 	private OBJInformation(List<Vector3f> posList, List<Vector2f> textCoordList,
-						   List<Vector3f> normList, List<Face> facesList) {
+	                       List<Vector3f> normList, List<Face> facesList) {
 
 		List<Integer> indices = new ArrayList();
 		// Create position array in the order it has been declared
@@ -101,8 +102,8 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		normals = normArr;
 	}
 	private static void processFaceVertex(OBJInformation.IdxGroup indices, List<Vector2f> textCoordList,
-										  List<Vector3f> normList, List<Integer> indicesList,
-										  float[] texCoordArr, float[] normArr) {
+	                                      List<Vector3f> normList, List<Integer> indicesList,
+	                                      float[] texCoordArr, float[] normArr) {
 
 		// Set index for vertex coordinates
 		int posIndex = indices.idxPos;
@@ -160,20 +161,20 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 		public OBJInformation.IdxGroup[] getFaceVertexIndices() {
 			return idxGroups;
 		}
-		
+
 	}
-	
+
 	//inner class that holds the information for a group
 	protected static class IdxGroup {
-		
+
 		public static final int NO_VALUE = -1;
-		
+
 		public int idxPos;
-		
+
 		public int idxTextCoord;
-		
+
 		public int idxVecNormal;
-		
+
 		public IdxGroup(){
 			idxPos = NO_VALUE;
 			idxTextCoord = NO_VALUE;
@@ -189,5 +190,28 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 			}
 		}
 		return list;
+	}
+
+	public static Simplex2v3d[] getSimplexArray(String path) {
+		OBJInformation info = new OBJInformation().getInfo(path);
+		Simplex2v3d[] ret = new Simplex2v3d[info.indexArray.length / 3];
+		int idxA;
+		int idxB;
+		int idxC;
+		for (int i = 0; i < ret.length; ++i) {
+			idxA = info.indexArray[i * 3];
+			idxB = info.indexArray[i * 3 + 1];
+			idxC = info.indexArray[i * 3 + 2];
+			ret[i] = new Simplex2v3d(info.vertices[idxA * 3],
+					info.vertices[idxA * 3 + 1],
+					info.vertices[idxA * 3 + 2],
+					info.vertices[idxB * 3],
+					info.vertices[idxB * 3 + 1],
+					info.vertices[idxB * 3 + 2],
+					info.vertices[idxC * 3],
+					info.vertices[idxC * 3 + 1],
+					info.vertices[idxC * 3 + 2]);
+		}
+		return ret;
 	}
 }

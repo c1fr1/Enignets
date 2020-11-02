@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.GL15.*;
 
 public class VBO {
-	
+
 	public static ArrayList<Integer> vboIDs = new ArrayList<>();
-	
+
 	private int vecSize;
-	
+
 	private float[] data;
-	
+
 	private int id;
-	
+
 	/**
 	 * creates a new vbo based on a list of floats
 	 * @param array information
@@ -25,7 +25,7 @@ public class VBO {
 		vboIDs.add(id);
 		setData(array);
 	}
-	
+
 	/**
 	 * get the size of the vector
 	 * @return size of the vector
@@ -33,7 +33,7 @@ public class VBO {
 	public int getVecSize() {
 		return vecSize;
 	}
-	
+
 	/**
 	 * get the vbo handle
 	 * @return vbo handle
@@ -41,7 +41,7 @@ public class VBO {
 	public int getId() {
 		return id;
 	}
-	
+
 	/**
 	 * get the information
 	 * @return info
@@ -49,7 +49,7 @@ public class VBO {
 	public float[] getData() {
 		return data;
 	}
-	
+
 	/**
 	 * sets the values of the vbos
 	 * @param ndata new information
@@ -59,7 +59,7 @@ public class VBO {
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 		glBufferData(GL_ARRAY_BUFFER, data, GL_STATIC_DRAW);
 	}
-	
+
 	/**
 	 * deletes the vbo
 	 */
@@ -72,7 +72,7 @@ public class VBO {
 			}
 		}
 	}
-	
+
 	/**
 	 * get the number of vertices in the vbo
 	 * @return number of vertices
@@ -80,7 +80,7 @@ public class VBO {
 	public int getVertexCount() {
 		return data.length/vecSize;
 	}
-	
+
 	/**
 	 * square texture coordinate buffer object
 	 * @return creates a new vbo with square texture coordinates

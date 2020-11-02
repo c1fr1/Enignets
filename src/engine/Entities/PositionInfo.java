@@ -15,7 +15,7 @@ public class PositionInfo extends Vector3f {
 	public PositionInfo() {
 		rotationMatrix = new Matrix4f();
 	}
-	
+
 	/**
 	 * creates default info from a position
 	 * @param x x position
@@ -26,7 +26,7 @@ public class PositionInfo extends Vector3f {
 		super(x, y, z);
 		rotationMatrix = new Matrix4f();
 	}
-	
+
 	/**
 	 * creates info from a position and rotation
 	 * @param x x position
@@ -40,7 +40,7 @@ public class PositionInfo extends Vector3f {
 		super(x, y, z);
 		rotationMatrix = new Matrix4f().setRotationXYZ(pitch, yaw, roll);
 	}
-	
+
 	/**
 	 * creates info based on a position and rotation matrix
 	 * @param x x position
@@ -52,7 +52,7 @@ public class PositionInfo extends Vector3f {
 		super(x, y, z);
 		this.rotationMatrix = rotationMatrix;
 	}
-	
+
 	/**
 	 * get a vector representing the rotation of the object
 	 * @return x = pitch, y = yaw, z = roll
@@ -64,7 +64,7 @@ public class PositionInfo extends Vector3f {
 		}
 		return rotations;
 	}
-	
+
 	/**
 	 * set the current rotations
 	 * @param ax pitch
@@ -75,7 +75,7 @@ public class PositionInfo extends Vector3f {
 		rotationMatrix = new Matrix4f().setRotationXYZ(ax, ay, az);
 		needsUpdate = true;
 	}
-	
+
 	/**
 	 * get the current pitch of the rotation matrix
 	 * @return current pitch
@@ -87,7 +87,7 @@ public class PositionInfo extends Vector3f {
 		}
 		return rotations.x;
 	}
-	
+
 	/**
 	 * get the current yaw of the rotation matrix
 	 * @return current yaw
@@ -99,7 +99,7 @@ public class PositionInfo extends Vector3f {
 		}
 		return rotations.y;
 	}
-	
+
 	/**
 	 * get the current roll of the rotation matrix
 	 * @return current roll
@@ -111,7 +111,7 @@ public class PositionInfo extends Vector3f {
 		}
 		return rotations.z;
 	}
-	
+
 	/**
 	 * sets the position to a vector
 	 * @param npos vector representing the new position
@@ -121,7 +121,7 @@ public class PositionInfo extends Vector3f {
 		y = npos.y;
 		z = npos.z;
 	}
-	
+
 	/**
 	 * sets the position to a vector
 	 * @param x new x
@@ -133,7 +133,7 @@ public class PositionInfo extends Vector3f {
 		this.y = y;
 		this.z = z;
 	}
-	
+
 	/**
 	 * adds a vector to the current position
 	 * @param tpos translation
@@ -141,7 +141,7 @@ public class PositionInfo extends Vector3f {
 	public void translate(Vector3f tpos) {
 		super.add(tpos);
 	}
-	
+
 	/**
 	 * adds a vector to the current position
 	 * @param x x translation
@@ -151,7 +151,7 @@ public class PositionInfo extends Vector3f {
 	public void translate(float x, float y, float z) {
 		super.add(x, y, z);
 	}
-	
+
 	/**
 	 * changes the pitch of the rotation matrix
 	 * @param amount change of pitch
@@ -161,7 +161,7 @@ public class PositionInfo extends Vector3f {
 		tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		needsUpdate = true;
 	}
-	
+
 	/**
 	 * changes the yaw of the rotation matrix
 	 * @param amount change in yaw
@@ -171,7 +171,7 @@ public class PositionInfo extends Vector3f {
 		tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		needsUpdate = true;
 	}
-	
+
 	/**
 	 * changes the roll of the rotation matrix
 	 * @param amount change in roll
@@ -181,7 +181,7 @@ public class PositionInfo extends Vector3f {
 		tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		needsUpdate = true;
 	}
-	
+
 	/**
 	 * rotates a vector by the current rotation matrix
 	 * @param vector input vector
@@ -190,7 +190,7 @@ public class PositionInfo extends Vector3f {
 	public Vector3f rotateVector(Vector3f vector) {
 		return rotateVector(vector.x, vector.y, vector.z);
 	}
-	
+
 	/**
 	 * rotates a vector by the current rotation matrix
 	 * @param vx input x
@@ -209,7 +209,7 @@ public class PositionInfo extends Vector3f {
 		ret.rotateZ(rotations.z);
 		return ret;
 	}
-	
+
 	/**
 	 * gets the current rotation matrix
 	 * @return rotation matrix
@@ -217,7 +217,7 @@ public class PositionInfo extends Vector3f {
 	public Matrix4f getRotationMatrix() {
 		return rotationMatrix;
 	}
-	
+
 	/**
 	 * a vector that points in the direction the rotation matrix is facing
 	 * @return rotated vector
@@ -225,7 +225,7 @@ public class PositionInfo extends Vector3f {
 	public Vector3f getDirectionVector() {
 		return rotateVector(0, 0, -1);
 	}
-	
+
 	/**
 	 * rotate the camera object around an axis
 	 * @param angle
@@ -237,7 +237,7 @@ public class PositionInfo extends Vector3f {
 		rotationMatrix.rotate(angle, axis);
 		needsUpdate = true;
 	}
-	
+
 	/**
 	 * sets the scale of the object
 	 * @param scale new scale of the object
@@ -245,7 +245,7 @@ public class PositionInfo extends Vector3f {
 	public void setScale(float scale) {
 		this.scale = scale;
 	}
-	
+
 	/**
 	 * change the scale by a factor
 	 * @param factor factor to scale by
@@ -253,7 +253,7 @@ public class PositionInfo extends Vector3f {
 	public void scaleBy(float factor) {
 		scale *= factor;
 	}
-	
+
 	/**
 	 * gets the current scale
 	 * @return current scale
@@ -261,7 +261,7 @@ public class PositionInfo extends Vector3f {
 	public float getScale() {
 		return scale;
 	}
-	
+
 	/**
 	 * translates a camera matrix by the information in stored in this object
 	 * @param mat camera matrix
@@ -272,37 +272,21 @@ public class PositionInfo extends Vector3f {
 			rotations = EnigUtils.getEulerAngles(rotationMatrix);
 			needsUpdate = false;
 		}
-		mat.translate(this);
-		mat.rotateX(-rotations.x);
-		mat.rotateY(-rotations.y);
-		mat.rotateZ(-rotations.z);
-		return mat;
+		Matrix4f ret = mat.translate(this, new Matrix4f());
+		ret.rotateX(-rotations.x);
+		ret.rotateY(-rotations.y);
+		ret.rotateZ(-rotations.z);
+		return ret;
 	}
-	
+
 	/**
 	 * WIP
 	 * @param newVector
 	 */
 	public void setDirectionVector(Vector3f newVector) {
-		needsUpdate = true;
-		/*Vector3f normal = newVector.normalize(new Vector3f());
-		Vector3f directionVector = new Vector3f(0f, 0f, 1f);
-		Vector3f axis = directionVector.cross(normal).normalize();
-		rotationMatrix = new Matrix4f().rotate((float) Math.acos(normal.dot(directionVector)), axis);
-		*/
-		Vector3f normal = newVector.normalize(new Vector3f());
-		float yaw = (float) Math.atan2(normal.y, Math.abs(normal.z));
-		float pitch = -(float) Math.atan2(normal.x, -normal.z);
-		float sinx = (float) Math.sin(yaw);
-		float cosx = (float) Math.cos(yaw);
-		float siny = (float) Math.sin(pitch);
-		float cosy = (float) Math.cos(pitch);
-		//rotationMatrix = new Matrix4f().rotateY(pitch).rotateX(yaw);
-		rotationMatrix = rotationMatrix.setLookAlong(newVector.x, newVector.y, newVector.z, 0f, 1f, 0f);
-		//rotationMatrix.lookat
-		//rotationMatrix = rotationMatrix.setLookAlong(0f, 0f, 1f, 0f, 1f, 0f);
+
 	}
-	
+
 	/**
 	 * WIP
 	 * @param pos
@@ -311,7 +295,7 @@ public class PositionInfo extends Vector3f {
 		needsUpdate = true;
 		//rotationMatrix.setLookAt(new Vector3f().sub(this), new Vector3f().sub(pos), new Vector3f(0f, 1f, 0f));
 		setDirectionVector(new Vector3f((pos.x-x), (pos.y-y), (pos.z-z)));
-		
+
 	}
-	
+
 }

@@ -3,9 +3,10 @@ package engine;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class EnigUtils {
-	
+
 	/**
 	 * prints out the matrix
 	 * @param m matrix to print out
@@ -16,24 +17,24 @@ public class EnigUtils {
 		retval += m.m01() + ", ";
 		retval += m.m02() + ", ";
 		retval += m.m03() + "]\n[";
-		
+
 		retval += m.m10() + ", ";
 		retval += m.m11() + ", ";
 		retval += m.m12() + ", ";
 		retval += m.m13() + "]\n[";
-		
+
 		retval += m.m20() + ", ";
 		retval += m.m21() + ", ";
 		retval += m.m22() + ", ";
 		retval += m.m23() + "]\n[";
-		
+
 		retval += m.m30() + ", ";
 		retval += m.m31() + ", ";
 		retval += m.m32() + ", ";
 		retval += m.m33() + "]\n";
 		System.out.println(retval);
 	}
-	
+
 	/**
 	 * find the axis of rotations based on a matrix
 	 * @param mat matrix to reverse engineer
@@ -72,7 +73,7 @@ public class EnigUtils {
 		}
 		return new Vector3f(getAngle(x), getAngle(y), getAngle(z));
 	}
-	
+
 	/**
 	 * finds the angle withing 0 and tau
 	 * @param a value
@@ -88,7 +89,7 @@ public class EnigUtils {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * prints out an array of floats
 	 * @param in array of floats
@@ -100,7 +101,7 @@ public class EnigUtils {
 		}
 		System.out.println("]");
 	}
-	
+
 	/**
 	 * prints out an integer array
 	 * @param in
@@ -112,7 +113,7 @@ public class EnigUtils {
 		}
 		System.out.println("]");
 	}
-	
+
 	/**
 	 * changes the size of a vector to a new value
 	 * @param vec vector to change
@@ -122,7 +123,7 @@ public class EnigUtils {
 	public static Vector3f resizeVector(Vector3f vec, float target) {
 		return vec.mul(target/vec.length());
 	}
-	
+
 	/**
 	 * changes the size of a vector to a new value
 	 * @param vec vector to change
@@ -132,7 +133,7 @@ public class EnigUtils {
 	public static Vector2f resizeVector(Vector2f vec, float target) {
 		return vec.mul(target/vec.length());
 	}
-	
+
 	/**
 	 * creates a vector with a target size proportional to a current size
 	 * @param x x value of the vector
@@ -144,7 +145,7 @@ public class EnigUtils {
 		float length = (float) Math.sqrt(x*x + y*y);
 		return new Vector2f(x * target/length, y * target/length);
 	}
-	
+
 	/**
 	 * checks to see if an array of x and y coordinates has a certain x and y
 	 * @param arrx array of x coordinates
@@ -161,7 +162,7 @@ public class EnigUtils {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * adds two arrays to a larger array
 	 * @param a first array
@@ -178,7 +179,7 @@ public class EnigUtils {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * rounds a float to a certain amount of decimal places
 	 * @param in original float
@@ -189,7 +190,7 @@ public class EnigUtils {
 		float factor = (float) Math.pow(10, decPlaces);
 		return Math.round(in * factor) / factor;
 	}
-	
+
 	/**
 	 * rounds a double to a certain amount of decimal places
 	 * @param in original double
@@ -200,7 +201,7 @@ public class EnigUtils {
 		double factor = Math.pow(10, decPlaces);
 		return Math.round(in * factor) / (factor);
 	}
-	
+
 	/**
 	 * formats a float so that it fits into a certain amount of characters asa string
 	 * @param in original float
@@ -224,7 +225,7 @@ public class EnigUtils {
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * clamps a float to a given range
 	 * @param val input
@@ -234,6 +235,41 @@ public class EnigUtils {
 	 */
 	public static float clamp(float val, float min, float max) {
 		return Math.max(min, Math.min(max, val));
+	}
+
+	public static float compareAngles(float angleA, float angleB) {
+		float a = getAngle(angleA);
+		float b = getAngle(angleB);
+		float ret = Math.abs(a - b);
+		if (a < Math.PI) {
+			ret = Math.min(ret, Math.abs(a - b + (float)Math.PI * 2));
+		}else {
+			ret = Math.min(ret, Math.abs(a - b - (float)Math.PI * 2));
+		}
+		return ret;
+	}
+
+	public static Matrix4f clearMatrix(Matrix4f mat, Matrix4f dest) {
+		float dist = mat.m00() * mat.m00() + mat.m01() * mat.m01() + mat.m02() * mat.m02();
+		dist = (float) Math.sqrt(dist);
+		return dest.set(dist, 0   , 0   , mat.m30(),
+				0   , dist    , 0   , mat.m31(),
+				0   , 0   , dist    , mat.m32(),
+				0   , 0   , 0  , 1);
+	}
+
+	public static Matrix4f clearMatrix(Matrix4f mat) {
+		float dist = mat.m00() * mat.m00() + mat.m01() * mat.m01() + mat.m02() * mat.m02();
+		dist = (float) Math.sqrt(dist);
+		return mat.set(dist , 0   , 0   , mat.m30(),
+				0   , dist    , 0   , mat.m31(),
+				0   , 0   , dist    , mat.m32(),
+				0   , 0   , 0   , 1);
+	}
+
+	public static Matrix4f rotateToFace(Vector3f direction) {
+		Vector3f currentDir = new Vector3f(1f, 0f, 0f);
+		return new Matrix4f().rotate(direction.angle(currentDir), currentDir.cross(direction, new Vector3f()).normalize());
 	}
 }
 /*

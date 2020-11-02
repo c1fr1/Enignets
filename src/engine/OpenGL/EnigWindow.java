@@ -4,8 +4,11 @@ import engine.Entities.Camera;
 import engine.Entities.GameObject;
 import engine.OpenAL.Sound;
 import engine.OpenAL.SoundSource;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.openal.AL;
 import org.lwjgl.openal.ALC;
@@ -14,6 +17,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -24,7 +30,6 @@ import static org.lwjgl.openal.AL10.alDeleteSources;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.opengl.ARBImaging.GL_TABLE_TOO_LARGE;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_MULTISAMPLE;
 import static org.lwjgl.opengl.GL15.glDeleteBuffers;
 import static org.lwjgl.opengl.GL20.GL_SHADING_LANGUAGE_VERSION;
 import static org.lwjgl.opengl.GL30.*;
@@ -33,47 +38,57 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class EnigWindow {
 	public long id;
-	
+
 	private int width;
 	private int height;
 	private float aspectRatio;
-	
+
 	public int fps = 144;
-	
+
 	public float cursorXFloat;
 	public float cursorYFloat;
-	
+
 	public double cursorXDouble;
 	public double cursorYDouble;
-	
+
 	public double cursorXOffset;
 	public double cursorYOffset;
-	
+
 	public boolean inputEnabled = false;
 	public boolean printFrames = false;
 	public boolean fullscreen = false;
-	
+
 	public int[] mouseButtons = new int[GLFW_MOUSE_BUTTON_LAST + 1];
 	public int[] keys = new int[GLFW_KEY_LAST + 1];
 	public int mousePressStatus;
-	
+
 	public int framesSinceLastSecond = 0;
 	public int lastFrameCount = 0;
 	public long lastSecond;
-	
+
 	private long device, context;
-	private ALCCapabilities deviceCaps;
-	
+	private ALCCapabilities deviceCapablities;
+
 	public static EnigWindow mainWindow;
-	
+
 	/**
 	 * creates an undecorated window
 	 * @param title name of the window
 	 */
 	public EnigWindow(String title) {
-		init(title, true);
+		maxInit(title, false, true);
 	}
-	
+
+	/**
+	 * creates an undecorated window
+	 * @param title name of the window
+	 * @param iconPath path to the icon for the window
+	 */
+	public EnigWindow(String title, String iconPath) {
+		maxInit(title, false, true);
+		setIcon(iconPath);
+	}
+
 	/**
 	 * creates a window
 	 * @param title name of the window
@@ -82,7 +97,18 @@ public class EnigWindow {
 	public EnigWindow(String title, boolean decorated) {
 		init(title, decorated);
 	}
-	
+
+	/**
+	 * creates a window
+	 * @param title name of the window
+	 * @param iconPath path to the icon for the window
+	 * @param decorated if it should be decorated or not
+	 */
+	public EnigWindow(String title, String iconPath, boolean decorated) {
+		init(title, decorated);
+		setIcon(iconPath);
+	}
+
 	/**
 	 * creates a window
 	 * @param w width
@@ -92,7 +118,19 @@ public class EnigWindow {
 	public EnigWindow(int w, int h, String title) {
 		init(w, h, title, true);
 	}
-	
+
+	/**
+	 * creates a window
+	 * @param w width
+	 * @param h height
+	 * @param title name of the window
+	 * @param iconPath path to the icon for the window
+	 */
+	public EnigWindow(int w, int h, String title, String iconPath) {
+		init(w, h, title, true);
+		setIcon(iconPath);
+	}
+
 	/**
 	 * creates a window
 	 * @param w width
@@ -103,7 +141,20 @@ public class EnigWindow {
 	public EnigWindow(int w, int h, String title, boolean decorated) {
 		init(w, h, title, decorated);
 	}
-	
+
+	/**
+	 * creates a window
+	 * @param w width
+	 * @param h height
+	 * @param title name of the window
+	 * @param title name of the window
+	 * @param decorated if it should be decorated or not
+	 */
+	public EnigWindow(int w, int h, String title, String iconPath, boolean decorated) {
+		init(w, h, title, decorated);
+		setIcon(iconPath);
+	}
+
 	/**
 	 * close the window, delete all resources, close openGL, openAL, and clean things up
 	 */
@@ -111,15 +162,15 @@ public class EnigWindow {
 		// Free the window callbacks and destroy the window
 		glfwFreeCallbacks(id);
 		glfwDestroyWindow(id);
-		
+
 		// Terminate GLFW and free the error callback
 		glfwTerminate();
 		glfwSetErrorCallback(null).free();
-		
+
 		// Terminate OpenAL
 		alcDestroyContext(context);
 		alcCloseDevice(device);
-		
+
 		for (Integer i: VAO.vaoIDs) {
 			glDeleteVertexArrays(i);
 		}
@@ -142,22 +193,22 @@ public class EnigWindow {
 			alDeleteSources(i);
 		}
 	}
-	
+
 	/**
 	 * makes a fullscreen window
 	 * @param title name of the window
- 	 * @param decorated if the window is decorated or not
+	 * @param decorated if the window is decorated or not
 	 */
 	public void init(String title, boolean decorated) {
 		// Setup an error callback. The default implementation
 		// will print the error message in System.err.
 		GLFWErrorCallback.createPrint(System.err).set();
-		
+
 		// Initialize GLFW. Most GLFW functions will not work before doing this.
 		if ( !glfwInit() ) {
 			throw new IllegalStateException("Unable to initialize GLFW");
 		}
-		
+
 		// Configure GLFW
 		glfwDefaultWindowHints(); // optional, the current window hints are already the default
 		glfwWindowHint(GLFW_SAMPLES, 4);
@@ -168,26 +219,26 @@ public class EnigWindow {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-		
+
 		// Create the window
 		GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		width = vidMode.width();
 		height = vidMode.height();
 		setAspectRatio();
-		
+
 		id = glfwCreateWindow(width, height, title, glfwGetPrimaryMonitor(), NULL);//creates window
-		
+
 		if (id == NULL) {
 			throw new RuntimeException("Failed to create the GLFW window");
 		}
-		
+
 		// Setup a key callback. It will be called every time a key is pressed, repeated or released.
 		glfwSetKeyCallback(id, (window, key, scancode, action, mods) -> {
 			if (key >= 0) {
 				keys[key] = action;
 			}
 		});
-		
+
 		glfwSetCursorPosCallback(id, new GLFWCursorPosCallback() {
 			@Override
 			public void invoke(long window, double xpos, double ypos) {
@@ -206,25 +257,33 @@ public class EnigWindow {
 				}
 			}
 		});
-		
+
 		glfwSetMouseButtonCallback(id, (long window, int button, int action, int mods) -> {
-			if (action >= 0) {
-				mouseButtons[button] = action;
+			if (button >= 0) {
+				if (action == 0) {
+					mouseButtons[button] = 3;
+				} else {
+					mouseButtons[button] = action;
+				}
 			}
 		});
-		
-		
+
+		glfwSetScrollCallback(id, (long window, double xOffset, double yOffset) -> {
+
+		});
+
+
 		// Get the thread stack and push a new frame
 		try ( MemoryStack stack = stackPush() ) {
 			IntBuffer pWidth = stack.mallocInt(1); // int*
 			IntBuffer pHeight = stack.mallocInt(1); // int*
-			
+
 			// Get the window size passed to glfwCreateWindow
 			glfwGetWindowSize(id, pWidth, pHeight);
-			
+
 			// Get the resolution of the primary monitor
 			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-			
+
 			// Center the window
 			glfwSetWindowPos(
 					id,
@@ -232,24 +291,24 @@ public class EnigWindow {
 					(vidmode.height() - pHeight.get(0)) / 2
 			);
 		} // the stack frame is popped automatically
-		
+
 		// Make the OpenGL context current
 		glfwMakeContextCurrent(id);
 		// Enable v-sync
 		glfwSwapInterval(1);
-		
+
 		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		
+
 		// Make the window visible
 		glfwShowWindow(id);
-		
+
 		glfwSetWindowSizeCallback(id, (long window, int w, int h) -> {
 			width = w;
 			height = h;
 			setAspectRatio();
 			setViewport();
 		});
-		
+
 		initOpenGL();
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
@@ -258,12 +317,10 @@ public class EnigWindow {
 		glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		initOpenAL();
-		
+
 		mainWindow = this;
-		
-		//runOpeningSequence();
 	}
-	
+
 	/**
 	 * creates a window
 	 * @param iw window width
@@ -275,12 +332,12 @@ public class EnigWindow {
 		// Setup an error callback. The default implementation
 		// will print the error message in System.err.
 		GLFWErrorCallback.createPrint(System.err).set();
-		
+
 		// Initialize GLFW. Most GLFW functions will not work before doing this.
 		if ( !glfwInit() ) {
 			throw new IllegalStateException("Unable to initialize GLFW");
 		}
-		
+
 		// Configure GLFW
 		glfwDefaultWindowHints(); // optional, the current window hints are already the default
 		glfwWindowHint(GLFW_SAMPLES, 4);
@@ -291,26 +348,26 @@ public class EnigWindow {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-		
+
 		// Create the window
 		//GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		width = iw;
 		height = ih;
 		setAspectRatio();
-		
+
 		id = glfwCreateWindow(width, height, title, NULL, NULL);//fullscreen
-		
+
 		if (id == NULL) {
 			throw new RuntimeException("Failed to create the GLFW window");
 		}
-		
+
 		// Setup a key callback. It will be called every time a key is pressed, repeated or released.
 		glfwSetKeyCallback(id, (window, key, scancode, action, mods) -> {
 			if (key >= 0) {
 				keys[key] = action;
 			}
 		});
-		
+
 		glfwSetCursorPosCallback(id, new GLFWCursorPosCallback() {
 			@Override
 			public void invoke(long window, double xpos, double ypos) {
@@ -329,25 +386,33 @@ public class EnigWindow {
 				}
 			}
 		});
-		
+
 		glfwSetMouseButtonCallback(id, (long window, int button, int action, int mods) -> {
-			if (action >= 0) {
-				mouseButtons[button] = action;
+			if (button >= 0) {
+				if (action == 0) {
+					mouseButtons[button] = 3;
+				} else {
+					mouseButtons[button] = action;
+				}
 			}
 		});
-		
-		
+
+		glfwSetScrollCallback(id, (long window, double xOffset, double yOffset) -> {
+
+		});
+
+
 		// Get the thread stack and push a new frame
 		try ( MemoryStack stack = stackPush() ) {
 			IntBuffer pWidth = stack.mallocInt(1); // int*
 			IntBuffer pHeight = stack.mallocInt(1); // int*
-			
+
 			// Get the window size passed to glfwCreateWindow
 			glfwGetWindowSize(id, pWidth, pHeight);
-			
+
 			// Get the resolution of the primary monitor
 			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-			
+
 			// Center the window
 			glfwSetWindowPos(
 					id,
@@ -355,136 +420,163 @@ public class EnigWindow {
 					(vidmode.height() - pHeight.get(0)) / 2
 			);
 		} // the stack frame is popped automatically
-		
+
 		// Make the OpenGL context current
 		glfwMakeContextCurrent(id);
 		// Enable v-sync
 		glfwSwapInterval(1);
-		
+
 		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		
+
 		// Make the window visible
 		glfwShowWindow(id);
-		
+
 		glfwSetWindowSizeCallback(id, (long window, int w, int h) -> {
 			width = w;
 			height = h;
 			setViewport();
 		});
-		
+
 		initOpenGL();
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_MULTISAMPLE);
 		glEnable(GL_CULL_FACE);
-		glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		initOpenAL();
-		
+
 		mainWindow = this;
-		
-		//runOpeningSequence();
 	}
-	
+
 	/**
-	 * runs opening sequence
+	 * creates a maximized window
+	 * @param title window name
+	 * @param decorated if the window is decorated or not?
 	 */
-	public void runOpeningSequence() {
-		System.out.println("OpenGL Version " + glGetString(GL_VERSION));
-		System.out.println("GLSL   Version " + glGetString(GL_SHADING_LANGUAGE_VERSION));
-		int frame = 0;
-		ShaderProgram openingShader = new ShaderProgram("res/shaders/openingShaders/vert", "res/shaders/openingShaders/frag");
-		GameObject openingObject = new GameObject("res/enignets.obj");
-		Camera openingCamera = new Camera((float) (0.27*Math.PI), 0.01f, 1000f);
-		
-		openingCamera.usingStaticRotation = true;
-		openingCamera.orderOfTransformations = new int[] {0, 2, 1};
-		openingCamera.translate(0f, 0f, -5f);
-		openingCamera.pitch((float)  Math.PI/2);
-		
-		while (openingCamera.getPitch() < (float) (3*Math.PI/2) && keys[GLFW_KEY_SPACE] != 1) {
-			if (glfwWindowShouldClose(id)) {
-				return;
-			}
-			openingCamera.setPos(0f, 0f, (float) (13-10f*Math.pow(150f-(float) frame*2, 6f)/1.1390625e+13));
-			openingCamera.pitch(0.022f);
-			update();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			frame += 1;
-			openingShader.enable();
-			openingShader.shaders[2].uniforms[0].set(new float[] {(float) frame});
-			openingShader.shaders[2].uniforms[1].set(new float[] {(float) width, (float) height});
-			openingObject.render(openingCamera);
-			ShaderProgram.disable();
-			glfwSwapBuffers(id);
-			glfwPollEvents();
-			sync(60);
+	public void maxInit(String title, boolean decorated, boolean resizeable) {
+		// Setup an error callback. The default implementation
+		// will print the error message in System.err.
+		GLFWErrorCallback.createPrint(System.err).set();
+
+		// Initialize GLFW. Most GLFW functions will not work before doing this.
+		if ( !glfwInit() ) {
+			throw new IllegalStateException("Unable to initialize GLFW");
 		}
-		frame = 286;
-		openingCamera.setPos(0f, 0f, 7.44497655929f);
-		openingCamera.setPitch((float) (3*Math.PI/2));
-		update();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		openingShader.enable();
-		openingShader.shaders[2].uniforms[0].set(new float[] {(float) frame});
-		openingShader.shaders[2].uniforms[1].set(new float[] {(float) width, (float) height});
-		openingObject.render(openingCamera);
-		ShaderProgram.disable();
-		glfwSwapBuffers(id);
-		glfwPollEvents();
-		float fov = (float) (0.27*Math.PI);
-		while (frame < 343) {
-			if (glfwWindowShouldClose(id)) {
-				return;
-			}
-			if (keys[GLFW_KEY_SPACE] == 1) {
-				frame = 370;
-			}
-			++frame;
-			fov -= 0.27*Math.PI/57.01;
-			openingCamera.setPos(0f, 0f, (float)(16.88933655389*Math.sqrt(1f/(1+Math.tan(fov)*Math.tan(fov)))/(2*Math.sin(fov))));
-			openingCamera.setPerspective(fov, 0.01f, 99999999999999999999999999999999999999f);
-			update();
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			openingShader.enable();
-			openingShader.shaders[2].uniforms[0].set(new float[]{(float) frame});
-			openingShader.shaders[2].uniforms[1].set(new float[]{(float) width, (float) height});
-			openingObject.render(openingCamera);
-			ShaderProgram.disable();
-			resetOffsets();
-			glfwSwapBuffers(id);
-			glfwPollEvents();
-			EnigWindow.checkGLError();
-			sync(60);
+
+		// Configure GLFW
+		glfwDefaultWindowHints(); // optional, the current window hints are already the default
+		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
+		glfwWindowHint(GLFW_RESIZABLE, resizeable ? 1 : 0); // the window will be resizable
+		glfwWindowHint(GLFW_DECORATED, decorated ? 1 : 0);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+		// Create the window
+		GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		width = vidMode.width();
+		height = vidMode.height();
+		setAspectRatio();
+
+		id = glfwCreateWindow(width, height, title, NULL, NULL);//fullscreen
+
+		if (id == NULL) {
+			throw new RuntimeException("Failed to create the GLFW window");
 		}
-		fov = 0.0001f;
-		openingCamera.setPos(0f, 0f, (float)(16.88933655389*Math.sqrt(1f/(1+Math.tan(fov)*Math.tan(fov)))/(2*Math.sin(fov))));
-		openingCamera.setPerspective(fov, 0.01f, 99999999999999999999999999999999999999f);
-		update();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		openingShader.enable();
-		openingShader.shaders[2].uniforms[0].set(new float[]{(float) frame});
-		openingShader.shaders[2].uniforms[1].set(new float[]{(float) width, (float) height});
-		openingObject.render(openingCamera);
-		ShaderProgram.disable();
-		resetOffsets();
-		glfwSwapBuffers(id);
-		glfwPollEvents();
-		while (frame < 370) {
-			++frame;
-			if (glfwWindowShouldClose(id)) {
-				return;
+
+		// Setup a key callback. It will be called every time a key is pressed, repeated or released.
+		glfwSetKeyCallback(id, (window, key, scancode, action, mods) -> {
+			if (key >= 0) {
+				keys[key] = action;
 			}
-			if (keys[GLFW_KEY_SPACE] > 0) {
-				return;
+		});
+
+		glfwSetCursorPosCallback(id, new GLFWCursorPosCallback() {
+			@Override
+			public void invoke(long window, double xpos, double ypos) {
+				if (inputEnabled) {
+					cursorXOffset += cursorXDouble - xpos;
+					cursorYOffset += cursorYDouble - ypos;
+					cursorXDouble = xpos;
+					cursorYDouble = ypos;
+					cursorXFloat = (float) (2*xpos - width) / (float) width;
+					cursorYFloat = (float) (2*ypos - height) / (float) height;
+				}else {
+					cursorXDouble = xpos;
+					cursorYDouble = ypos;
+					cursorXFloat = (float) (2*xpos - width) / (float) width;
+					cursorYFloat = (float) -(2*ypos - height) / (float) height;
+				}
 			}
-			resetOffsets();
-			glfwPollEvents();
-			sync(60);
-		}
-		glDisable(GL_CULL_FACE);
+		});
+
+		glfwSetMouseButtonCallback(id, (long window, int button, int action, int mods) -> {
+			if (button >= 0) {
+				if (action == 0) {
+					mouseButtons[button] = 3;
+				} else {
+					mouseButtons[button] = action;
+				}
+			}
+		});
+
+		glfwSetScrollCallback(id, (long window, double xOffset, double yOffset) -> {
+
+		});
+
+
+		// Get the thread stack and push a new frame
+		try ( MemoryStack stack = stackPush() ) {
+			IntBuffer pWidth = stack.mallocInt(1); // int*
+			IntBuffer pHeight = stack.mallocInt(1); // int*
+
+			// Get the window size passed to glfwCreateWindow
+			glfwGetWindowSize(id, pWidth, pHeight);
+
+			// Get the resolution of the primary monitor
+			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+			// Center the window
+			glfwSetWindowPos(
+					id,
+					(vidmode.width() - pWidth.get(0)) / 2,
+					(vidmode.height() - pHeight.get(0)) / 2
+			);
+		} // the stack frame is popped automatically
+
+		// Make the OpenGL context current
+		glfwMakeContextCurrent(id);
+		// Enable v-sync
+		glfwSwapInterval(1);
+
+		glfwSetInputMode(id, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		// Make the window visible
+		glfwShowWindow(id);
+
+		glfwSetWindowSizeCallback(id, (long window, int w, int h) -> {
+			width = w;
+			height = h;
+			setViewport();
+		});
+
+		initOpenGL();
+		glEnable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_CULL_FACE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		initOpenAL();
+
+		mainWindow = this;
 	}
-	
+
+
+
 	/**
 	 * checks for any openGL errors
 	 */
@@ -516,18 +608,18 @@ public class EnigWindow {
 			throw new RuntimeException("id: " + error + " : " + errorInfo);
 		}
 	}
-	
+
 	private void setAspectRatio() {
 		aspectRatio = (float) width / (float) height;
 	}
-	
+
 	/**
 	 * initializes openGL
 	 */
 	public void initOpenGL() {
 		GL.createCapabilities();
 	}
-	
+
 	/**
 	 * initializes openAL
 	 */
@@ -535,17 +627,17 @@ public class EnigWindow {
 		device = alcOpenDevice((ByteBuffer) null);
 		if (device == 0)
 			throw new IllegalStateException("Failed to open the default device.");
-		
-		deviceCaps = ALC.createCapabilities(device);
-		
+
+		deviceCapablities = ALC.createCapabilities(device);
+
 		context = alcCreateContext(device, (IntBuffer) null);
 		if (context == 0)
 			throw new IllegalStateException("Failed to create an OpenAL context.");
-		
+
 		alcMakeContextCurrent(context);
-		AL.createCapabilities(deviceCaps);
+		AL.createCapabilities(deviceCapablities);
 	}
-	
+
 	/**
 	 * syncs the fps and
 	 */
@@ -560,9 +652,12 @@ public class EnigWindow {
 			if (mouseButtons[i] == 1) {
 				++mouseButtons[i];
 			}
+			if (mouseButtons[i] == 3) {
+				mouseButtons[i] = 0;
+			}
 		}
 	}
-	
+
 	/**
 	 * reset cursor offsets
 	 */
@@ -580,7 +675,7 @@ public class EnigWindow {
 			}
 		}
 	}
-	
+
 	/**
 	 * changes whether or not the cursor is hidden and being used to move the camera
 	 * @return if the cursor is being used to move the camera
@@ -594,9 +689,9 @@ public class EnigWindow {
 		inputEnabled = !inputEnabled;
 		return inputEnabled;
 	}
-	
+
 	private long variableYieldTime, lastTime;
-	
+
 	/**
 	 * An accurate sync method that adapts automatically
 	 * to the system it runs on to provide reliable results.
@@ -606,16 +701,16 @@ public class EnigWindow {
 	 */
 	private void sync(int fps) {
 		if (fps <= 0) return;
-		
+
 		long sleepTime = 1000000000 / fps; // nanoseconds to sleep this frame
 		// yieldTime + remainder micro & nano seconds if smaller than sleepTime
 		long yieldTime = Math.min(sleepTime, variableYieldTime + sleepTime % (1000*1000));
 		long overSleep = 0; // time the sync goes over by
-		
+
 		try {
 			while (true) {
 				long t = System.nanoTime() - lastTime;
-				
+
 				if (t < sleepTime - yieldTime) {
 					//Thread.sleep(1);
 				}else if (t < sleepTime) {
@@ -628,7 +723,7 @@ public class EnigWindow {
 			}
 		}finally{
 			lastTime = System.nanoTime() - Math.min(overSleep, sleepTime);
-			
+
 			// auto tune the time sync should yield
 			if (overSleep > variableYieldTime) {
 				// increase by 200 microseconds (1/5 a ms)
@@ -640,14 +735,14 @@ public class EnigWindow {
 			}
 		}
 	}
-	
+
 	public void setViewport() {
 		int[] fbwidth = new int[1];
 		int[] fbheight = new int[1];
 		glfwGetFramebufferSize(id, fbwidth, fbheight);
 		glViewport(0, 0, fbwidth[0], fbheight[0]);
 	}
-	
+
 	/**
 	 * returns the width of the window
 	 * @return width of the window
@@ -655,7 +750,7 @@ public class EnigWindow {
 	public int getWidth() {
 		return width;
 	}
-	
+
 	/**
 	 * returns the height of the window
 	 * @return height of the window
@@ -663,8 +758,76 @@ public class EnigWindow {
 	public int getHeight() {
 		return height;
 	}
-	
+
 	public float getAspectRatio() {
 		return aspectRatio;
+	}
+
+	public Matrix4f getSquarePerspectiveMatrix(float maxHeight) {
+		return new Matrix4f().ortho(-maxHeight/2f * getAspectRatio(),  maxHeight/2f * getAspectRatio(), -maxHeight/2f, maxHeight/2f, 0, 1);
+	}
+
+	public Matrix4f getAlignedPerspectiveMatrix(float maxHeight) {
+		return new Matrix4f().ortho(0,  maxHeight * getAspectRatio(), -maxHeight/2f, maxHeight/2f, 0, 1);
+	}
+
+	public float getCursorXAligned(float maxHeight) {
+		return (1 + cursorXFloat) * maxHeight / 2f * aspectRatio;
+	}
+
+	public float getCursorXScaled(float maxHeight) {
+		return cursorXFloat * maxHeight / 2f * aspectRatio;
+	}
+	public float getCursorYScaled(float maxHeight) {
+		return cursorYFloat * maxHeight / 2f;
+	}
+
+	public void setIcon(String imagePath) {
+
+		GLFWImage image = makeGLFWImage(imagePath);
+		GLFWImage.Buffer buffer = GLFWImage.malloc(1);
+		buffer.put(0, image);
+
+		glfwSetWindowIcon(id, buffer);
+	}
+
+	public static GLFWImage makeGLFWImage(String imagePath) {
+		BufferedImage b = null;
+		try {
+			ClassLoader l = EnigWindow.class.getClassLoader();
+			b = ImageIO.read(EnigWindow.class.getClassLoader().getResource(imagePath));
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		int bwi = b.getWidth();
+		int bhi = b.getHeight();
+		int len = bwi * bhi;
+
+		int[] rgbArray = new int[len];
+
+		System.out.println();
+
+		b.getRGB(0, 0, bwi, bhi, rgbArray, 0, bwi);
+
+		ByteBuffer buffer = BufferUtils.createByteBuffer(len * 4);
+
+		for(int i = 0; i < len; ++i) {
+			int rgb = rgbArray[i];
+			buffer.put((byte)(rgb >> 16 & 0xff));
+			buffer.put((byte)(rgb >>  8 & 0xff));
+			buffer.put((byte)(rgb       & 0xff));
+			buffer.put((byte)(rgb >> 24 & 0xff));
+		}
+
+		buffer.flip();
+
+		// create a GLFWImage
+		GLFWImage img= GLFWImage.create();
+		img.width(bwi);     // setup the images' width
+		img.height(bhi);   // setup the images' height
+		img.pixels(buffer);   // pass image data
+
+		return img;
 	}
 }

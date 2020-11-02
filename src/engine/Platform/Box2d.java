@@ -4,12 +4,12 @@ import engine.OpenGL.VAO;
 import org.joml.Vector2f;
 
 public class Box2d {
-	
+
 	float minx;
 	float maxx;
 	float miny;
 	float maxy;
-	
+
 	/**
 	 * creates a new box given the minimums and maximum coordinates
 	 * @param xmin minimum x
@@ -23,7 +23,7 @@ public class Box2d {
 		miny = ymin;
 		maxy = ymax;
 	}
-	
+
 	/**
 	 * creates a new box given two vectors on opposing ends
 	 * @param a first corner
@@ -35,7 +35,7 @@ public class Box2d {
 		miny = Math.min(a.y, b.y);
 		maxy = Math.max(a.y, b.y);
 	}
-	
+
 	/**
 	 * returns the center of the rectangle
 	 * @return center of the triangle
@@ -43,7 +43,7 @@ public class Box2d {
 	public Vector2f getCenter() {
 		return new Vector2f((minx + maxx)/2, (miny + maxy)/2);
 	}
-	
+
 	/**
 	 * checks to see if a point ins in the rectangle
 	 * @param point point to check
@@ -52,7 +52,7 @@ public class Box2d {
 	public boolean contains(Vector2f point) {
 		return contains(point.x, point.y);
 	}
-	
+
 	/**
 	 * checks to see if a point is in a rectangle that is sligtly larger than
 	 * @param x x coordinate of the point
@@ -63,7 +63,7 @@ public class Box2d {
 	public boolean contains(float x, float y, float extra) {
 		return minx < x + extra && maxx > x - extra && miny < y + extra && maxy > y - extra;
 	}
-	
+
 	/**
 	 * checks to see if a point is in a rectangle that is sligtly larger than
 	 * @param point point to check
@@ -73,7 +73,7 @@ public class Box2d {
 	public boolean contains(Vector2f point, float extra) {
 		return contains(point.x, point.y, extra);
 	}
-	
+
 	/**
 	 * checks to see if a point ins in the rectangle
 	 * @param x x coordinate of the point
@@ -83,7 +83,7 @@ public class Box2d {
 	public boolean contains(float x, float y) {
 		return minx < x && maxx > x && miny < y && maxy > y;
 	}
-	
+
 	/**
 	 * returns true if the other box is completely inside this box
 	 * @param other the other box
@@ -92,7 +92,7 @@ public class Box2d {
 	public boolean contains(Box2d other) {
 		return minx < other.minx && maxx > other.maxx && miny < other.miny && maxy > other.maxy;
 	}
-	
+
 	/**
 	 * returns true if any of the vertices of the other box are touching the box;
 	 * @param other the other box
@@ -101,7 +101,7 @@ public class Box2d {
 	public boolean touching(Box2d other) {
 		return contains(other.minx, other.miny) || contains(other.minx, other.miny) || contains(other.minx, other.maxy) || contains(other.minx, other.maxy) || contains(other.maxx, other.miny) || contains(other.maxx, other.miny) || contains(other.maxx, other.maxy) || contains(other.maxx, other.maxy);
 	}
-	
+
 	/**
 	 * returns true if the box contains any of the points
 	 * @param points the points
@@ -115,7 +115,7 @@ public class Box2d {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * returns true if any of the points are contained in the box
 	 * @param points formatted [x1, y1, x2, y2...]
@@ -129,7 +129,7 @@ public class Box2d {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * returns true if any of the points in the vertice vbo are in the box
 	 * @param object obejct to check
@@ -138,7 +138,7 @@ public class Box2d {
 	public boolean touches(VAO object) {
 		return touches(object.vbos[0].getData());
 	}
-	
+
 	/**
 	 * creates a new VAO based on the coordinates
 	 * @return new VAO based on this object
@@ -146,7 +146,7 @@ public class Box2d {
 	public VAO getVAO() {
 		return new VAO(minx, miny, width(), height());
 	}
-	
+
 	/**
 	 * gets the width
 	 * @return width
@@ -154,7 +154,7 @@ public class Box2d {
 	public float width() {
 		return maxx - minx;
 	}
-	
+
 	/**
 	 * gets the height
 	 * @return height

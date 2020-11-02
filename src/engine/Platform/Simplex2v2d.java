@@ -6,9 +6,9 @@ public class Simplex2v2d {
 	private Vector2f pointA;
 	private Vector2f pointB;
 	private Vector2f pointC;
-	
+
 	float doubleAreaReciprocal;
-	
+
 	/**
 	 * creates a simplex based on 3 points
 	 * @param a first point
@@ -21,7 +21,7 @@ public class Simplex2v2d {
 		pointC = c;
 		updateDoubleAreaReciprocal();
 	}
-	
+
 	/**
 	 * creates a simplex based on the coordinates for 3 points
 	 * @param ax first x
@@ -37,14 +37,14 @@ public class Simplex2v2d {
 		pointC = new Vector2f(cx, cy);
 		updateDoubleAreaReciprocal();
 	}
-	
+
 	/**
 	 * sets the double area reciprocal based on the current points (used for point testing)
 	 */
 	private void updateDoubleAreaReciprocal() {
 		doubleAreaReciprocal = 1f/(pointA.x*pointB.y - pointA.x*pointC.y - pointB.x*pointA.y + pointB.x*pointC.y + pointC.x*pointA.y - pointC.x*pointB.y);
 	}
-	
+
 	/**
 	 * checks to see if another point is inside this simplex
 	 * @param other point to check
@@ -53,7 +53,7 @@ public class Simplex2v2d {
 	public boolean containsPoint(Vector2f other) {
 		return containsPoint(other.x, other.y);
 	}
-	
+
 	/**
 	 * checks to see if another point is inside this simplex
 	 * @param ox x of the point
@@ -74,7 +74,7 @@ public class Simplex2v2d {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * checks to see if another point is inside this simplex given an extra offset
 	 * @param ox x of the point
@@ -96,7 +96,7 @@ public class Simplex2v2d {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * checks to see if a 2d box touches
 	 * @param box box that could touch the simplex
@@ -126,7 +126,7 @@ public class Simplex2v2d {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * checks to see if a 2d box touches given an extra offset
 	 * @param box box that could touch the simplex
@@ -157,7 +157,7 @@ public class Simplex2v2d {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * sets the first point
 	 * @param pointA new first point
@@ -166,7 +166,7 @@ public class Simplex2v2d {
 		this.pointA = pointA;
 		updateDoubleAreaReciprocal();
 	}
-	
+
 	/**
 	 * sets the second point
 	 * @param pointB new second point
@@ -175,7 +175,7 @@ public class Simplex2v2d {
 		this.pointB = pointB;
 		updateDoubleAreaReciprocal();
 	}
-	
+
 	/**
 	 * sets the third point
 	 * @param pointC new third point
@@ -184,7 +184,7 @@ public class Simplex2v2d {
 		this.pointC = pointC;
 		updateDoubleAreaReciprocal();
 	}
-	
+
 	/**
 	 * gets the first point
 	 * @return first point
@@ -192,7 +192,7 @@ public class Simplex2v2d {
 	public Vector2f getPointA() {
 		return new Vector2f(pointA);
 	}
-	
+
 	/**
 	 * gets the second point
 	 * @return second point
@@ -200,7 +200,7 @@ public class Simplex2v2d {
 	public Vector2f getPointB() {
 		return new Vector2f(pointB);
 	}
-	
+
 	/**
 	 * gets the third point
 	 * @return third point

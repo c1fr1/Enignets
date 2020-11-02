@@ -10,19 +10,34 @@ import org.joml.Vector4f;
 public class Camera extends Vector3f {
 	public Matrix4f projectionMatrix;
 	public Matrix4f rotationMatrix;
-	
+
 	public Vector3f calculatedRotations = new Vector3f();
-	
+
 	private Vector4f directionVector = new Vector4f(0f, 0f, 1f, 1f);
-	
+
 	public boolean usingStaticRotation = true;
-	
-	private float pitch;
-	private float yaw;
-	private float roll;
-	
+
+	protected float pitch;
+	protected float yaw;
+	protected float roll;
+
 	public int[] orderOfTransformations = new int[] {0, 1, 2};//0 = projection matrix, 1 = rotation matrix, 2 = translation matrix;
-	
+
+	public Camera(Camera other) {
+		x = other.x;
+		y = other.y;
+		z = other.z;
+		projectionMatrix = new Matrix4f(other.projectionMatrix);
+		rotationMatrix = new Matrix4f(other.rotationMatrix);
+		calculatedRotations = new Vector3f(other.calculatedRotations);
+		directionVector = new Vector4f(other.directionVector);
+		usingStaticRotation = other.usingStaticRotation;
+		pitch = other.pitch;
+		yaw = other.yaw;
+		roll = other.roll;
+		orderOfTransformations = other.orderOfTransformations;
+	}
+
 	/**
 	 * Creates a new Camera object
 	 * @param fieldOfView field of view 0.25*pi, is standard
@@ -36,7 +51,7 @@ public class Camera extends Vector3f {
 		rotationMatrix = new Matrix4f();
 		setPos(0f, 0f, 0f);
 	}
-	
+
 	/**
 	 * Creates a new Camera object
 	 * @param fieldOfView field of view, 0.25*pi is standard
@@ -51,7 +66,7 @@ public class Camera extends Vector3f {
 		rotationMatrix = new Matrix4f();
 		setPos(0f, 0f, 0f);
 	}
-	
+
 	/**
 	 * Creates a new Camera object
 	 * @param fieldOfView field of view, 0.25*pi is standard
@@ -69,7 +84,7 @@ public class Camera extends Vector3f {
 		orderOfTransformations = new int[] {first, second, third};
 		setPos(0f, 0f, 0f);
 	}
-	
+
 	/**
 	 * Creates a new Camera object
 	 * @param fieldOfView field of view, 0.25*pi is standard
@@ -88,18 +103,18 @@ public class Camera extends Vector3f {
 		orderOfTransformations = new int[] {first, second, third};
 		setPos(0f, 0f, 0f);
 	}
-	
+
 	/**
 	 * creates a new camera with an orthographic perspective matrix
 	 * @param minDistance minimum render distance
 	 * @param farDistance maximum render distance
 	 */
 	public Camera(float minDistance, float farDistance) {
-		projectionMatrix = new Matrix4f().ortho(-1f, 1, -1f, 1, minDistance, farDistance);
-		rotationMatrix= new Matrix4f();
+		projectionMatrix = new Matrix4f().ortho(-100f, 100f, -100f, 100f, minDistance, farDistance);
+		rotationMatrix = new Matrix4f();
 		setPos(0f, 0f, 0f);
 	}
-	
+
 	/**
 	 * returns a copy of the position
 	 * @return copy of this position
@@ -107,7 +122,7 @@ public class Camera extends Vector3f {
 	public Vector3f getPos() {
 		return new Vector3f(this);
 	}
-	
+
 	/**
 	 * changes the perspective matrix to fit the new requirements
 	 * @param fov field of view, 0.25*pi is standard
@@ -118,7 +133,7 @@ public class Camera extends Vector3f {
 		float aspectRatio = (float) EnigWindow.mainWindow.getWidth() / (float) EnigWindow.mainWindow.getHeight();
 		projectionMatrix = new Matrix4f().perspective(fov, aspectRatio, minDistance, renderDistance);
 	}
-	
+
 	/**
 	 * sets the position of the camera
 	 * @param npos new position
@@ -128,7 +143,7 @@ public class Camera extends Vector3f {
 		y = npos.y;
 		z = npos.z;
 	}
-	
+
 	/**
 	 * sets the position of the camera
 	 * @param x new x
@@ -140,7 +155,7 @@ public class Camera extends Vector3f {
 		this.y = y;
 		this.z = z;
 	}
-	
+
 	/**
 	 * adds the given vector to the cameras position
 	 * @param tpos translation
@@ -148,7 +163,7 @@ public class Camera extends Vector3f {
 	public void translate(Vector3f tpos) {
 		super.add(tpos);
 	}
-	
+
 	/**
 	 * adds the given vector to the cameras position
 	 * @param x x offset
@@ -158,7 +173,7 @@ public class Camera extends Vector3f {
 	public void translate(float x, float y, float z) {
 		super.add(x, y, z);
 	}
-	
+
 	/**
 	 * changes how far up/down the camera is looking
 	 * @param v offset
@@ -187,7 +202,7 @@ public class Camera extends Vector3f {
 			tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		}
 	}
-	
+
 	/**
 	 * changes how twisted the camera is
 	 * @param v offset
@@ -202,11 +217,11 @@ public class Camera extends Vector3f {
 			tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		}
 	}
-	
+
 	public Vector4f getDirectionVector() {
 		return directionVector;
 	}
-	
+
 	/**
 	 * get the camera matrix that will apply transformations to individual vectors
 	 * @return the camera matrix based on perspective, rotation, and translation
@@ -224,16 +239,35 @@ public class Camera extends Vector3f {
 		}
 		return retVal;
 	}
-	
+
+	/**
+	 * gets the camera matrix given a specific order of transformations
+	 * @param transformations transformations that will be applied to the resulting matrix
+	 * @return the camera matrix based on the transformations
+	 */
+	public Matrix4f getCameraMatrix(int[] transformations) {
+		Matrix4f retVal = new Matrix4f();
+		for (int m:transformations) {
+			if (m == 0) {
+				retVal = retVal.mul(projectionMatrix);
+			}else if (m==1) {
+				retVal = retVal.mul(rotationMatrix);
+			}else if (m==2) {
+				retVal = retVal.translate(-this.x, -this.y, -this.z);
+			}
+		}
+		return retVal;
+	}
+
 	/**
 	 * finds the angles of rotation based on the current rotation matrix
 	 * @return x = pitch, y = yaw, z = roll
 	 */
 	public Vector3f angles() {
 		float sy = (float) Math.sqrt(rotationMatrix.m00()*rotationMatrix.m00()+rotationMatrix.m10()*rotationMatrix.m10());
-		
+
 		boolean singular = sy < 1e-6; // If
-		
+
 		float x, y, z;
 		if (!singular) {
 			x = (float) Math.atan2(rotationMatrix.m21(), rotationMatrix.m22());
@@ -247,7 +281,7 @@ public class Camera extends Vector3f {
 		}
 		return new Vector3f(x, y, z);
 	}
-	
+
 	/**
 	 * fetches current pitch of the camera
 	 * @return current pitch
@@ -259,7 +293,7 @@ public class Camera extends Vector3f {
 			return calculatedRotations.x;
 		}
 	}
-	
+
 	/**
 	 * fetches current yaw of the camera
 	 * @return current yaw
@@ -271,7 +305,7 @@ public class Camera extends Vector3f {
 			return calculatedRotations.y;
 		}
 	}
-	
+
 	/**
 	 * fetches current roll of the camera
 	 * @return current roll
@@ -283,7 +317,7 @@ public class Camera extends Vector3f {
 			return calculatedRotations.z;
 		}
 	}
-	
+
 	/**
 	 * sets the xpos rotation to something specific, if the camera doesn't use static rotations, then it simply rotates by v
 	 * @param v new value
@@ -298,7 +332,7 @@ public class Camera extends Vector3f {
 			tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		}
 	}
-	
+
 	/**
 	 * sets the ypos rotation to something specific, if the camera doesn't use static rotations, then it simply rotates by v
 	 * @param v new value
@@ -313,7 +347,7 @@ public class Camera extends Vector3f {
 			tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		}
 	}
-	
+
 	/**
 	 * sets the z rotation to something specific, if the camera doesn't use static rotations, then it simply rotates by v
 	 * @param v new value
@@ -328,14 +362,14 @@ public class Camera extends Vector3f {
 			tempRotationMatrix.mul(rotationMatrix, rotationMatrix);
 		}
 	}
-	
+
 	/**
 	 * updates the rotation vector that is stored on the camera
 	 */
 	public void updateRotations() {
 		calculatedRotations = EnigUtils.getEulerAngles(rotationMatrix);
 	}
-	
+
 	/**
 	 * rotates a given vector by the rotation matrix of the camera, then scales it by a factor
 	 * @param x x position of the vector
@@ -345,9 +379,13 @@ public class Camera extends Vector3f {
 	 * @return new rotated vector
 	 */
 	public Vector3f getRotatedVector(float x, float y, float z, float s) {
-		return new Vector3f(x, y, z).rotateX(-2*pitch).rotateY(-2*yaw).rotateZ(-2*roll).mul(s);
+		if (usingStaticRotation) {
+			return new Vector3f(x, y, z).rotateX(-pitch).rotateY(-yaw).rotateZ(-roll).mul(s);
+		} else  {
+			return new Vector3f(x, y, z).rotateX(-calculatedRotations.x).rotateY(-calculatedRotations.y).rotateZ(-calculatedRotations.z).mul(s);
+		}
 	}
-	
+
 	/**
 	 * rotates a 2d vector by the yaw of the camera, then sets the magnitude to a scale
 	 * @param x x position

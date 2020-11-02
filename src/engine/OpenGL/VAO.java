@@ -2,6 +2,7 @@ package engine.OpenGL;
 
 import engine.Entities.PositionInfo;
 import engine.Platform.Box3d;
+//import javafx.scene.layout.VBox;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -10,22 +11,23 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL31.glDrawElementsInstanced;
 
 public class VAO {
-	
+
 	public static ArrayList<Integer> vaoIDs = new ArrayList<>();
-	
+
 	private int id;
 	private int ibo;
-	
+
 	private int[] indices;
-	
+
 	public VBO[] vbos;
-	
+
 	private int verticesPerShape = 3;
-	
+
 	public Box3d boundingBox;
-	
+
 	/**
 	 * create a new VAO with vertices, and indices
 	 * @param vertices vertices of the object (3 dimensional)
@@ -72,7 +74,7 @@ public class VAO {
 		}
 		boundingBox = new Box3d(minX, minY, minZ, maxX, maxY, maxZ);
 	}
-	
+
 	/**
 	 * create a new VAO with vertices, and indices specifying the number of vertices per shape
 	 * @param vertices vertices fo the obejct (3 dimensional)
@@ -120,7 +122,7 @@ public class VAO {
 		}
 		boundingBox = new Box3d(minX, minY, minZ, maxX, maxY, maxZ);
 	}
-	
+
 	/**
 	 * create a square object
 	 * @param x corner xpos
@@ -155,7 +157,180 @@ public class VAO {
 		float maxZ = 0f;
 		boundingBox = new Box3d(minX, minY, minZ, maxX, maxY, maxZ);
 	}
-	
+	/**
+	 * create a square object
+	 * @param x corner xpos
+	 * @param y corner ypos
+	 * @param width width of the box
+	 * @param height height of the box
+	 * @param yOrtho determines if the rectangle will be orthoganal to the y axis or x axis (true or false respectively)
+	 */
+	public VAO(float x, float y, float width, float height, boolean yOrtho) {
+		vbos = new VBO[1];
+		id = glGenVertexArrays();
+		vaoIDs.add(id);
+		glBindVertexArray(id);
+		if (yOrtho) {//y unit vector is orthogonal (x-z plane)
+			vbos[0] = new VBO(new float[]{
+					x, 0f, y + height,
+					x + width, 0f, y + height,
+					x + width, 0f, y,
+					x, 0f, y
+			}, 3);
+		} else {//x-orthogonal
+			vbos[0] = new VBO(new float[]{
+					0f, x, y + height,
+					0f, x + width, y + height,
+					0f, x + width, y,
+					0f, x, y
+			}, 3);//013 312
+		}
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		addVBO(new float[] {0f, 0f,
+				1f, 0f,
+				1f, 1f,
+				0f, 1f
+		}, 2);
+		addVBO(VBO.squareTCBO());
+		if (yOrtho) {
+			addVBO(new float[] {
+					0f, 1f, 0f,
+					0f, 1f, 0f,
+					0f, 1f, 0f,
+					0f, 1f, 0f
+			}, 3);
+		} else {
+			addVBO(new float[] {
+					1f, 0f, 0f,
+					1f, 0f, 0f,
+					1f, 0f, 0f,
+					1f, 0f, 0f
+			}, 3);
+		}
+		ibo = glGenBuffers();
+		VBO.vboIDs.add(ibo);
+		indices = squareIndices();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+		verticesPerShape = 3;
+		float minX = x;
+		float maxX = x + width;
+		float minY = y;
+		float maxY = y + height;
+		float minZ = 0f;
+		float maxZ = 0f;
+		boundingBox = new Box3d(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	public VAO(float x, float y, float width, float height, float left) {
+		vbos = new VBO[1];
+		id = glGenVertexArrays();
+		vaoIDs.add(id);
+		glBindVertexArray(id);
+		vbos[0] = new VBO(new float[] {
+				x - left, y + height, 0f,
+				x - left, y, 0f,
+				x + width, y, 0f,
+				x + width, y + height, 0f
+		}, 3);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		addVBO(new VBO(new float[] {
+				-left / (width + left), 0f,
+				-left / (width + left), 1f,
+				1f, 1f,
+				1f, 0f
+		}, 2));
+		ibo = glGenBuffers();
+		VBO.vboIDs.add(ibo);
+		indices = squareIndices();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+		verticesPerShape = 3;
+		float minX = x;
+		float maxX = x + width;
+		float minY = y;
+		float maxY = y + height;
+		float minZ = 0f;
+		float maxZ = 0f;
+		boundingBox = new Box3d(minX, minY, minZ, maxX, maxY, maxZ);
+	}
+
+	public VAO(float minx, float miny, float minz, float maxx, float maxy, float maxz) {
+		float[] vertices = new float[] {
+				minx, miny, minz,// 0
+				minx, miny, maxz,// 1
+				maxx, miny, maxz,// 2
+				maxx, miny, minz,// 3
+				minx, maxy, minz,// 4
+				maxx, maxy, minz,// 5
+
+				minx, miny, minz,// 6
+				minx, miny, maxz,// 7
+				minx, maxy, maxz,// 8
+				minx, maxy, minz,// 9
+				maxx, miny, maxz,// 10
+				maxx, maxy, maxz,// 11
+
+				maxx, miny, minz,// 12
+				maxx, miny, maxz,// 13
+				maxx, maxy, maxz,// 14
+				maxx, maxy, minz,// 15
+				minx, maxy, minz,// 16
+				minx, maxy, maxz,// 17
+		};
+		float[] textureCoordinates = new float[] {
+				0.5f, 1f/3f,// 0
+				0f  , 1f/3f,// 1
+				0f  , 0f   ,// 2
+				0.5f, 0f   ,// 3
+				1f  , 1f/3f,// 4
+				1f  , 0f   ,// 5
+
+				0f  , 1f/3f,// 6
+				0.5f, 1f/3f,// 7
+				0.5f, 2f/3f,// 8
+				0f  , 2f/3f,// 9
+				1f  , 1f/3f,// 10
+				1f  , 2f/3f,// 11
+
+				0f  , 2f/3f,// 12
+				0f  , 1f   ,// 13
+				0.5f, 1f   ,// 14
+				0.5f, 2f/3f,// 15
+				1f  , 2f/3f,// 16
+				1f  , 1f   ,// 17
+		};
+		indices = new int[] {
+				0, 2, 1,
+				0, 3, 2,
+				4, 5, 0,
+				5, 3, 0,
+
+				8, 6, 7,
+				9, 6, 8,
+				8, 10, 11,
+				8, 7, 10,
+
+				15, 14, 13,
+				15, 13, 12,
+				17, 14, 15,
+				17, 15, 16,
+		};
+		boundingBox = new Box3d(minx, miny, minz, maxx, maxy, maxz);
+		vbos = new VBO[1];
+		id = glGenVertexArrays();
+		vaoIDs.add(id);
+		glBindVertexArray(id);
+		vbos[0] = new VBO(vertices, 3);
+		glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+		ibo = glGenBuffers();
+		VBO.vboIDs.add(ibo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+		verticesPerShape = 3;
+		addVBO(new VBO(textureCoordinates, 2));
+	}
+
 	/**
 	 * creates a vao (and vbos) from a obj file
 	 * @param path path to the file
@@ -204,7 +379,7 @@ public class VAO {
 		addVBO(info.textCoords, 2);
 		addVBO(info.normals, 3);
 	}
-	
+
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this
 	 */
@@ -213,7 +388,7 @@ public class VAO {
 		draw();
 		unbind();
 	}
-	
+
 	/**
 	 * binds the vao and enables all of the vbos, prepares the vao to be drawn
 	 */
@@ -223,41 +398,63 @@ public class VAO {
 			glEnableVertexAttribArray(i);
 		}
 	}
-	
+
 	/**
 	 * draws the object, assuming that the VAO represents points
 	 */
 	public void drawPoints() {
 		glDrawElements(GL_POINTS, indices.length, GL_UNSIGNED_INT, 0);
 	}
-	
+
+	public void drawPointsInstanced(int count) {
+		glDrawElementsInstanced(GL_POINTS, indices.length, GL_UNSIGNED_INT, 0, count);
+	}
+
 	/**
 	 * draws the object, assuming that the VAO represents lines
 	 */
 	public void drawLines() {
 		glDrawElements(GL_LINES, indices.length, GL_UNSIGNED_INT, 0);
 	}
-	
+
+	public void drawLinesInstanced(int count) {
+		glDrawElementsInstanced(GL_LINES, indices.length, GL_UNSIGNED_INT, 0, count);
+	}
+
 	/**
 	 * draws the object, assuming that the VAO represents triangles
 	 */
 	public void drawTriangles() {
 		glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
 	}
-	
+
+	public void drawTrianglesInstanced(int count) {
+		glDrawElementsInstanced(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0, count);
+	}
+
 	/**
 	 * draws the object, checking how many vertices per shapes the vao holds
 	 */
 	public void draw() {
 		if (verticesPerShape == 1) {
-			glDrawElements(GL_POINTS, indices.length, GL_UNSIGNED_INT, 0);
+			drawPoints();
 		}else if (verticesPerShape == 2) {
-			glDrawElements(GL_LINES, indices.length, GL_UNSIGNED_INT, 0);
+			drawLines();
 		}else if (verticesPerShape == 3) {
-			glDrawElements(GL_TRIANGLES, indices.length, GL_UNSIGNED_INT, 0);
+			drawTriangles();
 		}
 	}
-	
+
+	public void drawInstanced(int count) {
+		if (verticesPerShape == 1) {
+			drawPointsInstanced(count);
+		} else if (verticesPerShape == 2) {
+			drawLinesInstanced(count);
+		} else if (verticesPerShape == 3) {
+			drawTrianglesInstanced(count);
+		}
+	}
+
 	/**
 	 * disables the vbos then unbinds the vao, cleans up after rendering
 	 */
@@ -267,7 +464,7 @@ public class VAO {
 		}
 		glBindVertexArray(0);
 	}
-	
+
 	/**
 	 * binds the vao and enables the specified vbos, prepares the vao to be drawn
 	 * @param vboset
@@ -279,7 +476,7 @@ public class VAO {
 			glEnableVertexAttribArray(i);
 		}
 	}
-	
+
 	/**
 	 * disables the vbos specified then unbinds the vao, cleans up after rendering
 	 * @param vboset
@@ -291,7 +488,7 @@ public class VAO {
 		}
 		glBindVertexArray(0);
 	}
-	
+
 	/**
 	 * renders a the vbo in each given position
 	 * @param camMatrix camera of the user
@@ -323,7 +520,7 @@ public class VAO {
 			glDisableVertexAttribArray(i);
 		}
 	}
-	
+
 	/**
 	 * renders the vbo given a set of different information
 	 * @param camMatrix camera of the user
@@ -366,7 +563,7 @@ public class VAO {
 			glDisableVertexAttribArray(i);
 		}
 	}
-	
+
 	/**
 	 * adds a vbo to the vao
 	 * @param newVBO new vbo
@@ -381,7 +578,7 @@ public class VAO {
 		glVertexAttribPointer(vbos.length, newVBO.getVecSize(), GL_FLOAT, false, 0, 0);
 		vbos = tempVBOL;
 	}
-	
+
 	/**
 	 * adds a vbo to the vbos in the vao
 	 * @param info information for the new vbo
@@ -390,7 +587,7 @@ public class VAO {
 	public void addVBO(float[] info, int size) {
 		addVBO(new VBO(info, size));
 	}
-	
+
 	/**
 	 * returns the id of the vao
 	 * @return id of the vao
@@ -398,7 +595,7 @@ public class VAO {
 	public int getID() {
 		return id;
 	}
-	
+
 	/**
 	 * gets the indices
 	 * @return indices of the indices
@@ -406,7 +603,7 @@ public class VAO {
 	public int[] getIndices() {
 		return indices;
 	}
-	
+
 	/**
 	 * returns the number of vertices per each shape
 	 * @return the number of vertices per shape
@@ -414,7 +611,7 @@ public class VAO {
 	public int getVerticesPerShape() {
 		return verticesPerShape;
 	}
-	
+
 	/**
 	 * returns the number of vertices in the vao
 	 * @return number of vertices in the vao
@@ -422,7 +619,7 @@ public class VAO {
 	public int getVertxCount() {
 		return vbos[0].getVertexCount();
 	}
-	
+
 	/**
 	 * delets the vao, and ibo
 	 */
@@ -441,7 +638,7 @@ public class VAO {
 			}
 		}
 	}
-	
+
 	/**
 	 * deletes all vbos in the vao
 	 */
@@ -450,7 +647,7 @@ public class VAO {
 			v.delete();
 		}
 	}
-	
+
 	/**
 	 * indices for a square
 	 * @return indices for a square
@@ -461,7 +658,7 @@ public class VAO {
 				3, 1, 2
 		};
 	}
-	
+
 	/**
 	 * texture coordinates for a square vao
 	 * @return texture coordinates for a square

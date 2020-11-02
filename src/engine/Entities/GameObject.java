@@ -6,7 +6,7 @@ import engine.OpenGL.VAO;
 
 public class GameObject extends PositionInfo {
 	public VAO model;
-	
+
 	/**
 	 * creates a game object from a vao
 	 * @param vao model
@@ -14,7 +14,7 @@ public class GameObject extends PositionInfo {
 	public GameObject(VAO vao) {
 		model = vao;
 	}
-	
+
 	/**
 	 * creates a game object from an obj file
 	 * @param path obj file path
@@ -22,7 +22,7 @@ public class GameObject extends PositionInfo {
 	public GameObject(String path) {
 		model = new VAO(path);
 	}
-	
+
 	/**
 	 * fullRender the model
 	 * @param cam player matrix

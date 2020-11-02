@@ -1,9 +1,8 @@
 package engine.OpenAL;
 
-import com.sun.media.sound.WaveFileReader;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,11 +14,11 @@ import java.util.ArrayList;
 import static org.lwjgl.openal.AL10.*;
 
 public class Sound {
-	
+
 	public static ArrayList<Integer> soundIDs = new ArrayList<>();
-	
+
 	private int id;
-	
+
 	/**
 	 * a lot of this is copied straight from the LWJGL github page, I couldn't find the WaveData class in the library that I had locally, so I went to the github page.
 	 * @param file file path to a .wav file
@@ -28,9 +27,9 @@ public class Sound {
 		try {
 			id = alGenBuffers();
 			soundIDs.add(id);
-			
+
 			InputStream url = getClass().getClassLoader().getResourceAsStream(file);
-			AudioInputStream ais = new WaveFileReader().getAudioInputStream(url);
+			AudioInputStream ais = AudioSystem.getAudioInputStream(url);
 			AudioFormat format = ais.getFormat();
 			int channels = 0;
 			if (format.getChannels() == 1) {
@@ -52,7 +51,7 @@ public class Sound {
 			} else {
 				assert false : "Only mono or stereo is supported";
 			}
-			
+
 			//read data into buffer
 			ByteBuffer buffer = null;
 			try {
@@ -84,12 +83,12 @@ public class Sound {
 			} catch (IOException ioe) {
 				throw ioe;
 			}
-			
-			
+
+
 			//create our result
 			alBufferData(id, channels, buffer, (int) format.getSampleRate());
 			buffer.clear();
-			
+
 			//close stream
 			try {
 				ais.close();
@@ -101,7 +100,7 @@ public class Sound {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * gets the handle for the openAL sound buffer
 	 * @return sound handle
