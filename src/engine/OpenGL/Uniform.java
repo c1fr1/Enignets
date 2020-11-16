@@ -108,6 +108,15 @@ public class Uniform {
 		glUniform4fv(pos, value);
 	}
 
+	public void set(Matrix4f[] info) {
+		int pos = glGetUniformLocation(ShaderProgram.currentShaderProgram.getID(), name);
+		float[] value = new float[info.length * 16];
+		for (int i = 0; i < info.length; ++i) {
+			info[i].get(value, i * 16);
+		}
+		glUniform4fv(pos, value);
+	}
+
 	/**
 	 * sets the uniform for the current shader assuming that the uniform object is a matrix, if it is a vector, this will crash
 	 * @param info matrix input to be set in the shader

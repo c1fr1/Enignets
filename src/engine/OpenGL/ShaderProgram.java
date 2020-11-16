@@ -60,8 +60,8 @@ public class ShaderProgram {
 		id = glCreateProgram();
 		shaderProgramIDs.add(id);
 
-		shaders[0] = new Shader("res/shaders/" + folderName + "/vert", GL_VERTEX_SHADER);
-		shaders[2] = new Shader("res/shaders/" + folderName + "/frag", GL_FRAGMENT_SHADER);
+		shaders[0] = new Shader("res/shaders/" + folderName + "/vert.glsl", GL_VERTEX_SHADER);
+		shaders[2] = new Shader("res/shaders/" + folderName + "/frag.glsl", GL_FRAGMENT_SHADER);
 
 		glAttachShader(id, shaders[0].getID());
 		glAttachShader(id, shaders[2].getID());
@@ -219,6 +219,10 @@ public class ShaderProgram {
 	}
 
 	public void setUniform(int shader, int uniform, Vector4f[] val) {
+		shaders[shader].uniforms[uniform].set(val);
+	}
+
+	public void setUniform(int shader, int uniform, Matrix4f[] val) {
 		shaders[shader].uniforms[uniform].set(val);
 	}
 
