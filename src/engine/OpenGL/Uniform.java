@@ -114,7 +114,7 @@ public class Uniform {
 		for (int i = 0; i < info.length; ++i) {
 			info[i].get(value, i * 16);
 		}
-		glUniform4fv(pos, value);
+		glUniformMatrix4fv(pos, false, value);
 	}
 
 	/**

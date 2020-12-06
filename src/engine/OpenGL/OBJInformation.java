@@ -17,6 +17,11 @@ public class OBJInformation {//based off of https://github.com/MCRewind/3DGame/b
 	public OBJInformation() {
 
 	}
+
+	public OBJInformation(String fileName) {
+		getInfo(fileName);
+	}
+
 	public OBJInformation getInfo(String fileName) {
 		List<String> lines = null;
 		try {
