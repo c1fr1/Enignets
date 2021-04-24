@@ -103,7 +103,7 @@ public class Uniform {
 			value[4 * i] = info[i].x;
 			value[4 * i + 1] = info[i].y;
 			value[4 * i + 2] = info[i].z;
-			value[4 * i + 3] = info[i].z;
+			value[4 * i + 3] = info[i].w;
 		}
 		glUniform4fv(pos, value);
 	}
