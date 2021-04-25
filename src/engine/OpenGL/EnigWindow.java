@@ -587,20 +587,28 @@ public class EnigWindow {
 			switch (error) {
 				case GL_INVALID_ENUM:
 					errorInfo = "Invalid enum";
+					break;
 				case GL_INVALID_VALUE:
 					errorInfo = "Invalid value";
+					break;
 				case GL_INVALID_OPERATION:
 					errorInfo = "Invalid operation";
+					break;
 				case GL_STACK_OVERFLOW:
 					errorInfo = "Stack overflow";
+					break;
 				case GL_STACK_UNDERFLOW:
 					errorInfo = "Stack underflow";
+					break;
 				case GL_OUT_OF_MEMORY:
 					errorInfo = "Out of memory";
+					break;
 				case GL_TABLE_TOO_LARGE:
 					errorInfo = "Table too large";
+					break;
 				case GL_INVALID_FRAMEBUFFER_OPERATION:
 					errorInfo = "Invalid framebuffer operation";
+					break;
 				default:
 					errorInfo = "I rly dik";
 			}
