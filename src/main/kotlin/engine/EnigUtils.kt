@@ -7,7 +7,10 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.Vector2f
 import org.lwjgl.BufferUtils
+import org.lwjgl.assimp.AIScene
+import org.lwjgl.assimp.Assimp
 import org.lwjgl.glfw.GLFWImage
+import org.lwjgl.system.MemoryUtil
 import java.awt.image.BufferedImage
 import java.io.BufferedReader
 import java.io.InputStream
@@ -272,6 +275,39 @@ fun<T> solveDepressedCubic(p : Float, q : Float, callback : (Float, Float?, Floa
 	}
 }
 
-
 fun Float.lerp(other : Float, t : Float) = this + t * (other - this)
 fun Double.lerp(other : Float, t : Float) = this + t * (other - this)
+
+fun loadScene(path : String) : AIScene {
+
+	val allBytes = getResourceStream(path).readAllBytes()
+	val buffer = MemoryUtil.memCalloc(allBytes.size)
+	buffer.put(allBytes)
+	buffer.flip()
+
+	val settings = Assimp.aiCreatePropertyStore()!!
+	Assimp.aiSetImportPropertyInteger(
+		settings, Assimp.AI_CONFIG_PP_SBP_REMOVE,
+		Assimp.aiPrimitiveType_LINE or Assimp.aiPrimitiveType_POINT
+	)
+
+	Assimp.aiImportFileFromMemoryWithProperties(
+		buffer,
+		Assimp.aiProcess_FindDegenerates or // removes "fake" triangle primitives
+				Assimp.aiProcess_SortByPType or// removes line and point primitives
+				Assimp.aiProcess_JoinIdenticalVertices or// trivial
+				Assimp.aiProcess_Triangulate or// trivial
+				Assimp.aiProcess_LimitBoneWeights or// selects only top 4 weights
+				Assimp.aiProcess_GenUVCoords or// generates tex coords if they are specified in a different format
+				Assimp.aiProcess_FindInvalidData or// removes some potential invalid data and fixes it if possible
+				Assimp.aiProcess_ImproveCacheLocality,// improve cache hit rate
+		"",
+		settings
+	)
+	val scene = Assimp.aiImportFileFromMemory(
+		buffer,
+		Assimp.aiProcessPreset_TargetRealtime_Quality or Assimp.aiProcess_JoinIdenticalVertices or Assimp.aiProcess_Triangulate,
+		""
+	)!!
+	return scene
+}

@@ -1,17 +1,16 @@
 package engine.opengl.bufferObjects
 
+import engine.getResourceStream
+import engine.loadScene
+import engine.opengl.GLResource
 import engine.shapes.Box2d
 import engine.shapes.Box3d
-import engine.getResourceStream
-import engine.opengl.GLResource
-import org.lwjgl.assimp.AIMesh
-import org.lwjgl.assimp.Assimp
-import org.lwjgl.assimp.Assimp.aiProcessPreset_TargetRealtime_MaxQuality
-import org.lwjgl.assimp.Assimp.aiProcess_Triangulate
+import org.lwjgl.assimp.*
+import org.lwjgl.assimp.Assimp.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL31.glDrawElementsInstanced
-import java.nio.ByteBuffer
-import java.util.ArrayList
+import org.lwjgl.system.MemoryUtil
+
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class VAO : GLResource {
@@ -130,45 +129,79 @@ class VAO : GLResource {
 
 	constructor(box : Box3d) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz)
 
-	/**
-	 * creates a vao (and vbos) from a obj file
-	 * @param path path to the file
-	 */
-	constructor(path: String) : super(glGenVertexArrays()) {
+	constructor(mesh : AIMesh) : super(glGenVertexArrays()) {
 		vaoIDs.add(id)
 		glBindVertexArray(id)
-		val fileData = ByteBuffer.wrap(getResourceStream(path).readAllBytes())
-		val scene = Assimp.aiImportFile(fileData,
-			aiProcessPreset_TargetRealtime_MaxQuality or aiProcess_Triangulate)!!
-
-		val mesh = AIMesh.create(scene.mMeshes()!![0])
-
-		vbos = arrayOf(
-			VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
-				0 -> mesh.mVertices()[i / 3].x()
-				1 -> mesh.mVertices()[i / 3].y()
-				2 -> mesh.mVertices()[i / 3].x()
+		val tempVBOs = arrayListOf<VBO<*>>()
+		tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
+			0 -> mesh.mVertices()[i / 3].x()
+			1 -> mesh.mVertices()[i / 3].y()
+			2 -> mesh.mVertices()[i / 3].x()
+			else -> Float.NaN
+		}}, 3))
+		if (mesh.mTextureCoords(0) != null) {
+			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 2) {i -> when (i % 2) {
+				0 -> mesh.mTextureCoords(0)!![i / 2].x()
+				1 -> mesh.mTextureCoords(0)!![i / 2].y()
 				else -> Float.NaN
-			}}, 3),
-			VBO(FloatArray(mesh.mNumVertices() * 2) {i -> when (i % 2) {
-				0 -> mesh.mTextureCoords(i / 2)!!.get().x()
-				1 -> mesh.mTextureCoords(i / 2)!!.get().y()
-				else -> Float.NaN
-			}}, 2),
-			VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
+			}}, 2))
+		}
+		if (mesh.mNormals() != null) {
+			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
 				0 -> mesh.mNormals()!![i / 3].x()
 				1 -> mesh.mNormals()!![i / 3].y()
 				2 -> mesh.mNormals()!![i / 3].z()
 				else -> Float.NaN
-			}}, 3)
-		)
-		vbos[0].assignToVAO(0)
-		vbos[1].assignToVAO(1)
-		vbos[2].assignToVAO(2)
+			}}, 3))
+		}
 
-		ibo = IBO(IntArray(mesh.mNumFaces() * 3) {i -> mesh.mFaces().mIndices()[i]})
+		if (mesh.mBones() != null) {
+			val boneIndexBuffer = IntArray(mesh.mNumVertices() * 4) {-1}
+			val boneWeightBuffer = FloatArray(mesh.mNumVertices() * 4) {0f}
+			for (i in 0 until mesh.mNumBones()) {
+				val b = AIBone.create(mesh.mBones()!![i])
+				for (w in b.mWeights()) {
+					for (j in 0 until 4) {
+						if (boneIndexBuffer[w.mVertexId() * 4 + j] == -1) {
+							boneIndexBuffer[w.mVertexId() * 4 + j] = i
+							boneWeightBuffer[w.mVertexId() * 4 + j] = w.mWeight()
+						}
+					}
+				}
+			}
+
+			for (i in boneIndexBuffer.indices) if (boneIndexBuffer[i] == -1) boneIndexBuffer[i] = 0
+
+			tempVBOs.add(VBO(boneIndexBuffer, 4))
+			tempVBOs.add(VBO(boneWeightBuffer, 4))
+		}
+
+		vbos = tempVBOs.toTypedArray()
+		for (i in vbos.indices) vbos[i].assignToVAO(i)
+
+		var tempIBO = arrayListOf<Int>()
+		for (f in mesh.mFaces().filter { it.mNumIndices() == 3 }) {
+			tempIBO.add(f.mIndices()[0])
+			tempIBO.add(f.mIndices()[1])
+			tempIBO.add(f.mIndices()[2])
+		}
+		ibo = IBO(tempIBO.toIntArray())
 		verticesPerShape = 3
 	}
+
+	constructor(scene : AIScene, index : Int = 0) : this(AIMesh.create(scene.mMeshes()!![index]))
+
+	/**
+	 * creates a vao (and vbos) from a file that describes a 3d scene
+	 * vbos are in the following order, if data for a specific vbo is not given, the following vbos will be moved down a slot
+	 * 0 | vertexes
+	 * 1 | texture coordinates
+	 * 2 | normals
+	 * 3 | bone indexes
+	 * 4 | bone weights
+	 * @param path path to the file
+	 */
+	constructor(path: String) : this(loadScene(path))
 
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this
