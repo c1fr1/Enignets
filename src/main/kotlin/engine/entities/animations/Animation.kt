@@ -1,13 +1,13 @@
 package engine.entities.animations
 
-import engine.getResourceStream
+import engine.loadScene
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.assimp.*
-import org.lwjgl.system.MemoryUtil
-import java.lang.StringBuilder
 
 class Animation(obj : AIAnimation) {
+
+	constructor(scene : AIScene, index : Int) : this(AIAnimation.create(scene.mAnimations()!![index]))
 
 	var name = obj.mName().dataString()
 	var duration = obj.mDuration()
@@ -18,22 +18,8 @@ class Animation(obj : AIAnimation) {
 	var meshChannels : Array<MeshAnim> = Array(obj.mNumMeshChannels()) { MeshAnim(AIMeshAnim.create(obj.mMeshChannels()!![it])) }
 
 	companion object {
-		operator fun invoke(path : String) : Array<Animation> {
-			val allBytes = getResourceStream(path).readAllBytes()
-			val buffer = MemoryUtil.memCalloc(allBytes.size)
-			buffer.put(allBytes)
-			buffer.flip()
-
-			val scene = Assimp.aiImportFileFromMemory(
-				buffer,
-				Assimp.aiProcess_Triangulate or Assimp.aiProcess_ValidateDataStructure, ""
-			)!!
-
-			val ret = Array(scene.mNumAnimations()) { Animation(AIAnimation.create(scene.mAnimations()!!.get(it))) }
-
-			MemoryUtil.memFree(buffer)
-			return ret
-		}
+		operator fun invoke(path : String) = Companion(loadScene(path))
+		operator fun invoke(scene : AIScene) = Array(scene.mNumAnimations()) { Animation(AIAnimation.create(scene.mAnimations()!![it])) }
 	}
 }
 

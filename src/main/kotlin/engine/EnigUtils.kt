@@ -309,5 +309,6 @@ fun loadScene(path : String) : AIScene {
 		Assimp.aiProcessPreset_TargetRealtime_Quality or Assimp.aiProcess_JoinIdenticalVertices or Assimp.aiProcess_Triangulate,
 		""
 	)!!
+	MemoryUtil.memFree(buffer)
 	return scene
 }
