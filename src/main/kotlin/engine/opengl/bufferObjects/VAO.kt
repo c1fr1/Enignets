@@ -146,7 +146,7 @@ class VAO : GLResource {
 		tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
 			0 -> mesh.mVertices()[i / 3].x()
 			1 -> mesh.mVertices()[i / 3].y()
-			2 -> mesh.mVertices()[i / 3].x()
+			2 -> mesh.mVertices()[i / 3].z()
 			else -> Float.NaN
 		}}, 3))
 		if (mesh.mTextureCoords(0) != null) {
@@ -175,6 +175,7 @@ class VAO : GLResource {
 						if (boneIndexBuffer[w.mVertexId() * 4 + j] == -1) {
 							boneIndexBuffer[w.mVertexId() * 4 + j] = i
 							boneWeightBuffer[w.mVertexId() * 4 + j] = w.mWeight()
+							break
 						}
 					}
 				}
@@ -333,7 +334,7 @@ class VAO : GLResource {
 	 * returns the number of vertices in the vao
 	 * @return number of vertices in the vao
 	 */
-	val vertxCount: Int get() = vbos[0].vertexCount
+	val vertexCount: Int get() = vbos[0].vertexCount
 
 	operator fun get(i : Int) = vbos[i]
 

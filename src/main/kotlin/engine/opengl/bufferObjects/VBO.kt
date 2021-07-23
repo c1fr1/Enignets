@@ -3,8 +3,7 @@
 package engine.opengl.bufferObjects
 
 import engine.opengl.GLResource
-import engine.opengl.checkGLError
-import org.joml.Vector2fc
+import org.joml.*
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.glGenBuffers
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
@@ -124,35 +123,101 @@ sealed class VBO<T>(
 
 sealed class VBOd(data : DoubleArray, vectorSize : Int, dynamic: Boolean = false) :
 	VBO<DoubleArray>(data, vectorSize, GL_DOUBLE, dynamic)
-class VBO1d(data : DoubleArray, dynamic: Boolean = false) : VBOd(data, 1, dynamic)
-class VBO2d(data : DoubleArray, dynamic: Boolean = false) : VBOd(data, 2, dynamic)
-class VBO3d(data : DoubleArray, dynamic: Boolean = false) : VBOd(data, 3, dynamic)
-class VBO4d(data : DoubleArray, dynamic: Boolean = false) : VBOd(data, 4, dynamic)
+class VBO1d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 1, dynamic)
+class VBO2d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 2, dynamic) {
+	operator fun get(index : Int) : Vector2d = Vector2d(data[index / 2], data[index / 2 + 1])
+	operator fun set(index : Int, value : Vector2dc) {
+		data[index / 2] = value.x()
+		data[index / 2 + 1] = value.y()
+	}
+}
+class VBO3d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 3, dynamic) {
+	operator fun get(index: Int) : Vector3d = Vector3d(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
+	operator fun set(index : Int, value : Vector3dc) {
+		data[index / 3] = value.x()
+		data[index / 3 + 1] = value.y()
+		data[index / 3 + 2] = value.z()
+	}
+}
+class VBO4d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 4, dynamic) {
+	operator fun get(index: Int) : Vector4d =
+		Vector4d(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
+	operator fun set(index : Int, value : Vector4dc) {
+		data[index / 4] = value.x()
+		data[index / 4 + 1] = value.y()
+		data[index / 4 + 2] = value.z()
+		data[index / 4 + 3] = value.w()
+	}
+}
 
 sealed class VBOf(data : FloatArray, vectorSize : Int, dynamic: Boolean = false) :
 	VBO<FloatArray>(data, vectorSize, GL_FLOAT, dynamic)
-class VBO1f(data : FloatArray, dynamic: Boolean = false) : VBOf(data, 1, dynamic)
-class VBO2f(data : FloatArray, dynamic: Boolean = false) : VBOf(data, 2, dynamic)
-class VBO3f(data : FloatArray, dynamic: Boolean = false) : VBOf(data, 3, dynamic)
-class VBO4f(data : FloatArray, dynamic: Boolean = false) : VBOf(data, 4, dynamic)
+class VBO1f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 1, dynamic)
+class VBO2f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 2, dynamic) {
+	operator fun get(index : Int) : Vector2f = Vector2f(data[index / 2], data[index / 2 + 1])
+	operator fun set(index : Int, value : Vector2fc) {
+		data[index / 2] = value.x()
+		data[index / 2 + 1] = value.y()
+	}
+}
+class VBO3f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 3, dynamic) {
+	operator fun get(index: Int) : Vector3f = Vector3f(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
+	operator fun set(index : Int, value : Vector3fc) {
+		data[index / 3] = value.x()
+		data[index / 3 + 1] = value.y()
+		data[index / 3 + 2] = value.z()
+	}
+}
+class VBO4f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 4, dynamic) {
+	operator fun get(index: Int) : Vector4f =
+		Vector4f(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
+	operator fun set(index : Int, value : Vector4fc) {
+		data[index / 4] = value.x()
+		data[index / 4 + 1] = value.y()
+		data[index / 4 + 2] = value.z()
+		data[index / 4 + 3] = value.w()
+	}
+}
 
 sealed class VBOi(data : IntArray, vectorSize : Int, dynamic: Boolean = false) :
 	VBO<IntArray>(data, vectorSize, GL_INT, dynamic)
-class VBO1i(data : IntArray, dynamic: Boolean = false) : VBOi(data, 1, dynamic)
-class VBO2i(data : IntArray, dynamic: Boolean = false) : VBOi(data, 2, dynamic)
-class VBO3i(data : IntArray, dynamic: Boolean = false) : VBOi(data, 3, dynamic)
-class VBO4i(data : IntArray, dynamic: Boolean = false) : VBOi(data, 4, dynamic)
+class VBO1i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 1, dynamic)
+class VBO2i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 2, dynamic) {
+	operator fun get(index : Int) : Vector2i = Vector2i(data[index / 2], data[index / 2 + 1])
+	operator fun set(index : Int, value : Vector2ic) {
+		data[index / 2] = value.x()
+		data[index / 2 + 1] = value.y()
+	}
+}
+class VBO3i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 3, dynamic) {
+	operator fun get(index: Int) : Vector3i = Vector3i(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
+	operator fun set(index : Int, value : Vector3ic) {
+		data[index / 3] = value.x()
+		data[index / 3 + 1] = value.y()
+		data[index / 3 + 2] = value.z()
+	}
+}
+class VBO4i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 4, dynamic) {
+	operator fun get(index: Int) : Vector4i =
+		Vector4i(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
+	operator fun set(index : Int, value : Vector4ic) {
+		data[index / 4] = value.x()
+		data[index / 4 + 1] = value.y()
+		data[index / 4 + 2] = value.z()
+		data[index / 4 + 3] = value.w()
+	}
+}
 
 sealed class VBOs(data : ShortArray, vectorSize : Int, dynamic: Boolean = false) :
 	VBO<ShortArray>(data, vectorSize, GL_SHORT, dynamic)
-class VBO1s(data : ShortArray, dynamic: Boolean = false) : VBOs(data, 1, dynamic)
-class VBO2s(data : ShortArray, dynamic: Boolean = false) : VBOs(data, 2, dynamic)
-class VBO3s(data : ShortArray, dynamic: Boolean = false) : VBOs(data, 3, dynamic)
-class VBO4s(data : ShortArray, dynamic: Boolean = false) : VBOs(data, 4, dynamic)
+class VBO1s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 1, dynamic)
+class VBO2s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 2, dynamic)
+class VBO3s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 3, dynamic)
+class VBO4s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 4, dynamic)
 
 class IBO(data : IntArray) : VBOi(data, 1, false) {
 
-	override var data: IntArray
+	override var data : IntArray
 		get() = super.data
 		set(value) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)

@@ -2,13 +2,11 @@
 
 package engine
 
-import org.joml.Math.cosFromSin
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import org.joml.Vector2f
 import org.lwjgl.BufferUtils
 import org.lwjgl.assimp.AIScene
-import org.lwjgl.assimp.Assimp
+import org.lwjgl.assimp.Assimp.*
 import org.lwjgl.glfw.GLFWImage
 import org.lwjgl.system.MemoryUtil
 import java.awt.image.BufferedImage
@@ -285,29 +283,26 @@ fun loadScene(path : String) : AIScene {
 	buffer.put(allBytes)
 	buffer.flip()
 
-	val settings = Assimp.aiCreatePropertyStore()!!
-	Assimp.aiSetImportPropertyInteger(
-		settings, Assimp.AI_CONFIG_PP_SBP_REMOVE,
-		Assimp.aiPrimitiveType_LINE or Assimp.aiPrimitiveType_POINT
+	val settings = aiCreatePropertyStore()!!
+	aiSetImportPropertyInteger(
+		settings, AI_CONFIG_PP_SBP_REMOVE,
+		aiPrimitiveType_LINE or aiPrimitiveType_POINT
 	)
 
-	Assimp.aiImportFileFromMemoryWithProperties(
+	val scene = aiImportFileFromMemoryWithProperties(
 		buffer,
-		Assimp.aiProcess_FindDegenerates or // removes "fake" triangle primitives
-				Assimp.aiProcess_SortByPType or// removes line and point primitives
-				Assimp.aiProcess_JoinIdenticalVertices or// trivial
-				Assimp.aiProcess_Triangulate or// trivial
-				Assimp.aiProcess_LimitBoneWeights or// selects only top 4 weights
-				Assimp.aiProcess_GenUVCoords or// generates tex coords if they are specified in a different format
-				Assimp.aiProcess_FindInvalidData or// removes some potential invalid data and fixes it if possible
-				Assimp.aiProcess_ImproveCacheLocality,// improve cache hit rate
+		aiProcess_FindDegenerates or // removes "fake" triangle primitives
+				aiProcess_SortByPType or// removes line and point primitives
+				aiProcess_JoinIdenticalVertices or// trivial
+				aiProcess_Triangulate or// trivial
+				aiProcess_LimitBoneWeights or// selects only top 4 weights
+				aiProcess_GenUVCoords or// generates tex coords if they are specified in a different format
+				aiProcess_FindInvalidData or// removes some potential invalid data and fixes it if possible
+				aiProcess_ForceGenNormals or//
+				aiProcess_ImproveCacheLocality// improve cache hit rate
+				,
 		"",
 		settings
-	)
-	val scene = Assimp.aiImportFileFromMemory(
-		buffer,
-		Assimp.aiProcessPreset_TargetRealtime_Quality or Assimp.aiProcess_JoinIdenticalVertices or Assimp.aiProcess_Triangulate,
-		""
 	)!!
 	MemoryUtil.memFree(buffer)
 	return scene

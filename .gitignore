@@ -1,5 +1,4 @@
 
-
 # General java/kotlin/jetbrains stuff
 .idea/
 target/
@@ -38,3 +37,7 @@ gradle-app.setting
 
 # IntelliJ
 out/
+
+# Blender
+# model cache of some sort?
+*.blend1
