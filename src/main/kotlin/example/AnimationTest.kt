@@ -4,6 +4,7 @@ import engine.EnigView
 import engine.PIf
 import engine.entities.Camera3D
 import engine.entities.animations.Animation
+import engine.loadScene
 import engine.opengl.EnigContext
 import engine.opengl.EnigWindow
 import engine.opengl.KeyState
@@ -17,7 +18,6 @@ import org.lwjgl.opengl.GL11.GL_CULL_FACE
 import org.lwjgl.opengl.GL11.glDisable
 
 fun main() {
-	val anim = Animation("testDragon.dae")
 	EnigContext.init()
 	val window = EnigWindow("enignets animation test demo")
 	glDisable(GL_CULL_FACE)
@@ -32,17 +32,19 @@ fun main() {
 }
 
 class AnimationTestView(window : EnigWindow) : EnigView() {
-	lateinit var vao: VAO
-	lateinit var shader: ShaderProgram
+	lateinit var vaos : Array<VAO>
+	lateinit var shader : ShaderProgram
 
-	val anim = Animation("testDragon.dae")
+
+	val scene = loadScene("dfgod.dae")
+	val anims = Animation(scene)
 
 	val cam = Camera3D(window.aspectRatio)
 	val input = window.inputHandler
 
 	override fun generateResources(window: EnigWindow) {
 		super.generateResources(window)
-		vao = VAO("testDragon.dae")
+		vaos = VAO(scene)
 		shader = ShaderProgram("colorShader")
 		window.inputEnabled = true
 	}

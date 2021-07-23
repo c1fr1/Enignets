@@ -129,6 +129,16 @@ class VAO : GLResource {
 
 	constructor(box : Box3d) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz)
 
+	/**
+	 * creates a vao (and vbos) from a assimp mesh
+	 * vbos are in the following order, if data for a specific vbo is not given, the following vbos will be moved down a slot
+	 * 0 | vertexes
+	 * 1 | texture coordinates
+	 * 2 | normals
+	 * 3 | bone indexes
+	 * 4 | bone weights
+	 * @param mesh assimp mesh
+	 */
 	constructor(mesh : AIMesh) : super(glGenVertexArrays()) {
 		vaoIDs.add(id)
 		glBindVertexArray(id)
@@ -179,7 +189,7 @@ class VAO : GLResource {
 		vbos = tempVBOs.toTypedArray()
 		for (i in vbos.indices) vbos[i].assignToVAO(i)
 
-		var tempIBO = arrayListOf<Int>()
+		val tempIBO = arrayListOf<Int>()
 		for (f in mesh.mFaces().filter { it.mNumIndices() == 3 }) {
 			tempIBO.add(f.mIndices()[0])
 			tempIBO.add(f.mIndices()[1])
@@ -189,19 +199,7 @@ class VAO : GLResource {
 		verticesPerShape = 3
 	}
 
-	constructor(scene : AIScene, index : Int = 0) : this(AIMesh.create(scene.mMeshes()!![index]))
-
-	/**
-	 * creates a vao (and vbos) from a file that describes a 3d scene
-	 * vbos are in the following order, if data for a specific vbo is not given, the following vbos will be moved down a slot
-	 * 0 | vertexes
-	 * 1 | texture coordinates
-	 * 2 | normals
-	 * 3 | bone indexes
-	 * 4 | bone weights
-	 * @param path path to the file
-	 */
-	constructor(path: String) : this(loadScene(path))
+	constructor(scene : AIScene, index : Int) : this(AIMesh.create(scene.mMeshes()!![index]))
 
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this
@@ -358,5 +356,8 @@ class VAO : GLResource {
 
 	companion object {
 		var vaoIDs = ArrayList<Int>()
+
+		operator fun invoke(path : String) = Companion(loadScene(path))
+		operator fun invoke(scene : AIScene) = Array(scene.mNumMeshes()) {VAO(scene, it)}
 	}
 }

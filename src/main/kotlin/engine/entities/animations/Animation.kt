@@ -35,7 +35,7 @@ class MeshKey(obj : AIMeshKey) {
 
 class NodeAnim(obj : AINodeAnim) {
 
-	val modelName : String = obj.mNodeName().dataString()//HERE
+	val modelName : String = obj.mNodeName().dataString()
 	val positionKeys : Array<VectorKey> = Array(obj.mNumPositionKeys()) { VectorKey(obj.mPositionKeys()!![it]) }
 	val rotationKeys : Array<QuatKey> = Array(obj.mNumRotationKeys()) { QuatKey(obj.mRotationKeys()!![it]) }
 	val scalingKeys : Array<VectorKey> = Array(obj.mNumScalingKeys()) { VectorKey(obj.mScalingKeys()!![it]) }
