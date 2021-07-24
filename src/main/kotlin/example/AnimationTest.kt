@@ -10,6 +10,7 @@ import engine.opengl.EnigWindow
 import engine.opengl.KeyState
 import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
+import engine.opengl.bufferObjects.VBO3f
 import engine.opengl.checkGLError
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
@@ -42,10 +43,28 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 	val cam = Camera3D(window.aspectRatio)
 	val input = window.inputHandler
 
+	fun checkDuplicates(vao : VAO) {
+		for (i in 0 until vao.vertexCount) {
+			var count = 0
+			for (j in 0 until vao.vertexCount) {
+				if (j != i) {
+					var dist = (vao.vbos[0] as VBO3f)[i].distanceSquared((vao.vbos[0] as VBO3f)[j])
+					dist += (vao.vbos[2] as VBO3f)[i].distanceSquared((vao.vbos[2] as VBO3f)[j])
+					if (dist < 0.00001) {
+						++count
+					}
+				}
+			}
+			println(count)
+		}
+		println("face count ${vao.ibo.data.size / 3}")
+	}
+
 	override fun generateResources(window: EnigWindow) {
 		super.generateResources(window)
 		vaos = VAO(scene)
-		shader = ShaderProgram("colorShader")
+		checkDuplicates(vaos[0])
+		shader = ShaderProgram("jointWeightsShader")
 		window.inputEnabled = true
 	}
 
@@ -53,7 +72,8 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 		FBO.prepareDefaultRender()
 		shader.enable()
 		shader[ShaderType.VERTEX_SHADER][0].set(cam.getMatrix())
-		shader[ShaderType.FRAGMENT_SHADER][0].set(0.7f, 0.7f, 0.7f)
+
+		vaos[0].fullRender()
 
 		handleMovement(dtime)
 
