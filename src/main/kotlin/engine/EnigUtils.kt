@@ -298,7 +298,6 @@ fun loadScene(path : String) : AIScene {
 				aiProcess_LimitBoneWeights or// selects only top 4 weights
 				aiProcess_GenUVCoords or// generates tex coords if they are specified in a different format
 				aiProcess_FindInvalidData or// removes some potential invalid data and fixes it if possible
-				aiProcess_ForceGenNormals or//
 				aiProcess_ImproveCacheLocality// improve cache hit rate
 				,
 		"",

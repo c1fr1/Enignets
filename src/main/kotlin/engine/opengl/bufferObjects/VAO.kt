@@ -15,9 +15,9 @@ import org.lwjgl.system.MemoryUtil
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 class VAO : GLResource {
 
-	private var ibo: IBO
+	var ibo : IBO
 
-	var vbos: Array<VBO<*>>
+	var vbos : Array<VBO<*>>
 
 	val verticesPerShape : Int
 
