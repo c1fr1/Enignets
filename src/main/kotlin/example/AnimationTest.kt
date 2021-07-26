@@ -37,7 +37,7 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 	lateinit var shader : ShaderProgram
 
 
-	val scene = loadScene("dfgod.dae")
+	val scene = loadScene("simpleRigged.dae")
 	val anims = Animation(scene)
 
 	val cam = Camera3D(window.aspectRatio)
@@ -58,6 +58,7 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 			println(count)
 		}
 		println("face count ${vao.ibo.data.size / 3}")
+		println("vertex count ${vao.vertexCount}")
 	}
 
 	override fun generateResources(window: EnigWindow) {

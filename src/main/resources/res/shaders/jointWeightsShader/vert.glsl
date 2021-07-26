@@ -17,6 +17,6 @@ void main() {
 	colors[3] = vec3(0, 0, 1);
 	weightedSums = vec4(colors[boneIndexes.x], 1) * boneWeights.x;
 	weightedSums += vec4(colors[boneIndexes.y], 1) * boneWeights.y;
-	weightedSums += vec4(colors[boneIndexes.z], 1) * boneWeights.z;
-	weightedSums += vec4(colors[boneIndexes.w], 1) * boneWeights.w;
+	//weightedSums += vec4(colors[boneIndexes.z], 1) * boneWeights.z;
+	//weightedSums += vec4(colors[boneIndexes.w], 1) * boneWeights.w;
 }
