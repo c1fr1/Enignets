@@ -7,6 +7,8 @@ import org.joml.*
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.glGenBuffers
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
+import org.lwjgl.opengl.GL30.glVertexAttribIPointer
+import org.lwjgl.opengl.GL41.glVertexAttribLPointer
 
 sealed class VBO<T>(
 		data : T,
@@ -36,7 +38,11 @@ sealed class VBO<T>(
 
 	fun assignToVAO(index: Int) {
 		glBindBuffer(GL_ARRAY_BUFFER, id)
-		glVertexAttribPointer(index, vectorSize, type, false, 0, 0)
+		when (type) {
+			GL_DOUBLE -> glVertexAttribLPointer(index, vectorSize, GL_DOUBLE, 0, 0)
+			GL_INT, GL_SHORT -> glVertexAttribIPointer(index, vectorSize, type, 0, 0)
+			else -> glVertexAttribPointer(index, vectorSize, GL_FLOAT, false, 0, 0)
+		}
 	}
 
 	val size : Int
