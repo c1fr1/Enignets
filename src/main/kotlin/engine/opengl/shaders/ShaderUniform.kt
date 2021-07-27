@@ -16,7 +16,12 @@ open class ShaderUniform {
 		} else {
 			declaration.trim().removeSuffix(";").split(' ')
 		}
-		type = ShaderDataType(words[1].trim())
-		name = words[2].trim()
+		type = if (words[2].contains('[')) {
+			name = words[2].trim().substring(0, words[2].indexOf('['))
+			ShaderDataType("${words[1].trim()}${words[2].substring(words[2].indexOf('['))}")
+		} else {
+			name = words[2].trim()
+			ShaderDataType(words[1].trim())
+		}
 	}
 }

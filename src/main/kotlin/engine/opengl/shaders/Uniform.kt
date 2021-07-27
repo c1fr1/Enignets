@@ -246,6 +246,11 @@ class Uniform(uniform: ShaderUniform, program: Int) : ShaderUniform(uniform.name
 		glUniformMatrix4fv(pos, false, info.toFloatArray())
 	}
 
+	fun set(info: Array<Matrix4f>) {
+		type.checkType(Mat4, info.size)
+		glUniformMatrix4fv(pos, false, info.toFloatArray())
+	}
+
 	fun set(info: Matrix4x3fc) {
 		type.checkType(Mat4x3)
 		glUniformMatrix4x3fv(pos, false, info.get(FloatArray(12)))

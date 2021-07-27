@@ -13,6 +13,7 @@
  - intersect for bounds
  - make more complete examples
  - documentation
+ - add functions for writing more specific uniform arrays
 
  - TESTING
 	- Ray2f (?)

@@ -53,6 +53,13 @@ fun Array<Matrix3x2fc>.toFloatArray() : FloatArray {
 	}
 	return ret
 }
+fun Array<Matrix4f>.toFloatArray() : FloatArray {
+	val ret = FloatArray(size * 16)
+	for (i in indices) {
+		get(i).get(ret, i * 16)
+	}
+	return ret
+}
 fun Array<Matrix4fc>.toFloatArray() : FloatArray {
 	val ret = FloatArray(size * 16)
 	for (i in indices) {
