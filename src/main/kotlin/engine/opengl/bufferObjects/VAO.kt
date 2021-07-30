@@ -1,5 +1,6 @@
 package engine.opengl.bufferObjects
 
+import engine.entities.animations.fuckBlender
 import engine.getResourceStream
 import engine.loadScene
 import engine.opengl.GLResource
@@ -143,12 +144,25 @@ class VAO : GLResource {
 		vaoIDs.add(id)
 		glBindVertexArray(id)
 		val tempVBOs = arrayListOf<VBO<*>>()
-		tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
-			0 -> mesh.mVertices()[i / 3].x()
-			1 -> mesh.mVertices()[i / 3].y()
-			2 -> mesh.mVertices()[i / 3].z()
-			else -> Float.NaN
-		}}, 3))
+		if (fuckBlender) {
+			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) { i ->
+				when (i % 3) {
+					0 -> mesh.mVertices()[i / 3].x()
+					1 -> mesh.mVertices()[i / 3].z()
+					2 -> -mesh.mVertices()[i / 3].y()
+					else -> Float.NaN
+				}
+			}, 3))
+		} else {
+			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) { i ->
+				when (i % 3) {
+					0 -> mesh.mVertices()[i / 3].x()
+					1 -> mesh.mVertices()[i / 3].y()
+					2 -> mesh.mVertices()[i / 3].z()
+					else -> Float.NaN
+				}
+			}, 3))
+		}
 		if (mesh.mTextureCoords(0) != null) {
 			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 2) {i -> when (i % 2) {
 				0 -> mesh.mTextureCoords(0)!![i / 2].x()

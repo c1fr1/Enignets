@@ -7,6 +7,8 @@ import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.assimp.*
 
+var fuckBlender = true
+
 class Animation(obj : AIAnimation) {
 
 	constructor(scene : AIScene, index : Int) : this(AIAnimation.create(scene.mAnimations()!![index]))
@@ -15,7 +17,9 @@ class Animation(obj : AIAnimation) {
 	var duration = obj.mDuration()
 	var ticksPerSecond = obj.mTicksPerSecond()
 
-	var nodeChannels : Array<NodeAnim> = Array(obj.mNumChannels()) { NodeAnim(AINodeAnim.create(obj.mChannels()!![it])) }
+	var nodeChannels : Array<NodeAnim> = Array(obj.mNumChannels()) {if (fuckBlender && it == 0) NodeAnim(AINodeAnim.create(obj.mChannels()!![it]), true) else NodeAnim(AINodeAnim.create(obj.mChannels()!![it]))}
+
+	fun getMats(frame : Int) = Array(nodeChannels.size) {nodeChannels[it].mats[frame]}
 
 	var meshChannels : Array<MeshAnim> = Array(obj.mNumMeshChannels()) { MeshAnim(AIMeshAnim.create(obj.mMeshChannels()!![it])) }
 
