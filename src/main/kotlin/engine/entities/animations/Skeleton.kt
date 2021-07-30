@@ -6,13 +6,6 @@ import org.lwjgl.assimp.AIMatrix4x4
 import org.lwjgl.assimp.AINode
 import org.lwjgl.assimp.AIScene
 
-/*fun Matrix4f(mat : AIMatrix4x4) = Matrix4f(
-	mat.a1(), mat.a2(), mat.a3(), mat.a4(),
-	mat.b1(), mat.b2(), mat.b3(), mat.b4(),
-	mat.c1(), mat.c2(), mat.c3(), mat.c4(),
-	mat.d1(), mat.d2(), mat.d3(), mat.d4()
-)*/
-
 fun AIMatrix4x4.toJoml() = Matrix4f(
 	a1(), b1(), c1(), d1(),
 	a2(), b2(), c2(), d2(),
@@ -42,8 +35,16 @@ class Skeleton {
 					names.indexOf(AINode.create(node.mChildren()!![it]).mName().dataString())
 				}
 				val transform = node.mTransformation().toJoml()
-				val totalTransform = if (parent != null) transform * tmpNodes[parent]!!.totalTransform else Matrix4f()
-						tmpNodes[id] = Node(children, node.mName().dataString(), transform, id, parent, totalTransform)
+
+				if (parent == null && fuckBlender) {
+					transform.mul(
+						1f,  0f, 0f, 0f,
+						0f,  0f, 1f, 0f,
+						0f, -1f, 0f, 0f,
+						0f,  0f, 0f, 1f)
+				}
+				val totalTransform = if (parent != null) transform * tmpNodes[parent]!!.totalTransform else transform
+				tmpNodes[id] = Node(children, node.mName().dataString(), transform, id, parent, totalTransform)
 				id
 			} else {
 				null
@@ -65,14 +66,11 @@ class Skeleton {
 			for (child in nodes[nodeID].children) {
 				val nodeGlobalTransform = ret[nodeID] * ret[child]
 				ret[child] = nodeGlobalTransform
-				//nodes[child].transformation * ret[nodeID]
 				setMats(child)
 			}
 		}
-		//ret[rootNode] = nodes[rootNode].transformation
 		setMats(rootNode)
 		for (i in ret.indices) {
-			//ret[i] = ret[i] * nodes[i].totalTransform
 			ret[i] = ret[i] * nodes[i].totalTransform
 		}
 

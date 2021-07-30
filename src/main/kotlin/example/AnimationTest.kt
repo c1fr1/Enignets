@@ -66,7 +66,7 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 		vaos[0].fullRender()
 
 		handleMovement(dtime)
-		if (input.keys[GLFW_KEY_E] == KeyState.Released) {frame = (frame + 1) % 60}
+		frame = (frame + 1) % 60
 
 		return input.keys[GLFW_KEY_ESCAPE] == KeyState.Released
 	}

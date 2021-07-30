@@ -6,6 +6,7 @@ import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.assimp.*
+import kotlin.math.sqrt
 
 var fuckBlender = true
 
@@ -44,7 +45,7 @@ class NodeAnim(obj : AINodeAnim, antiRotate : Boolean = false) {
 	val positionKeys : Array<VectorKey> = Array(obj.mNumPositionKeys()) { VectorKey(obj.mPositionKeys()!![it]) }
 	val rotationKeys : Array<QuatKey> = Array(obj.mNumRotationKeys()) {
 		val ret = QuatKey(obj.mRotationKeys()!![it])
-		if (antiRotate) {ret.rotateX(PIf);ret} else ret
+		if (antiRotate) {ret.mul(Quaternionf(sqrt(2.0f) / 2.0f, 0f, 0f, sqrt(2.0f) / 2.0f));ret} else ret
 	}
 	val scalingKeys : Array<VectorKey> = Array(obj.mNumScalingKeys()) { VectorKey(obj.mScalingKeys()!![it]) }
 
