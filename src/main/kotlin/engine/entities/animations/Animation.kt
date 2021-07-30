@@ -1,6 +1,8 @@
 package engine.entities.animations
 
+import engine.PIf
 import engine.loadScene
+import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.assimp.*
@@ -24,7 +26,7 @@ class Animation(obj : AIAnimation) {
 }
 
 class MeshAnim(obj : AIMeshAnim) {
-	var name = obj.mName()
+	var name = obj.mName().dataString()
 	var keys = Array(obj.mNumKeys()) {MeshKey(obj.mKeys()[it])}
 }
 
@@ -33,12 +35,21 @@ class MeshKey(obj : AIMeshKey) {
 	val meshIndex = obj.mValue()
 }
 
-class NodeAnim(obj : AINodeAnim) {
-
-	val modelName : String = obj.mNodeName().dataString()
+class NodeAnim(obj : AINodeAnim, antiRotate : Boolean = false) {
+	val nodeName : String = obj.mNodeName().dataString()
 	val positionKeys : Array<VectorKey> = Array(obj.mNumPositionKeys()) { VectorKey(obj.mPositionKeys()!![it]) }
-	val rotationKeys : Array<QuatKey> = Array(obj.mNumRotationKeys()) { QuatKey(obj.mRotationKeys()!![it]) }
+	val rotationKeys : Array<QuatKey> = Array(obj.mNumRotationKeys()) {
+		val ret = QuatKey(obj.mRotationKeys()!![it])
+		if (antiRotate) {ret.rotateX(PIf);ret} else ret
+	}
 	val scalingKeys : Array<VectorKey> = Array(obj.mNumScalingKeys()) { VectorKey(obj.mScalingKeys()!![it]) }
+
+	val mats : Array<Matrix4f> =
+		Array(obj.mNumPositionKeys().coerceAtLeast(obj.mNumRotationKeys()).coerceAtLeast(obj.mNumScalingKeys())) {
+			Matrix4f().translate(positionKeys[it.coerceAtMost(obj.mNumPositionKeys() - 1)].negate())
+				.rotate(rotationKeys[it.coerceAtMost(obj.mNumRotationKeys() - 1)])
+				.scale(scalingKeys[it.coerceAtMost(obj.mNumScalingKeys() - 1)])
+		}
 
 	val preState : AnimBehaviour = AnimBehaviour(obj.mPreState())
 	val postState : AnimBehaviour = AnimBehaviour(obj.mPostState())
