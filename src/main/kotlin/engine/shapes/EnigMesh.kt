@@ -143,7 +143,7 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 		val oAddedEdges = Array(vertexCount) {Array(it) {false}}
 
 		fun Edge3f.inBounds() = bounds().touches(bounds)
-		fun Pair<Simplex2v3d, Simplex2v3d>.inBounds() = first.union(second).touches(bounds)
+		fun Pair<Simplex2v3d, Simplex2v3d>.inBounds() = first.intersect(second).touches(bounds)
 
 		fun endPoint(i : Int) = Vector3f(endBuffer[getXi(i)], endBuffer[getYi(i)], endBuffer[getZi(i)])
 		fun oEndPoint(i : Int) = Vector3f(oEndBuffer[other.getXi(i)], oEndBuffer[other.getYi(i)], oEndBuffer[other.getZi(i)])
@@ -235,7 +235,7 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 	}
 }
 
-private fun Edge3f.bounds() = first.union(second)
+private fun Edge3f.bounds() = first.intersect(second)
 
 fun edgesIntersectionT(ea : Vector3f, ead : Vector3f, eb : Vector3f, ebd : Vector3f, oa : Vector3f, oad : Vector3f, ob : Vector3f, obd : Vector3f) : Float? {
 	val edA = ebd - ead

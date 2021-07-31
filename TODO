@@ -1,4 +1,3 @@
- - animations
  - use https://github.com/anatawa12/compile-time-constant
  - make samplers binding = 0 by default (unless this is already defined in gl specs?)
  - create a renderbuffer class

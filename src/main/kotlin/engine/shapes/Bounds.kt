@@ -105,7 +105,7 @@ interface Bound3f {
 		return false
 	}
 
-	fun union(other : Bound3f) = Box3d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
+	fun intersect(other : Bound3f) = Box3d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
 		miny.coerceAtMost(other.miny), maxy.coerceAtLeast(other.maxy),
 		minz.coerceAtMost(other.minz), maxz.coerceAtLeast(other.maxz))
 }
@@ -254,4 +254,7 @@ interface Bound2f {
 			= getCollisionT(d.x, d.y, oMinX, oMinY, oMaxX, oMaxY)
 	fun getCollisionT(dx : Float, dy : Float, o : Box2d) = getCollisionT(dx, dy, o.minx, o.miny, o.maxx, o.maxy)
 	fun getCollisionT(d : Vector2f, o : Box2d) = getCollisionT(d.x, d.y, o.minx, o.miny, o.maxx, o.maxy)
+
+	fun intersect(other : Bound2f) = Box2d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
+		miny.coerceAtMost(other.miny), maxy.coerceAtLeast(other.maxy))
 }
