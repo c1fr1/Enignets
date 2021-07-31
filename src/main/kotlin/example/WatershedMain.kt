@@ -2,12 +2,9 @@ package example
 
 import engine.EnigView
 import engine.entities.Camera2D
-import engine.opengl.EnigContext
-import engine.opengl.EnigWindow
-import engine.opengl.KeyState
+import engine.opengl.*
 import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
-import engine.opengl.checkGLError
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
 import org.joml.Vector2i
@@ -19,9 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue
 
 fun main() {
 	EnigContext.init()
-	val window = EnigWindow("enignets demo")
-	glDisable(GL_CULL_FACE)
-	glDisable(GL_DEPTH_TEST)
+	val window = EnigWindow("enignets demo", GLContextPreset.standard2D)
 	try {
 		val view = WatershedMain(window)
 		view.runIn(window)

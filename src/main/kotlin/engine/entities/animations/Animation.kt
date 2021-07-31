@@ -1,6 +1,5 @@
 package engine.entities.animations
 
-import engine.PIf
 import engine.loadScene
 import org.joml.Matrix4f
 import org.joml.Quaternionf

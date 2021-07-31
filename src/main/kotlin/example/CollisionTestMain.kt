@@ -3,11 +3,8 @@ package example
 import engine.*
 import engine.entities.Camera2D
 import engine.entities.Camera3D
-import engine.opengl.EnigContext
-import engine.opengl.EnigWindow
-import engine.opengl.KeyState
+import engine.opengl.*
 import engine.opengl.bufferObjects.*
-import engine.opengl.checkGLError
 import engine.opengl.jomlExtensions.*
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
@@ -17,12 +14,12 @@ import org.joml.Vector2f
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.GL_CULL_FACE
+import org.lwjgl.opengl.GL11.glDisable
 
 fun main() {
 	EnigContext.init()
-	val window = EnigWindow("enignets demo")
-	GL11.glDisable(GL11.GL_CULL_FACE)
-	//glDisable(GL_DEPTH_TEST)
+	val window = EnigWindow("enignets demo", GLContextPreset.standard3D.extended { glDisable(GL_CULL_FACE) })
 	try {
 		val view = CollisionTestMain(window)
 		view.runIn(window)

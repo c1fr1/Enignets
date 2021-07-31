@@ -7,12 +7,9 @@ import engine.entities.animations.Animation
 import engine.entities.animations.Skeleton
 import engine.entities.animations.toJoml
 import engine.loadScene
-import engine.opengl.EnigContext
-import engine.opengl.EnigWindow
-import engine.opengl.KeyState
+import engine.opengl.*
 import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
-import engine.opengl.checkGLError
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
 import org.joml.Matrix4f
@@ -24,8 +21,7 @@ import org.lwjgl.opengl.GL11.glDisable
 
 fun main() {
 	EnigContext.init()
-	val window = EnigWindow("enignets animation test demo")
-	glDisable(GL_CULL_FACE)
+	val window = EnigWindow("enignets animation test demo", GLContextPreset.standard3D)
 	try {
 		val view = AnimationTestView(window)
 		view.runIn(window)

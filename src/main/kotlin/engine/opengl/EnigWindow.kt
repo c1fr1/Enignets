@@ -46,7 +46,8 @@ class EnigWindow {
 	 * @param decorated if the window should be decorated
 	 * @param resizeable if the window should be resizeable
 	 */
-	constructor(windowSize : Vector2i, title: String, decorated: Boolean, resizeable: Boolean) {
+	constructor(windowSize : Vector2i, title: String, preset : GLContextPreset = GLContextPreset.standard,
+	            decorated: Boolean = true, resizeable: Boolean = true) {
 
 		// Configure GLFW
 		glfwDefaultWindowHints()
@@ -80,7 +81,11 @@ class EnigWindow {
 				setViewport()
 			}
 		}
-		initGLContext()
+
+		setContext()
+		preset.createContext()
+		// Enable v-sync
+		//glfwSwapInterval(1)
 	}
 
 	/**
@@ -91,8 +96,9 @@ class EnigWindow {
 	 * @param decorated if the window should be decorated
 	 * @param resizeable if the window should be resizeable
 	 */
-	constructor(w: Int, h: Int, title: String, decorated: Boolean = true, resizeable: Boolean = true)
-			: this(Vector2i(w, h), title, decorated, resizeable)
+	constructor(w: Int, h: Int, title: String, preset : GLContextPreset = GLContextPreset.standard,
+	            decorated: Boolean = true, resizeable: Boolean = true)
+			: this(Vector2i(w, h), title, preset, decorated, resizeable)
 
 	/**
 	 * creates a window
@@ -103,8 +109,10 @@ class EnigWindow {
 	 * @param decorated if it should be decorated or not
 	 * @param resizeable if the window should be resizeable
 	 */
-	constructor(w: Int, h: Int, title: String, iconPath: String, decorated: Boolean = false, resizeable: Boolean = true)
-			: this(w, h, title, decorated, resizeable) {
+	constructor(w : Int, h : Int, title : String, iconPath : String,
+	            preset : GLContextPreset = GLContextPreset.standard, decorated: Boolean = false,
+	            resizeable: Boolean = true)
+			: this(w, h, title, preset, decorated, resizeable) {
 		setIcon(iconPath)
 	}
 
@@ -114,8 +122,9 @@ class EnigWindow {
 	 * @param decorated if the window should be decorated or not
 	 * @param resizeable if the window should be resizeable or not
 	 */
-	constructor(title: String, decorated: Boolean = false, resizeable: Boolean = true)
-			: this(getPrimaryMonitorDimensions(), title, decorated, resizeable)
+	constructor(title : String, preset : GLContextPreset = GLContextPreset.standard, decorated : Boolean = false,
+	            resizeable : Boolean = true)
+			: this(getPrimaryMonitorDimensions(), title, preset, decorated, resizeable)
 
 	/**
 	 * creates an undecorated window
@@ -124,22 +133,10 @@ class EnigWindow {
 	 * @param decorated if the window should be decorated or not
 	 * @param resizeable if the window should be resizeable or not
 	 */
-	constructor(title: String, iconPath: String, decorated: Boolean = false, resizeable: Boolean = true)
-			: this(title, decorated, resizeable) {
+	constructor(title : String, iconPath : String, preset : GLContextPreset = GLContextPreset.standard,
+	            decorated : Boolean = false, resizeable : Boolean = true)
+			: this(title, preset, decorated, resizeable) {
 		setIcon(iconPath)
-	}
-
-	private fun initGLContext() {
-		setContext()
-		// Enable v-sync
-		//glfwSwapInterval(1)
-		GL.createCapabilities()
-		glEnable(GL_BLEND)
-		glEnable(GL_DEPTH_TEST)
-		glEnable(GL_MULTISAMPLE)
-		glEnable(GL_CULL_FACE)
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
 	}
 
 	fun setContext() = glfwMakeContextCurrent(id)

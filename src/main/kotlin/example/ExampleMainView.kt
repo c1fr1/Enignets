@@ -6,14 +6,11 @@ import engine.TAUf
 import engine.entities.Camera2D
 import engine.entities.Camera3D
 import engine.measurePerformanceFor
-import engine.opengl.EnigContext
-import engine.opengl.EnigWindow
-import engine.opengl.KeyState
+import engine.opengl.*
 import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
 import engine.opengl.bufferObjects.VBO
 import engine.opengl.bufferObjects.VBO3f
-import engine.opengl.checkGLError
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.rotate
@@ -32,7 +29,7 @@ var r = Random(100110562541)
 
 fun main() {
 	EnigContext.init()
-	val window = EnigWindow("enignets demo")
+	val window = EnigWindow("enignets demo", GLContextPreset.standard3D.extended { glDisable(GL_CULL_FACE) })
 	glDisable(GL_CULL_FACE)
 	//glDisable(GL_DEPTH_TEST)
 	try {
