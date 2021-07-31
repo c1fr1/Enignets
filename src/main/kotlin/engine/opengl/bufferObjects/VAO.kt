@@ -28,9 +28,9 @@ class VAO : GLResource {
 	 * @param ind indices of the faces (vps per face)
 	 * @param vps number of vertices associated with each individual shape
 	 */
-	constructor(vertices : FloatArray, ind : IntArray, vps : Int = 3) : super(glGenVertexArrays()) {
+	constructor(vertices : FloatArray, ind : IntArray, vps : Int = 3, dynamic : Boolean = false) : super(glGenVertexArrays()) {
 		glBindVertexArray(id)
-		vbos = arrayOf(VBO(vertices, 3))
+		vbos = arrayOf(VBO(vertices, 3, dynamic))
 		vbos[0].assignToVAO(0)
 		vaoIDs.add(id)
 		ibo = IBO(ind)
@@ -53,18 +53,18 @@ class VAO : GLResource {
 	 * @param width width of the box
 	 * @param height height of the box
 	 */
-	constructor(x: Float, y: Float, width: Float, height: Float) : this(floatArrayOf(
+	constructor(x: Float, y: Float, width: Float, height: Float, dynamic : Boolean = false) : this(floatArrayOf(
 		x, y + height, 0f,
 		x, y, 0f,
 		x + width, y, 0f,
 		x + width, y + height, 0f
-	), intArrayOf(0, 1, 3, 3, 1, 2)) {
+	), intArrayOf(0, 1, 3, 3, 1, 2), 3, dynamic) {
 		addVBO(VBO(VBO.squareTC, 2))
 	}
 
-	constructor(box : Box2d) : this(box.x, box.y, box.width, box.height)
+	constructor(box : Box2d, dynamic : Boolean = false) : this(box.x, box.y, box.width, box.height, dynamic)
 
-	constructor(minx: Float, miny: Float, minz: Float, maxx: Float, maxy: Float, maxz: Float) :
+	constructor(minx: Float, miny: Float, minz: Float, maxx: Float, maxy: Float, maxz: Float, dynamic : Boolean = false) :
 			super(glGenVertexArrays()) {
 		glBindVertexArray(id)
 		val vertices = floatArrayOf(
@@ -122,61 +122,36 @@ class VAO : GLResource {
 			17, 15, 16
 		))
 		vaoIDs.add(id)
-		vbos = arrayOf(VBO(vertices, 3), VBO(textureCoordinates, 2))
+		vbos = arrayOf(VBO(vertices, 3, dynamic), VBO(textureCoordinates, 2, dynamic))
 		vbos[0].assignToVAO(0)
 		vbos[1].assignToVAO(1)
 		verticesPerShape = 3
 	}
 
-	constructor(box : Box3d) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz)
+	constructor(box : Box3d, dynamic : Boolean = false) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz, dynamic)
 
 	/**
 	 * creates a vao (and vbos) from a assimp mesh
 	 * vbos are in the following order, if data for a specific vbo is not given, the following vbos will be moved down a slot
 	 * 0 | vertexes
-	 * 1 | texture coordinates
+	 * 1 | texture coordinates (if there is texture data for multiple textures, those vbos will be inserted after this in order)
 	 * 2 | normals
 	 * 3 | bone indexes
 	 * 4 | bone weights
 	 * @param mesh assimp mesh
 	 */
-	constructor(mesh : AIMesh) : super(glGenVertexArrays()) {
+	constructor(mesh : AIMesh, dynamic : Boolean = false) : super(glGenVertexArrays()) {
 		vaoIDs.add(id)
 		glBindVertexArray(id)
 		val tempVBOs = arrayListOf<VBO<*>>()
-		if (fuckBlender) {
-			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) { i ->
-				when (i % 3) {
-					0 -> mesh.mVertices()[i / 3].x()
-					1 -> mesh.mVertices()[i / 3].z()
-					2 -> -mesh.mVertices()[i / 3].y()
-					else -> Float.NaN
-				}
-			}, 3))
-		} else {
-			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) { i ->
-				when (i % 3) {
-					0 -> mesh.mVertices()[i / 3].x()
-					1 -> mesh.mVertices()[i / 3].y()
-					2 -> mesh.mVertices()[i / 3].z()
-					else -> Float.NaN
-				}
-			}, 3))
-		}
-		if (mesh.mTextureCoords(0) != null) {
-			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 2) {i -> when (i % 2) {
-				0 -> mesh.mTextureCoords(0)!![i / 2].x()
-				1 -> mesh.mTextureCoords(0)!![i / 2].y()
-				else -> Float.NaN
-			}}, 2))
+		tempVBOs.add(VBO(mesh.mVertices(), mesh.mNumVertices(), dynamic, fuckBlender))
+		var textureIndex = 0
+		while (mesh.mTextureCoords(textureIndex) != null) {
+			tempVBOs.add(VBO(mesh.mTextureCoords(textureIndex)!!, mesh.mNumVertices()))
+			++textureIndex
 		}
 		if (mesh.mNormals() != null) {
-			tempVBOs.add(VBO(FloatArray(mesh.mNumVertices() * 3) {i -> when (i % 3) {
-				0 -> mesh.mNormals()!![i / 3].x()
-				1 -> mesh.mNormals()!![i / 3].y()
-				2 -> mesh.mNormals()!![i / 3].z()
-				else -> Float.NaN
-			}}, 3))
+			tempVBOs.add(VBO(mesh.mNormals()!!, mesh.mNumVertices(), dynamic, fuckBlender))
 		}
 
 		if (mesh.mBones() != null) {
@@ -197,8 +172,8 @@ class VAO : GLResource {
 
 			for (i in boneIndexBuffer.indices) if (boneIndexBuffer[i] == -1) boneIndexBuffer[i] = 0
 
-			tempVBOs.add(VBO(boneIndexBuffer, 4))
-			tempVBOs.add(VBO(boneWeightBuffer, 4))
+			tempVBOs.add(VBO(boneIndexBuffer, 4, dynamic))
+			tempVBOs.add(VBO(boneWeightBuffer, 4, dynamic))
 		}
 
 		vbos = tempVBOs.toTypedArray()
@@ -214,7 +189,7 @@ class VAO : GLResource {
 		verticesPerShape = 3
 	}
 
-	constructor(scene : AIScene, index : Int) : this(AIMesh.create(scene.mMeshes()!![index]))
+	constructor(scene : AIScene, index : Int, dynamic : Boolean = false) : this(AIMesh.create(scene.mMeshes()!![index]), dynamic)
 
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this

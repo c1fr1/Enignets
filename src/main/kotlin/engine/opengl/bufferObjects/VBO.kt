@@ -4,6 +4,8 @@ package engine.opengl.bufferObjects
 
 import engine.opengl.GLResource
 import org.joml.*
+import org.lwjgl.assimp.AIVector2D
+import org.lwjgl.assimp.AIVector3D
 import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.glGenBuffers
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
@@ -105,6 +107,13 @@ sealed class VBO<T>(
 			}
 		}
 
+		operator fun invoke(data : AIVector2D.Buffer, vertexCount : Int, dynamic : Boolean = false) =
+			VBO2f(data, vertexCount, dynamic)
+
+		operator fun invoke(data : AIVector3D.Buffer, vertexCount : Int, dynamic : Boolean = false,
+		                    rotate : Boolean = false) =
+			VBO3f(data, vertexCount, dynamic, rotate)
+
 		operator fun invoke(data : IntArray, vectorSize : Int, dynamic : Boolean = false) : VBOi {
 			return when(vectorSize) {
 				1 -> VBO1i(data, dynamic)
@@ -160,6 +169,12 @@ sealed class VBOf(data : FloatArray, vectorSize : Int, dynamic: Boolean = false)
 	VBO<FloatArray>(data, vectorSize, GL_FLOAT, dynamic)
 class VBO1f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 1, dynamic)
 class VBO2f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 2, dynamic) {
+	constructor(data : AIVector2D.Buffer, vertexCount : Int, dynamic : Boolean = false) :
+			this(FloatArray(vertexCount * 2) {when (it % 2) {
+				0 -> data[it / 2].x()
+				1 -> data[it / 2].y()
+				else -> Float.NaN
+			} }, dynamic)
 	operator fun get(index : Int) : Vector2f = Vector2f(data[index / 2], data[index / 2 + 1])
 	operator fun set(index : Int, value : Vector2fc) {
 		data[index / 2] = value.x()
@@ -167,6 +182,13 @@ class VBO2f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 2, dynami
 	}
 }
 class VBO3f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 3, dynamic) {
+	constructor(data : AIVector3D.Buffer, vertexCount : Int, dynamic : Boolean = false, rotate : Boolean = false) :
+			this(FloatArray(vertexCount * 3) {when (it % 3) {
+				0 -> data[it / 3].x()
+				1 -> if (rotate) data[it / 3].z() else data[it / 3].y()
+				2 -> if (rotate) -data[it / 3].y() else data[it / 3].y()
+				else -> Float.NaN
+			} }, dynamic)
 	operator fun get(index: Int) : Vector3f = Vector3f(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
 	operator fun set(index : Int, value : Vector3fc) {
 		data[index / 3] = value.x()
