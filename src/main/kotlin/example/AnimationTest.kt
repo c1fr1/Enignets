@@ -12,23 +12,14 @@ import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
-import org.joml.Matrix4f
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFW.GLFW_KEY_E
 import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import org.lwjgl.opengl.GL11.GL_CULL_FACE
-import org.lwjgl.opengl.GL11.glDisable
 
 fun main() {
 	EnigContext.init()
 	val window = EnigWindow("enignets animation test demo", GLContextPreset.standard3D)
-	try {
-		val view = AnimationTestView(window)
-		view.runIn(window)
-	} catch (t : Throwable) {
-		t.printStackTrace()
-		checkGLError()
-	}
+	val view = AnimationTestView(window)
+	view.runInGLSafe(window)
 	EnigContext.terminate()
 }
 

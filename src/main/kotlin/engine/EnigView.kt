@@ -34,4 +34,13 @@ abstract class EnigView {
 		}
 		cleanUpResources()
 	}
+
+	fun runInGLSafe(window : EnigWindow) {
+		try {
+			runIn(window)
+		} catch (t : Throwable) {
+			t.printStackTrace()
+			checkGLError()
+		}
+	}
 }

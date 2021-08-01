@@ -10,20 +10,14 @@ import engine.opengl.shaders.ShaderType
 import org.joml.Vector2i
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.opengl.GL11.*
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 fun main() {
 	EnigContext.init()
 	val window = EnigWindow("enignets demo", GLContextPreset.standard2D)
-	try {
-		val view = WatershedMain(window)
-		view.runIn(window)
-	} catch (t : Throwable) {
-		t.printStackTrace()
-		checkGLError()
-	}
+	val view = WatershedMain(window)
+	view.runInGLSafe(window)
 	EnigContext.terminate()
 }
 
