@@ -11,26 +11,28 @@ import org.lwjgl.opengl.GL20.glGenBuffers
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30.glVertexAttribIPointer
 import org.lwjgl.opengl.GL41.glVertexAttribLPointer
+import org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER
+
 
 sealed class VBO<T>(
 		data : T,
 		private val vectorSize : Int,
 		private val type : Int,
-		private val dynamic : Boolean = false
+		protected val usage : Int = GL_STATIC_DRAW
 	) : GLResource(glGenBuffers()) {
 
 	open var data : T = data
 		set(value) {
-			glBindBuffer(GL_ARRAY_BUFFER, id)
-			when (value) {
-				is DoubleArray -> glBufferData(GL_ARRAY_BUFFER, value, if (dynamic) GL_DYNAMIC_DRAW else GL_STATIC_DRAW)
-				is FloatArray -> glBufferData(GL_ARRAY_BUFFER, value, if (dynamic) GL_DYNAMIC_DRAW else GL_STATIC_DRAW)
-				is IntArray -> glBufferData(GL_ARRAY_BUFFER, value, if (dynamic) GL_DYNAMIC_DRAW else GL_STATIC_DRAW)
-				is ShortArray -> glBufferData(GL_ARRAY_BUFFER, value, if (dynamic) GL_DYNAMIC_DRAW else GL_STATIC_DRAW)
-				else -> throw InvalidVBOException()
-			}
+			bind()
+			storeGLData(value)
 			field = value
 		}
+
+	protected abstract fun storeGLData(value : T)
+
+	open fun bind() {
+		glBindBuffer(GL_ARRAY_BUFFER, id)
+	}
 
 	init {
 		this.data = data
@@ -39,7 +41,7 @@ sealed class VBO<T>(
 	val vertexCount : Int get() {return size / vectorSize}
 
 	fun assignToVAO(index: Int) {
-		glBindBuffer(GL_ARRAY_BUFFER, id)
+		bind()
 		when (type) {
 			GL_DOUBLE -> glVertexAttribLPointer(index, vectorSize, GL_DOUBLE, 0, 0)
 			GL_INT, GL_SHORT -> glVertexAttribIPointer(index, vectorSize, type, 0, 0)
@@ -47,7 +49,7 @@ sealed class VBO<T>(
 		}
 	}
 
-	val size : Int
+	open val size : Int
 		get() {
 			return when (data) {
 				is DoubleArray -> (data as DoubleArray).size
@@ -63,26 +65,11 @@ sealed class VBO<T>(
 	}
 
 	fun updateData(offset : Long, value : T) {
-		when (value) {
-			is DoubleArray -> {
-				glBufferSubData(GL_ARRAY_BUFFER, offset, value)
-				for (i in value.indices) (data as DoubleArray)[i + offset.toInt()] = value[i]
-			}
-			is FloatArray -> {
-				glBufferSubData(GL_ARRAY_BUFFER, offset, value)
-				for (i in value.indices) (data as FloatArray)[i + offset.toInt()] = value[i]
-			}
-			is IntArray -> {
-				glBufferSubData(GL_ARRAY_BUFFER, offset, value)
-				for (i in value.indices) (data as IntArray)[i + offset.toInt()] = value[i]
-			}
-			is ShortArray -> {
-				glBufferSubData(GL_ARRAY_BUFFER, offset, value)
-				for (i in value.indices) (data as ShortArray)[i + offset.toInt()] = value[i]
-			}
-			else -> throw InvalidVBOException()
-		}
+		bind()
+		updateDataRange(offset, value)
 	}
+
+	protected abstract fun updateDataRange(offset : Long, value : T)
 
 	companion object {
 		val squareTC : FloatArray = floatArrayOf(0f, 0f, 0f, 1f, 1f, 1f, 1f, 0f)
@@ -108,11 +95,11 @@ sealed class VBO<T>(
 		}
 
 		operator fun invoke(data : AIVector2D.Buffer, vertexCount : Int, dynamic : Boolean = false) =
-			VBO2f(data, vertexCount, dynamic)
+			VBO2f(data, dynamic)
 
 		operator fun invoke(data : AIVector3D.Buffer, vertexCount : Int, dynamic : Boolean = false,
 		                    rotate : Boolean = false) =
-			VBO3f(data, vertexCount, dynamic, rotate)
+			VBO3f(data, dynamic, rotate)
 
 		operator fun invoke(data : IntArray, vectorSize : Int, dynamic : Boolean = false) : VBOi {
 			return when(vectorSize) {
@@ -136,108 +123,204 @@ sealed class VBO<T>(
 	}
 }
 
-sealed class VBOd(data : DoubleArray, vectorSize : Int, dynamic: Boolean = false) :
-	VBO<DoubleArray>(data, vectorSize, GL_DOUBLE, dynamic)
+interface VertexBuffer<T> {
+	fun internalGet(i : Int) : T
+	fun internalSet(i : Int, value : T)
+}
+
+interface Vertex2DBuffer : VertexBuffer<Double> {
+	operator fun get(i : Int) : Vector2d {
+		return Vector2d(internalGet(i / 2), internalGet(i / 2 + 1))
+	}
+	operator fun set(i : Int, value : Vector2dc) {
+		internalSet(i / 2, value.x())
+		internalSet(i / 2 + 1, value.y())
+	}
+}
+interface Vertex3DBuffer : VertexBuffer<Double> {
+	operator fun get(i : Int) : Vector3d {
+		return Vector3d(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+	}
+	operator fun set(i : Int, value : Vector3dc) {
+		internalSet(i / 3, value.x())
+		internalSet(i / 3 + 1, value.y())
+		internalSet(i / 3 + 2, value.z())
+	}
+}
+interface Vertex4DBuffer : VertexBuffer<Double> {
+	operator fun get(i : Int) : Vector4d {
+		return Vector4d(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+	}
+	operator fun set(i : Int, value : Vector4dc) {
+		internalSet(i / 4, value.x())
+		internalSet(i / 4 + 1, value.y())
+		internalSet(i / 4 + 2, value.z())
+		internalSet(i / 4 + 3, value.w())
+	}
+}
+
+interface Vertex2FBuffer : VertexBuffer<Float> {
+	operator fun get(i : Int) : Vector2f {
+		return Vector2f(internalGet(i / 2), internalGet(i / 2 + 1))
+	}
+	operator fun set(i : Int, value : Vector2fc) {
+		internalSet(i / 2, value.x())
+		internalSet(i / 2 + 1, value.y())
+	}
+}
+interface Vertex3FBuffer : VertexBuffer<Float> {
+	operator fun get(i : Int) : Vector3f {
+		return Vector3f(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+	}
+	operator fun set(i : Int, value : Vector3fc) {
+		internalSet(i / 3, value.x())
+		internalSet(i / 3 + 1, value.y())
+		internalSet(i / 3 + 2, value.z())
+	}
+}
+interface Vertex4FBuffer : VertexBuffer<Float> {
+	operator fun get(i : Int) : Vector4f {
+		return Vector4f(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+	}
+	operator fun set(i : Int, value : Vector4fc) {
+		internalSet(i / 4, value.x())
+		internalSet(i / 4 + 1, value.y())
+		internalSet(i / 4 + 2, value.z())
+		internalSet(i / 4 + 3, value.w())
+	}
+}
+
+interface Vertex2IBuffer : VertexBuffer<Int> {
+	operator fun get(i : Int) : Vector2i {
+		return Vector2i(internalGet(i / 2), internalGet(i / 2 + 1))
+	}
+	operator fun set(i : Int, value : Vector2ic) {
+		internalSet(i / 2, value.x())
+		internalSet(i / 2 + 1, value.y())
+	}
+}
+interface Vertex3IBuffer : VertexBuffer<Int> {
+	operator fun get(i : Int) : Vector3i {
+		return Vector3i(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+	}
+	operator fun set(i : Int, value : Vector3ic) {
+		internalSet(i / 3, value.x())
+		internalSet(i / 3 + 1, value.y())
+		internalSet(i / 3 + 2, value.z())
+	}
+}
+interface Vertex4IBuffer : VertexBuffer<Int> {
+	operator fun get(i : Int) : Vector4i {
+		return Vector4i(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+	}
+	operator fun set(i : Int, value : Vector4ic) {
+		internalSet(i / 4, value.x())
+		internalSet(i / 4 + 1, value.y())
+		internalSet(i / 4 + 2, value.z())
+		internalSet(i / 4 + 3, value.w())
+	}
+}
+
+fun AIVector2D.Buffer.getArray() = FloatArray(limit() * 2) {
+	when (it % 2) {
+		0 -> get(it / 2).x()
+		1 -> get(it / 2).y()
+		else -> Float.NaN
+	}
+}
+fun AIVector3D.Buffer.getArray(rotate : Boolean = false) = FloatArray(limit() * 3) {
+	when (it % 3) {
+		0 -> get(it / 3).x()
+		1 -> if (rotate) get(it / 3).z() else get(it / 3).y()
+		2 -> if (rotate) -get(it / 3).y() else get(it / 3).z()
+		else -> Float.NaN
+	}
+}
+
+private fun getUsage(dynamic : Boolean = false, readable : Boolean = false) = when {
+	readable && dynamic -> GL_DYNAMIC_READ
+	readable && !dynamic -> GL_STATIC_READ
+	!readable && dynamic -> GL_DYNAMIC_DRAW
+	else -> GL_STATIC_DRAW
+}
+
+sealed class VBOd(data : DoubleArray, vectorSize : Int, dynamic : Boolean = false) :
+		VBO<DoubleArray>(data, vectorSize, GL_DOUBLE, getUsage(dynamic)), VertexBuffer<Double> {
+	override fun storeGLData(value : DoubleArray) {
+		glBufferData(GL_ARRAY_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset : Long, value : DoubleArray) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+
+	override fun internalSet(i : Int, value : Double) {
+		data[i] = value
+	}
+}
 class VBO1d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 1, dynamic)
-class VBO2d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 2, dynamic) {
-	operator fun get(index : Int) : Vector2d = Vector2d(data[index / 2], data[index / 2 + 1])
-	operator fun set(index : Int, value : Vector2dc) {
-		data[index / 2] = value.x()
-		data[index / 2 + 1] = value.y()
-	}
-}
-class VBO3d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 3, dynamic) {
-	operator fun get(index: Int) : Vector3d = Vector3d(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
-	operator fun set(index : Int, value : Vector3dc) {
-		data[index / 3] = value.x()
-		data[index / 3 + 1] = value.y()
-		data[index / 3 + 2] = value.z()
-	}
-}
-class VBO4d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 4, dynamic) {
-	operator fun get(index: Int) : Vector4d =
-		Vector4d(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
-	operator fun set(index : Int, value : Vector4dc) {
-		data[index / 4] = value.x()
-		data[index / 4 + 1] = value.y()
-		data[index / 4 + 2] = value.z()
-		data[index / 4 + 3] = value.w()
-	}
-}
+class VBO2d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 2, dynamic), Vertex2DBuffer
+class VBO3d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 3, dynamic), Vertex3DBuffer
+class VBO4d(data : DoubleArray, dynamic : Boolean = false) : VBOd(data, 4, dynamic), Vertex4DBuffer
 
 sealed class VBOf(data : FloatArray, vectorSize : Int, dynamic: Boolean = false) :
-	VBO<FloatArray>(data, vectorSize, GL_FLOAT, dynamic)
+		VBO<FloatArray>(data, vectorSize, GL_FLOAT, getUsage(dynamic)), VertexBuffer<Float> {
+	override fun storeGLData(value: FloatArray) {
+		glBufferData(GL_ARRAY_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset: Long, value: FloatArray) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+
+	override fun internalSet(i : Int, value : Float) {
+		data[i] = value
+	}
+}
 class VBO1f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 1, dynamic)
-class VBO2f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 2, dynamic) {
-	constructor(data : AIVector2D.Buffer, vertexCount : Int, dynamic : Boolean = false) :
-			this(FloatArray(vertexCount * 2) {when (it % 2) {
-				0 -> data[it / 2].x()
-				1 -> data[it / 2].y()
-				else -> Float.NaN
-			} }, dynamic)
-	operator fun get(index : Int) : Vector2f = Vector2f(data[index / 2], data[index / 2 + 1])
-	operator fun set(index : Int, value : Vector2fc) {
-		data[index / 2] = value.x()
-		data[index / 2 + 1] = value.y()
-	}
+class VBO2f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 2, dynamic), Vertex2FBuffer {
+	constructor(data : AIVector2D.Buffer, dynamic : Boolean = false) : this(data.getArray(), dynamic)
 }
-class VBO3f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 3, dynamic) {
-	constructor(data : AIVector3D.Buffer, vertexCount : Int, dynamic : Boolean = false, rotate : Boolean = false) :
-			this(FloatArray(vertexCount * 3) {when (it % 3) {
-				0 -> data[it / 3].x()
-				1 -> if (rotate) data[it / 3].z() else data[it / 3].y()
-				2 -> if (rotate) -data[it / 3].y() else data[it / 3].y()
-				else -> Float.NaN
-			} }, dynamic)
-	operator fun get(index: Int) : Vector3f = Vector3f(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
-	operator fun set(index : Int, value : Vector3fc) {
-		data[index / 3] = value.x()
-		data[index / 3 + 1] = value.y()
-		data[index / 3 + 2] = value.z()
+class VBO3f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 3, dynamic), Vertex3FBuffer {
+	constructor(data : AIVector3D.Buffer, dynamic : Boolean = false, rotate : Boolean = false) :
+			this(data.getArray(rotate), dynamic)
 	}
-}
-class VBO4f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 4, dynamic) {
-	operator fun get(index: Int) : Vector4f =
-		Vector4f(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
-	operator fun set(index : Int, value : Vector4fc) {
-		data[index / 4] = value.x()
-		data[index / 4 + 1] = value.y()
-		data[index / 4 + 2] = value.z()
-		data[index / 4 + 3] = value.w()
-	}
-}
+class VBO4f(data : FloatArray, dynamic : Boolean = false) : VBOf(data, 4, dynamic), Vertex4FBuffer
 
 sealed class VBOi(data : IntArray, vectorSize : Int, dynamic: Boolean = false) :
-	VBO<IntArray>(data, vectorSize, GL_INT, dynamic)
+		VBO<IntArray>(data, vectorSize, GL_INT, getUsage(dynamic)), VertexBuffer<Int> {
+	override fun storeGLData(value: IntArray) {
+		glBufferData(GL_ARRAY_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset: Long, value: IntArray) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+	override fun internalSet(i : Int, value : Int) {
+		data[i] = value
+	}
+}
 class VBO1i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 1, dynamic)
-class VBO2i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 2, dynamic) {
-	operator fun get(index : Int) : Vector2i = Vector2i(data[index / 2], data[index / 2 + 1])
-	operator fun set(index : Int, value : Vector2ic) {
-		data[index / 2] = value.x()
-		data[index / 2 + 1] = value.y()
-	}
-}
-class VBO3i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 3, dynamic) {
-	operator fun get(index: Int) : Vector3i = Vector3i(data[index / 3], data[index / 3 + 1], data[index / 3 + 2])
-	operator fun set(index : Int, value : Vector3ic) {
-		data[index / 3] = value.x()
-		data[index / 3 + 1] = value.y()
-		data[index / 3 + 2] = value.z()
-	}
-}
-class VBO4i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 4, dynamic) {
-	operator fun get(index: Int) : Vector4i =
-		Vector4i(data[index / 4], data[index / 4 + 1], data[index / 4 + 2], data[index / 4 + 3])
-	operator fun set(index : Int, value : Vector4ic) {
-		data[index / 4] = value.x()
-		data[index / 4 + 1] = value.y()
-		data[index / 4 + 2] = value.z()
-		data[index / 4 + 3] = value.w()
-	}
-}
+class VBO2i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 2, dynamic), Vertex2IBuffer
+class VBO3i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 3, dynamic), Vertex3IBuffer
+class VBO4i(data : IntArray, dynamic : Boolean = false) : VBOi(data, 4, dynamic), Vertex4IBuffer
 
 sealed class VBOs(data : ShortArray, vectorSize : Int, dynamic: Boolean = false) :
-	VBO<ShortArray>(data, vectorSize, GL_SHORT, dynamic)
+		VBO<ShortArray>(data, vectorSize, GL_SHORT, getUsage(dynamic)) {
+	override fun storeGLData(value: ShortArray) {
+		glBufferData(GL_ARRAY_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset: Long, value: ShortArray) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, value)
+	}
+}
 class VBO1s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 1, dynamic)
 class VBO2s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 2, dynamic)
 class VBO3s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 3, dynamic)
@@ -245,12 +328,189 @@ class VBO4s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 4, dynami
 
 class IBO(data : IntArray) : VBOi(data, 1, false) {
 
-	override var data : IntArray
-		get() = super.data
-		set(value) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, value, GL_STATIC_DRAW)
-		}
+	override fun bind() {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)
+	}
+
+	override fun storeGLData(value : IntArray) {
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, value, GL_STATIC_DRAW)
+	}
 }
+
+sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean = false, readable : Boolean = false) :
+		VBO<T>(value, vectorSize, type, getUsage(dynamic, readable)) {
+
+	override var data : T = value
+
+	init {
+		bind()
+		storeGLData(value)
+	}
+
+	abstract fun retrieveGLData() : T
+
+	override fun bind() {
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, id)
+	}
+
+	companion object {
+		operator fun invoke(data : DoubleArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOd {
+			return when(vectorSize) {
+				1 -> SSBO1d(data, dynamic, readable)
+				2 -> SSBO2d(data, dynamic, readable)
+				3 -> SSBO3d(data, dynamic, readable)
+				4 -> SSBO4d(data, dynamic, readable)
+				else -> throw InvalidVBOException()
+			}
+		}
+		operator fun invoke(data : FloatArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOf {
+			return when(vectorSize) {
+				1 -> SSBO1f(data, dynamic, readable)
+				2 -> SSBO2f(data, dynamic, readable)
+				3 -> SSBO3f(data, dynamic, readable)
+				4 -> SSBO4f(data, dynamic, readable)
+				else -> throw InvalidVBOException()
+			}
+		}
+		operator fun invoke(value : AIVector2D.Buffer, dynamic : Boolean = false, readable : Boolean = false) = SSBO2f(value, dynamic, readable)
+		operator fun invoke(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) = SSBO3f(value, dynamic, readable, rotate)
+
+		operator fun invoke(data : IntArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOi {
+			return when(vectorSize) {
+				1 -> SSBO1i(data, dynamic, readable)
+				2 -> SSBO2i(data, dynamic, readable)
+				3 -> SSBO3i(data, dynamic, readable)
+				4 -> SSBO4i(data, dynamic, readable)
+				else -> throw InvalidVBOException()
+			}
+		}
+		operator fun invoke(data : ShortArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOs {
+			return when(vectorSize) {
+				1 -> SSBO1s(data, dynamic, readable)
+				2 -> SSBO2s(data, dynamic, readable)
+				3 -> SSBO3s(data, dynamic, readable)
+				4 -> SSBO4s(data, dynamic, readable)
+				else -> throw InvalidVBOException()
+			}
+		}
+	}
+}
+
+sealed class SSBOd(value : DoubleArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
+		SSBO<DoubleArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Double> {
+
+	override fun retrieveGLData() : DoubleArray {
+		bind()
+		glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY)!!.asDoubleBuffer().get(data)
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+		return data
+	}
+
+	override fun storeGLData(value : DoubleArray) {
+		glBufferData(GL_SHADER_STORAGE_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset : Long, value : DoubleArray) {
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+	override fun internalSet(i : Int, value : Double) {
+		data[i] = value
+	}
+}
+sealed class SSBOf(value : FloatArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
+		SSBO<FloatArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Float> {
+
+	override fun retrieveGLData() : FloatArray {
+		bind()
+		glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY)!!.asFloatBuffer().get(data)
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+		return data
+	}
+
+	override fun storeGLData(value : FloatArray) {
+		glBufferData(GL_SHADER_STORAGE_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset : Long, value : FloatArray) {
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+	override fun internalSet(i : Int, value : Float) {
+		data[i] = value
+	}
+}
+sealed class SSBOi(value : IntArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
+		SSBO<IntArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Int> {
+
+	override fun retrieveGLData() : IntArray {
+		bind()
+		glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY)!!.asIntBuffer().get(data)
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+		return data
+	}
+
+	override fun storeGLData(value : IntArray) {
+		glBufferData(GL_SHADER_STORAGE_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset : Long, value : IntArray) {
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+	override fun internalSet(i : Int, value : Int) {
+		data[i] = value
+	}
+}
+sealed class SSBOs(value : ShortArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
+		SSBO<ShortArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Short> {
+
+	override fun retrieveGLData() : ShortArray {
+		bind()
+		glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY)!!.asShortBuffer().get(data)
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER)
+		return data
+	}
+
+	override fun storeGLData(value : ShortArray) {
+		glBufferData(GL_SHADER_STORAGE_BUFFER, value, usage)
+	}
+
+	override fun updateDataRange(offset : Long, value : ShortArray) {
+		glBufferSubData(GL_SHADER_STORAGE_BUFFER, offset, value)
+	}
+
+	override fun internalGet(i : Int) = data[i]
+	override fun internalSet(i : Int, value : Short) {
+		data[i] = value
+	}
+}
+
+class SSBO1d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 1, dynamic, readable)
+class SSBO2d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 2, dynamic, readable), Vertex2DBuffer
+class SSBO3d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 3, dynamic, readable), Vertex3DBuffer
+class SSBO4d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 4, dynamic, readable), Vertex4DBuffer
+
+class SSBO1f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 1, dynamic, readable)
+class SSBO2f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 2, dynamic, readable), Vertex2FBuffer {
+	constructor(value : AIVector2D.Buffer, dynamic : Boolean = false, readable : Boolean = false) : this(value.getArray(), dynamic, readable)
+}
+class SSBO3f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 3, dynamic, readable), Vertex3FBuffer {
+	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) : this(value.getArray(rotate), dynamic, readable)
+}
+class SSBO4f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 4, dynamic, readable), Vertex4FBuffer
+
+class SSBO1i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 1, dynamic, readable)
+class SSBO2i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 2, dynamic, readable), Vertex2IBuffer
+class SSBO3i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 3, dynamic, readable), Vertex3IBuffer
+class SSBO4i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 4, dynamic, readable), Vertex4IBuffer
+
+class SSBO1s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 1, dynamic, readable)
+class SSBO2s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 2, dynamic, readable)
+class SSBO3s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 3, dynamic, readable)
+class SSBO4s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 4, dynamic, readable)
 
 class InvalidVBOException : RuntimeException("invalid VBO storage class")

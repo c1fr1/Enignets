@@ -11,6 +11,7 @@
  - make more complete examples
  - documentation
  - add functions for writing more specific uniform arrays
+ - take another look at buffers (and maybe redesign?)
 
  - TESTING
 	- Ray2f (?)

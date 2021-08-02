@@ -30,7 +30,7 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 
 	val scene = loadScene("dfgod.dae")
 	val anims = Animation(scene)
-	val skeleton = Skeleton(scene, arrayOf("skeleton_Bone", "skeleton_Bone_001", "skeleton_Bone_002", "skeleton_Bone_003"))
+	val skeleton = Skeleton(scene, arrayOf("body_Bone", "body_Bone_001", "body_Bone_002", "body_Bone_003"))
 
 	val cam = Camera3D(window.aspectRatio)
 	val input = window.inputHandler
