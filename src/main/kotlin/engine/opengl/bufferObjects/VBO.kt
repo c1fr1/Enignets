@@ -6,12 +6,12 @@ import engine.opengl.GLResource
 import org.joml.*
 import org.lwjgl.assimp.AIVector2D
 import org.lwjgl.assimp.AIVector3D
-import org.lwjgl.opengl.GL15.*
 import org.lwjgl.opengl.GL20.glGenBuffers
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
+import org.lwjgl.opengl.GL30.glBindBufferBase
 import org.lwjgl.opengl.GL30.glVertexAttribIPointer
 import org.lwjgl.opengl.GL41.glVertexAttribLPointer
-import org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER
+import org.lwjgl.opengl.GL43.*
 
 
 sealed class VBO<T>(
@@ -353,6 +353,10 @@ sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, id)
 	}
 
+	fun bindToPosition(pos : Int) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, pos, id)
+	}
+
 	companion object {
 		operator fun invoke(data : DoubleArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOd {
 			return when(vectorSize) {
@@ -392,6 +396,11 @@ sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean 
 				4 -> SSBO4s(data, dynamic, readable)
 				else -> throw InvalidVBOException()
 			}
+		}
+
+		fun syncSSBOs() {
+			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT)
+
 		}
 	}
 }

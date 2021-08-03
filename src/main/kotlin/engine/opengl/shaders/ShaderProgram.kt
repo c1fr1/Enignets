@@ -42,8 +42,9 @@ class ShaderProgram : GLResource {
 			checkGLError()
 			throw RuntimeException(glGetProgramInfoLog(id))//TODO create new exception for this
 		}
-		glDetachShader(id, shaders[VERTEX_SHADER.index].id)
-		glDetachShader(id, shaders[FRAGMENT_SHADER.index].id)
+		if (vertPath != null) glDetachShader(id, shaders[VERTEX_SHADER.index].id)
+		if (geomPath != null) glDetachShader(id, shaders[GEOMETRY_SHADER.index].id)
+		if (fragPath != null) glDetachShader(id, shaders[FRAGMENT_SHADER.index].id)
 		uniforms = Array(shaders.size) {
 			Array(shaders[it].uniformCount) {uniformIndex -> Uniform(shaders[it].uniforms[uniformIndex], id)}
 		}
