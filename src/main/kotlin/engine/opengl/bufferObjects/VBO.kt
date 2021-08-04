@@ -2,6 +2,7 @@
 
 package engine.opengl.bufferObjects
 
+import engine.entities.animations.fuckBlender
 import engine.opengl.GLResource
 import org.joml.*
 import org.lwjgl.assimp.AIVector2D
@@ -377,7 +378,7 @@ sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean 
 			}
 		}
 		operator fun invoke(value : AIVector2D.Buffer, dynamic : Boolean = false, readable : Boolean = false) = SSBO2f(value, dynamic, readable)
-		operator fun invoke(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) = SSBO3f(value, dynamic, readable, rotate)
+		operator fun invoke(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = fuckBlender) = SSBO3f(value, dynamic, readable, rotate)
 
 		operator fun invoke(data : IntArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOi {
 			return when(vectorSize) {

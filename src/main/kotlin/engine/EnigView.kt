@@ -3,10 +3,6 @@ package engine
 import engine.opengl.EnigContext
 import engine.opengl.EnigWindow
 import engine.opengl.checkGLError
-import engine.opengl.shaders.ShaderProgram
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFW.glfwPollEvents
-import org.lwjgl.glfw.GLFW.glfwSwapBuffers
 
 abstract class EnigView {
 
