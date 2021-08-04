@@ -80,6 +80,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	 */
 	fun set(info : Vector2fc) = set(info.x(), info.y())
 
+	fun set(info : Array<Vector2f>) {
+		type.checkType(Vec2, info.size)
+		glUniform2fv(pos, info.toFloatArray())
+	}
+
 	fun set(info : Array<Vector2fc>) {
 		type.checkType(Vec2, info.size)
 		glUniform2fv(pos, info.toFloatArray())
@@ -88,6 +93,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	fun set(infoA : Double, infoB : Double) = set(infoA.toFloat(), infoB.toFloat())
 
 	fun set(info : Vector2dc) = set(info.x(), info.y())
+
+	fun set(info : Array<Vector2d>) {
+		type.checkType(DVec2, info.size)
+		glUniform2fv(pos, info.getF())
+	}
 
 	fun set(info : Array<Vector2dc>) {
 		type.checkType(DVec2, info.size)
@@ -100,6 +110,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	}
 
 	fun set(info : Vector2ic) = set(info.x(), info.y())
+
+	fun set(info : Array<Vector2i>) {
+		type.checkType(IVec2, info.size)
+		glUniform2iv(pos, info.toIntArray())
+	}
 
 	fun set(info : Array<Vector2ic>) {
 		type.checkType(IVec2, info.size)
@@ -127,6 +142,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	 */
 	fun set(info : Vector3fc) = set(info.x(), info.y(), info.z())
 
+	fun set(info : Array<Vector3f>) {
+		type.checkType(Vec3, info.size)
+		glUniform3fv(pos, info.toFloatArray())
+	}
+
 	fun set(info : Array<Vector3fc>) {
 		type.checkType(Vec3, info.size)
 		glUniform3fv(pos, info.toFloatArray())
@@ -135,6 +155,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	fun set(infoA : Double, infoB : Double, infoC : Double) = set(infoA.toFloat(), infoB.toFloat(), infoC.toFloat())
 
 	fun set(info : Vector3dc) = set(info.x(), info.y(), info.z())
+
+	fun set(info : Array<Vector3d>) {
+		type.checkType(DVec2, info.size)
+		glUniform3fv(pos, info.getF())
+	}
 
 	fun set(info : Array<Vector3dc>) {
 		type.checkType(DVec2, info.size)
@@ -147,6 +172,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	}
 
 	fun set(info : Vector3ic) = set(info.x(), info.y(), info.z())
+
+	fun set(info : Array<Vector3i>) {
+		type.checkType(IVec3, info.size)
+		glUniform3iv(pos, info.toIntArray())
+	}
 
 	fun set(info : Array<Vector3ic>) {
 		type.checkType(IVec3, info.size)
@@ -171,6 +201,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	 */
 	fun set(info: Vector4fc) = set(info.x(), info.y(), info.z(), info.w())
 
+	fun set(info: Array<Vector4f>) {
+		type.checkType(Vec4, info.size)
+		glUniform4fv(pos, info.toFloatArray())
+	}
+
 	fun set(info: Array<Vector4fc>) {
 		type.checkType(Vec4, info.size)
 		glUniform4fv(pos, info.toFloatArray())
@@ -180,6 +215,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		set(infoA.toFloat(), infoB.toFloat(), infoC.toFloat(), infoD.toFloat())
 
 	fun set(info: Vector4dc) = set(info.x(), info.y(), info.z(), info.w())
+
+	fun set(info: Array<Vector4d>) {
+		type.checkType(DVec4, info.size)
+		glUniform4fv(pos, info.getF())
+	}
 
 	fun set(info: Array<Vector4dc>) {
 		type.checkType(DVec4, info.size)
@@ -192,6 +232,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	}
 
 	fun set(info : Vector4ic) = set(info.x(), info.y(), info.z(), info.w())
+
+	fun set(info : Array<Vector4i>) {
+		type.checkType(IVec4, info.size)
+		glUniform4iv(pos, info.toIntArray())
+	}
 
 	fun set(info : Array<Vector4ic>) {
 		type.checkType(IVec4, info.size)
@@ -211,6 +256,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		glUniformMatrix2fv(pos, false, info.get(FloatArray(4)))
 	}
 
+	fun set(info : Array<Matrix2f>) {
+		type.checkType(Mat2, info.size)
+		glUniformMatrix2fv(pos, false, info.toFloatArray())
+	}
+
 	fun set(info : Array<Matrix2fc>) {
 		type.checkType(Mat2, info.size)
 		glUniformMatrix2fv(pos, false, info.toFloatArray())
@@ -221,6 +271,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		glUniformMatrix3fv(pos, false, info.get(FloatArray(9)))
 	}
 
+	fun set(info : Array<Matrix3f>) {
+		type.checkType(Mat3, info.size)
+		glUniformMatrix3fv(pos, false, info.toFloatArray())
+	}
+
 	fun set(info : Array<Matrix3fc>) {
 		type.checkType(Mat3, info.size)
 		glUniformMatrix3fv(pos, false, info.toFloatArray())
@@ -229,6 +284,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	fun set(info : Matrix3x2fc) {
 		type.checkType(Mat3x2)
 		glUniformMatrix3x2fv(pos, false, info.get(FloatArray(6)))
+	}
+
+	fun set(info : Array<Matrix3x2f>) {
+		type.checkType(Mat3x2, info.size)
+		glUniformMatrix3x2fv(pos, false, info.toFloatArray())
 	}
 
 	fun set(info : Array<Matrix3x2fc>) {
@@ -256,6 +316,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		glUniformMatrix4x3fv(pos, false, info.get(FloatArray(12)))
 	}
 
+	fun set(info : Array<Matrix4x3f>) {
+		type.checkType(Mat4x3, info.size)
+		glUniformMatrix4x3fv(pos, false, info.toFloatArray())
+	}
+
 	fun set(info : Array<Matrix4x3fc>) {
 		type.checkType(Mat4x3, info.size)
 		glUniformMatrix4x3fv(pos, false, info.toFloatArray())
@@ -263,6 +328,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 
 	fun set(info : Matrix2dc) {
 		type.checkType(DMat2)
+		glUniformMatrix2fv(pos, false, info.getF())
+	}
+
+	fun set(info : Array<Matrix2d>) {
+		type.checkType(DMat2, info.size)
 		glUniformMatrix2fv(pos, false, info.getF())
 	}
 
@@ -276,6 +346,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		glUniformMatrix3fv(pos, false, info.get(FloatArray(9)))
 	}
 
+	fun set(info : Array<Matrix3d>) {
+		type.checkType(DMat3, info.size)
+		glUniformMatrix3fv(pos, false, info.getF())
+	}
+
 	fun set(info : Array<Matrix3dc>) {
 		type.checkType(DMat3, info.size)
 		glUniformMatrix3fv(pos, false, info.getF())
@@ -283,6 +358,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 
 	fun set(info : Matrix3x2dc) {
 		type.checkType(DMat3x2)
+		glUniformMatrix3x2fv(pos, false, info.getF())
+	}
+
+	fun set(info : Array<Matrix3x2d>) {
+		type.checkType(DMat3x2, info.size)
 		glUniformMatrix3x2fv(pos, false, info.getF())
 	}
 
@@ -296,6 +376,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 		glUniformMatrix4fv(pos, false, info.get(FloatArray(16)))
 	}
 
+	fun set(info : Array<Matrix4d>) {
+		type.checkType(DMat4, info.size)
+		glUniformMatrix4fv(pos, false, info.getF())
+	}
+
 	fun set(info : Array<Matrix4dc>) {
 		type.checkType(DMat4, info.size)
 		glUniformMatrix4fv(pos, false, info.getF())
@@ -304,6 +389,11 @@ class Uniform(uniform : ShaderUniform, program : Int) : ShaderUniform(uniform.na
 	fun set(info : Matrix4x3dc) {
 		type.checkType(DMat4)
 		glUniformMatrix4fv(pos, false, info.get(FloatArray(12)))
+	}
+
+	fun set(info : Array<Matrix4x3d>) {
+		type.checkType(DMat4, info.size)
+		glUniformMatrix4fv(pos, false, info.getF())
 	}
 
 	fun set(info : Array<Matrix4x3dc>) {

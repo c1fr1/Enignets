@@ -59,7 +59,7 @@ class Skeleton {
 		nodes = Array(tmpNodes.size) {tmpNodes[it]!!}
 	}
 
-	fun getMats(animation: Animation, frame : Int, globalInverse : Matrix4f) : Array<Matrix4f> {
+	fun getMats(animation: Animation, frame : Int) : Array<Matrix4f> {
 		val ret = animation.getMats(frame)
 
 		fun setMats(nodeID : Int) {

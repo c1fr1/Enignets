@@ -1,16 +1,14 @@
 package engine.opengl.bufferObjects
 
 import engine.entities.animations.fuckBlender
-import engine.getResourceStream
+import engine.loadBoneData
 import engine.loadScene
 import engine.opengl.GLResource
 import engine.shapes.Box2d
 import engine.shapes.Box3d
 import org.lwjgl.assimp.*
-import org.lwjgl.assimp.Assimp.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL31.glDrawElementsInstanced
-import org.lwjgl.system.MemoryUtil
 
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
@@ -155,25 +153,10 @@ class VAO : GLResource {
 		}
 
 		if (mesh.mBones() != null) {
-			val boneIndexBuffer = IntArray(mesh.mNumVertices() * 4) {-1}
-			val boneWeightBuffer = FloatArray(mesh.mNumVertices() * 4) {0f}
-			for (i in 0 until mesh.mNumBones()) {
-				val b = AIBone.create(mesh.mBones()!![i])
-				for (w in b.mWeights()) {
-					for (j in 0 until 4) {
-						if (boneIndexBuffer[w.mVertexId() * 4 + j] == -1) {
-							boneIndexBuffer[w.mVertexId() * 4 + j] = i
-							boneWeightBuffer[w.mVertexId() * 4 + j] = w.mWeight()
-							break
-						}
-					}
-				}
-			}
+			val weightData = loadBoneData(mesh)
 
-			for (i in boneIndexBuffer.indices) if (boneIndexBuffer[i] == -1) boneIndexBuffer[i] = 0
-
-			tempVBOs.add(VBO(boneIndexBuffer, 4, dynamic))
-			tempVBOs.add(VBO(boneWeightBuffer, 4, dynamic))
+			tempVBOs.add(VBO(weightData.first, 4, dynamic))
+			tempVBOs.add(VBO(weightData.second, 4, dynamic))
 		}
 
 		vbos = tempVBOs.toTypedArray()

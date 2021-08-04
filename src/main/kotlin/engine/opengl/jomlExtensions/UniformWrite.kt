@@ -32,6 +32,13 @@ fun Array<Vector3i>.toIntArray() = IntArray(size * 3) {get(it / 3)[it % 3]}
 fun Array<Vector4ic>.toIntArray() = IntArray(size * 4) {get(it / 4)[it % 4]}
 fun Array<Vector4i>.toIntArray() = IntArray(size * 4) {get(it / 4)[it % 4]}
 
+fun Array<Matrix2f>.toFloatArray() : FloatArray {
+	val ret = FloatArray(size * 4)
+	for (i in indices) {
+		get(i).get(ret, i * 4)
+	}
+	return ret
+}
 fun Array<Matrix2fc>.toFloatArray() : FloatArray {
 	val ret = FloatArray(size * 4)
 	for (i in indices) {
@@ -39,10 +46,24 @@ fun Array<Matrix2fc>.toFloatArray() : FloatArray {
 	}
 	return ret
 }
+fun Array<Matrix3f>.toFloatArray() : FloatArray {
+	val ret = FloatArray(size * 9)
+	for (i in indices) {
+		get(i).get(ret, i * 9)
+	}
+	return ret
+}
 fun Array<Matrix3fc>.toFloatArray() : FloatArray {
 	val ret = FloatArray(size * 9)
 	for (i in indices) {
 		get(i).get(ret, i * 9)
+	}
+	return ret
+}
+fun Array<Matrix3x2f>.toFloatArray() : FloatArray {
+	val ret = FloatArray(size * 6)
+	for (i in indices) {
+		get(i).get(ret, i * 6)
 	}
 	return ret
 }
@@ -67,6 +88,13 @@ fun Array<Matrix4fc>.toFloatArray() : FloatArray {
 	}
 	return ret
 }
+fun Array<Matrix4x3f>.toFloatArray() : FloatArray {
+	val ret = FloatArray(size * 12)
+	for (i in indices) {
+		get(i).get(ret, i * 12)
+	}
+	return ret
+}
 fun Array<Matrix4x3fc>.toFloatArray() : FloatArray {
 	val ret = FloatArray(size * 12)
 	for (i in indices) {
@@ -75,10 +103,24 @@ fun Array<Matrix4x3fc>.toFloatArray() : FloatArray {
 	return ret
 }
 
+fun Array<Matrix2d>.toFloatArray() : DoubleArray {
+	val ret = DoubleArray(size * 4)
+	for (i in indices) {
+		get(i).get(ret, i * 4)
+	}
+	return ret
+}
 fun Array<Matrix2dc>.toFloatArray() : DoubleArray {
 	val ret = DoubleArray(size * 4)
 	for (i in indices) {
 		get(i).get(ret, i * 4)
+	}
+	return ret
+}
+fun Array<Matrix3d>.toFloatArray() : DoubleArray {
+	val ret = DoubleArray(size * 9)
+	for (i in indices) {
+		get(i).get(ret, i * 9)
 	}
 	return ret
 }
@@ -89,6 +131,13 @@ fun Array<Matrix3dc>.toFloatArray() : DoubleArray {
 	}
 	return ret
 }
+fun Array<Matrix3x2d>.toFloatArray() : DoubleArray {
+	val ret = DoubleArray(size * 6)
+	for (i in indices) {
+		get(i).get(ret, i * 6)
+	}
+	return ret
+}
 fun Array<Matrix3x2dc>.toFloatArray() : DoubleArray {
 	val ret = DoubleArray(size * 6)
 	for (i in indices) {
@@ -96,10 +145,24 @@ fun Array<Matrix3x2dc>.toFloatArray() : DoubleArray {
 	}
 	return ret
 }
+fun Array<Matrix4d>.toFloatArray() : DoubleArray {
+	val ret = DoubleArray(size * 16)
+	for (i in indices) {
+		get(i).get(ret, i * 16)
+	}
+	return ret
+}
 fun Array<Matrix4dc>.toFloatArray() : DoubleArray {
 	val ret = DoubleArray(size * 16)
 	for (i in indices) {
 		get(i).get(ret, i * 16)
+	}
+	return ret
+}
+fun Array<Matrix4x3d>.toFloatArray() : DoubleArray {
+	val ret = DoubleArray(size * 12)
+	for (i in indices) {
+		get(i).get(ret, i * 12)
 	}
 	return ret
 }
@@ -111,10 +174,24 @@ fun Array<Matrix4x3dc>.toFloatArray() : DoubleArray {
 	return ret
 }
 
+fun Array<Matrix2d>.getF() : FloatArray {
+	val ret = DoubleArray(size * 4)
+	for (i in indices) {
+		get(i).get(ret, i * 4)
+	}
+	return FloatArray(ret.size) {ret[it].toFloat()}
+}
 fun Array<Matrix2dc>.getF() : FloatArray {
 	val ret = DoubleArray(size * 4)
 	for (i in indices) {
 		get(i).get(ret, i * 4)
+	}
+	return FloatArray(ret.size) {ret[it].toFloat()}
+}
+fun Array<Matrix3d>.getF() : FloatArray {
+	val ret = DoubleArray(size * 9)
+	for (i in indices) {
+		get(i).get(ret, i * 9)
 	}
 	return FloatArray(ret.size) {ret[it].toFloat()}
 }
@@ -125,6 +202,13 @@ fun Array<Matrix3dc>.getF() : FloatArray {
 	}
 	return FloatArray(ret.size) {ret[it].toFloat()}
 }
+fun Array<Matrix3x2d>.getF() : FloatArray {
+	val ret = DoubleArray(size * 6)
+	for (i in indices) {
+		get(i).get(ret, i * 6)
+	}
+	return FloatArray(ret.size) {ret[it].toFloat()}
+}
 fun Array<Matrix3x2dc>.getF() : FloatArray {
 	val ret = DoubleArray(size * 6)
 	for (i in indices) {
@@ -132,10 +216,24 @@ fun Array<Matrix3x2dc>.getF() : FloatArray {
 	}
 	return FloatArray(ret.size) {ret[it].toFloat()}
 }
+fun Array<Matrix4d>.getF() : FloatArray {
+	val ret = DoubleArray(size * 16)
+	for (i in indices) {
+		get(i).get(ret, i * 16)
+	}
+	return FloatArray(ret.size) {ret[it].toFloat()}
+}
 fun Array<Matrix4dc>.getF() : FloatArray {
 	val ret = DoubleArray(size * 16)
 	for (i in indices) {
 		get(i).get(ret, i * 16)
+	}
+	return FloatArray(ret.size) {ret[it].toFloat()}
+}
+fun Array<Matrix4x3d>.getF() : FloatArray {
+	val ret = DoubleArray(size * 12)
+	for (i in indices) {
+		get(i).get(ret, i * 12)
 	}
 	return FloatArray(ret.size) {ret[it].toFloat()}
 }

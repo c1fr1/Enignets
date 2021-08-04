@@ -10,8 +10,9 @@
  - finish adding operators to ray classes
  - make more complete examples
  - documentation
- - add functions for writing more specific uniform arrays
  - take another look at buffers (and maybe redesign?)
+ - add support for glsl array sizes to be defined by constants
+ - figure out normal transformations for animations
 
  - TESTING
 	- Ray2f (?)

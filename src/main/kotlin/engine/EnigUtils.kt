@@ -2,9 +2,12 @@
 
 package engine
 
+import engine.opengl.bufferObjects.VBO
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.BufferUtils
+import org.lwjgl.assimp.AIBone
+import org.lwjgl.assimp.AIMesh
 import org.lwjgl.assimp.AIScene
 import org.lwjgl.assimp.Assimp.*
 import org.lwjgl.glfw.GLFWImage
@@ -305,4 +308,25 @@ fun loadScene(path : String) : AIScene {
 	)!!
 	MemoryUtil.memFree(buffer)
 	return scene
+}
+
+fun loadBoneData(m : AIMesh) : Pair<IntArray, FloatArray> {
+	val boneIndexBuffer = IntArray(m.mNumVertices() * 4) {-1}
+	val boneWeightBuffer = FloatArray(m.mNumVertices() * 4) {0f}
+	for (i in 0 until m.mNumBones()) {
+		val b = AIBone.create(m.mBones()!![i])
+		for (w in b.mWeights()) {
+			for (j in 0 until 4) {
+				if (boneIndexBuffer[w.mVertexId() * 4 + j] == -1) {
+					boneIndexBuffer[w.mVertexId() * 4 + j] = i
+					boneWeightBuffer[w.mVertexId() * 4 + j] = w.mWeight()
+					break
+				}
+			}
+		}
+	}
+
+	for (i in boneIndexBuffer.indices) if (boneIndexBuffer[i] == -1) boneIndexBuffer[i] = 0
+
+	return Pair(boneIndexBuffer, boneWeightBuffer)
 }

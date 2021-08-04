@@ -48,7 +48,7 @@ class AnimationTestView(window : EnigWindow) : EnigView() {
 		FBO.prepareDefaultRender()
 		shader.enable()
 		shader[ShaderType.VERTEX_SHADER][0].set(cam.getMatrix())
-		shader[ShaderType.VERTEX_SHADER][1].set(skeleton.getMats(anims[0], frame, scene.mRootNode()!!.mTransformation().toJoml()))
+		shader[ShaderType.VERTEX_SHADER][1].set(skeleton.getMats(anims[0], frame))
 
 		vaos[0].fullRender()
 
