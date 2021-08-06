@@ -144,14 +144,14 @@ class VAO : GLResource {
 		vaoIDs.add(id)
 		glBindVertexArray(id)
 		val tempVBOs = arrayListOf<VBO<*>>()
-		tempVBOs.add(VBO(mesh.mVertices(), mesh.mNumVertices(), dynamic, fuckBlender))
+		tempVBOs.add(VBO(mesh.mVertices(), dynamic, fuckBlender))
 		var textureIndex = 0
 		while (mesh.mTextureCoords(textureIndex) != null) {
-			tempVBOs.add(VBO(mesh.mTextureCoords(textureIndex)!!, mesh.mNumVertices()))
+			tempVBOs.add(VBO(mesh.mTextureCoords(textureIndex)!!))
 			++textureIndex
 		}
 		if (mesh.mNormals() != null) {
-			tempVBOs.add(VBO(mesh.mNormals()!!, mesh.mNumVertices(), dynamic, fuckBlender))
+			tempVBOs.add(VBO(mesh.mNormals()!!, dynamic, fuckBlender))
 		}
 
 		if (mesh.mBones() != null) {

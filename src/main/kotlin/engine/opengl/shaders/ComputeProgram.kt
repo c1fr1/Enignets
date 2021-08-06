@@ -25,6 +25,8 @@ class ComputeProgram : GLResource {
 
 		workGroupSize = Vector3i(1, 1, 1)
 
+		shaderSource += "#version 430 core\nlayout (std430) buffer;\n"
+
 		while (line != null) {
 			if (line.startsWith("#")) {
 				if (line == "#import <gnoise>") {

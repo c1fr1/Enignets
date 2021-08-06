@@ -1,5 +1,3 @@
-#version 330 core
-
 layout (location = 0) in vec3 vertices;
 layout (location = 3) in ivec4 boneIndexes;
 layout (location = 4) in vec4 boneWeights;

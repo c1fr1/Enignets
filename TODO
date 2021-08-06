@@ -13,7 +13,6 @@
  - take another look at buffers (and maybe redesign?)
  - add support for glsl array sizes to be defined by constants
  - figure out normal transformations for animations
- - find out what is up with SSBO objects holding vec3s (and maybe smaller vectors as well?)
  - fix the VAO constructor that takes an IBO as a parameter
 
  - TESTING

@@ -97,10 +97,10 @@ sealed class VBO<T>(
 			}
 		}
 
-		operator fun invoke(data : AIVector2D.Buffer, vertexCount : Int, dynamic : Boolean = false) =
+		operator fun invoke(data : AIVector2D.Buffer, dynamic : Boolean = false) =
 			VBO2f(data, dynamic)
 
-		operator fun invoke(data : AIVector3D.Buffer, vertexCount : Int, dynamic : Boolean = false,
+		operator fun invoke(data : AIVector3D.Buffer, dynamic : Boolean = false,
 		                    rotate : Boolean = false) =
 			VBO3f(data, dynamic, rotate)
 
@@ -511,8 +511,13 @@ class SSBO1f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = 
 class SSBO2f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 2, dynamic, readable), Vertex2FBuffer {
 	constructor(value : AIVector2D.Buffer, dynamic : Boolean = false, readable : Boolean = false) : this(value.getArray(), dynamic, readable)
 }
-class SSBO3f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 3, dynamic, readable), Vertex3FBuffer {
-	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) : this(value.getArray(rotate), dynamic, readable)
+class SSBO3f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(FloatArray(data.size * 4 / 3) {when (it % 4) {
+	0 -> data[it / 4 * 3]
+	1 -> data[it / 4 * 3 + 1]
+	2 -> data[it / 4 * 3 + 2]
+	else -> 0f
+} }, 3, dynamic, readable), Vertex3FBuffer {
+	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = fuckBlender) : this(value.getArray(rotate), dynamic, readable)
 }
 class SSBO4f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 4, dynamic, readable), Vertex4FBuffer
 

@@ -33,7 +33,7 @@ class MainView(window : EnigWindow) : EnigView() {
 	lateinit var computeShader : ComputeProgram
 	lateinit var colorShader : ShaderProgram
 
-	lateinit var positionBuffer : SSBO4f
+	lateinit var positionBuffer : SSBO3f
 	lateinit var boneIndexBuffer : SSBO4i
 	lateinit var boneWeightBuffer : SSBO4f
 	lateinit var outPosBuffer : SSBO4f
@@ -59,18 +59,9 @@ class MainView(window : EnigWindow) : EnigView() {
 
 		val boneData = loadBoneData(mesh)
 
-		val vertBuffer = mesh.mVertices()
-		val verts = FloatArray(mesh.mNumVertices() * 4) {
-			when (it % 4) {
-				0 -> vertBuffer[it / 4].x()
-				1 -> vertBuffer[it / 4].z()
-				2 -> -vertBuffer[it / 4].y()
-				else -> 1f
-			}
-		}
-		positionBuffer = SSBO(verts, 4) as SSBO4f
-		boneIndexBuffer = SSBO(boneData.first, 4) as SSBO4i
-		boneWeightBuffer = SSBO(boneData.second, 4) as SSBO4f
+		positionBuffer = SSBO3f(mesh.mVertices())
+		boneIndexBuffer = SSBO4i(boneData.first)
+		boneWeightBuffer = SSBO4f(boneData.second)
 		outPosBuffer = SSBO(FloatArray(mesh.mNumVertices() * 4), 4, true, true) as SSBO4f
 
 		vao = VAO(mesh)

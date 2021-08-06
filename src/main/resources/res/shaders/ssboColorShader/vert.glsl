@@ -1,5 +1,3 @@
-#version 430 core
-
 layout (binding = 3) readonly buffer Target { vec4 pos[]; };
 
 uniform mat4 matrix;
