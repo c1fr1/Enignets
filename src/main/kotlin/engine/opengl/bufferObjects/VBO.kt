@@ -5,6 +5,8 @@ package engine.opengl.bufferObjects
 import engine.entities.animations.fuckBlender
 import engine.opengl.GLResource
 import org.joml.*
+import org.lwjgl.assimp.AIFace
+import org.lwjgl.assimp.AIMesh
 import org.lwjgl.assimp.AIVector2D
 import org.lwjgl.assimp.AIVector3D
 import org.lwjgl.opengl.GL20.glGenBuffers
@@ -17,8 +19,8 @@ import org.lwjgl.opengl.GL43.*
 
 sealed class VBO<T>(
 		data : T,
-		private val vectorSize : Int,
-		private val type : Int,
+		protected val vectorSize : Int,
+		protected val type : Int,
 		protected val usage : Int = GL_STATIC_DRAW
 	) : GLResource(glGenBuffers()) {
 
@@ -41,7 +43,7 @@ sealed class VBO<T>(
 
 	val vertexCount : Int get() {return size / vectorSize}
 
-	fun assignToVAO(index: Int) {
+	open fun assignToVAO(index : Int) {
 		bind()
 		when (type) {
 			GL_DOUBLE -> glVertexAttribLPointer(index, vectorSize, GL_DOUBLE, 0, 0)
@@ -329,6 +331,8 @@ class VBO4s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 4, dynami
 
 class IBO(data : IntArray) : VBOi(data, 1, false) {
 
+	constructor(faces : AIFace.Buffer) : this(IntArray(faces.limit() * 3) {faces[it / 3].mIndices()[it % 3]})
+
 	override fun bind() {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)
 	}
@@ -401,7 +405,6 @@ sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean 
 
 		fun syncSSBOs() {
 			glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT)
-
 		}
 	}
 }
@@ -430,7 +433,7 @@ sealed class SSBOd(value : DoubleArray, vectorSize : Int, dynamic : Boolean = fa
 	}
 }
 sealed class SSBOf(value : FloatArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
-		SSBO<FloatArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Float> {
+		SSBO<FloatArray>(value, vectorSize, GL_FLOAT, dynamic, readable), VertexBuffer<Float> {
 
 	override fun retrieveGLData() : FloatArray {
 		bind()
@@ -453,7 +456,7 @@ sealed class SSBOf(value : FloatArray, vectorSize : Int, dynamic : Boolean = fal
 	}
 }
 sealed class SSBOi(value : IntArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
-		SSBO<IntArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Int> {
+		SSBO<IntArray>(value, vectorSize, GL_INT, dynamic, readable), VertexBuffer<Int> {
 
 	override fun retrieveGLData() : IntArray {
 		bind()
@@ -476,7 +479,7 @@ sealed class SSBOi(value : IntArray, vectorSize : Int, dynamic : Boolean = false
 	}
 }
 sealed class SSBOs(value : ShortArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) :
-		SSBO<ShortArray>(value, vectorSize, GL_DOUBLE, dynamic, readable), VertexBuffer<Short> {
+		SSBO<ShortArray>(value, vectorSize, GL_SHORT, dynamic, readable), VertexBuffer<Short> {
 
 	override fun retrieveGLData() : ShortArray {
 		bind()

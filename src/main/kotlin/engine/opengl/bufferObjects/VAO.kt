@@ -35,12 +35,14 @@ class VAO : GLResource {
 		verticesPerShape = vps
 	}
 
-	constructor(vbos : Array<VBO<*>>, ind: IntArray, vps : Int = 3) : super(glGenVertexArrays()) {
+	constructor(vbos : Array<VBO<*>>, ind : IntArray, vps : Int = 3) : this(vbos, IBO(ind), vps)
+
+	constructor(vbos : Array<VBO<*>>, ind : IBO, vps : Int = 3) : super(glGenVertexArrays()) {
 		glBindVertexArray(id)
 		this.vbos = vbos
 		for (i in this.vbos.indices) this.vbos[i].assignToVAO(i)
 		vaoIDs.add(id)
-		ibo = IBO(ind)
+		ibo = ind
 		verticesPerShape = vps
 	}
 
