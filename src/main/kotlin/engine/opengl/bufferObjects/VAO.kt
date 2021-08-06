@@ -43,6 +43,7 @@ class VAO : GLResource {
 		for (i in this.vbos.indices) this.vbos[i].assignToVAO(i)
 		vaoIDs.add(id)
 		ibo = ind
+		ibo.bind()
 		verticesPerShape = vps
 	}
 

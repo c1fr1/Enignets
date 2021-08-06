@@ -44,7 +44,7 @@ sealed class VBO<T>(
 	val vertexCount : Int get() {return size / vectorSize}
 
 	open fun assignToVAO(index : Int) {
-		bind()
+		glBindBuffer(GL_ARRAY_BUFFER, id)
 		when (type) {
 			GL_DOUBLE -> glVertexAttribLPointer(index, vectorSize, GL_DOUBLE, 0, 0)
 			GL_INT, GL_SHORT -> glVertexAttribIPointer(index, vectorSize, type, 0, 0)
@@ -518,6 +518,11 @@ class SSBO3f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = 
 	else -> 0f
 } }, 3, dynamic, readable), Vertex3FBuffer {
 	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = fuckBlender) : this(value.getArray(rotate), dynamic, readable)
+
+	override fun assignToVAO(index: Int) {
+		glBindBuffer(GL_ARRAY_BUFFER, id)
+		glVertexAttribPointer(index, vectorSize, GL_FLOAT, false, 16, 0)
+	}
 }
 class SSBO4f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 4, dynamic, readable), Vertex4FBuffer
 

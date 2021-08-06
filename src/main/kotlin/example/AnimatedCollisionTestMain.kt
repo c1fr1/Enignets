@@ -62,9 +62,9 @@ class MainView(window : EnigWindow) : EnigView() {
 		positionBuffer = SSBO3f(mesh.mVertices())
 		boneIndexBuffer = SSBO4i(boneData.first)
 		boneWeightBuffer = SSBO4f(boneData.second)
-		outPosBuffer = SSBO(FloatArray(mesh.mNumVertices() * 4), 4, true, true) as SSBO4f
+		outPosBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true, true)
 
-		vao = VAO(mesh)
+		vao = VAO(arrayOf(outPosBuffer), IBO(mesh.mFaces()))
 
 		computeShader = ComputeProgram("res/shaders/animComputeShader/compute.glsl")
 		colorShader = ShaderProgram("ssboColorShader")
