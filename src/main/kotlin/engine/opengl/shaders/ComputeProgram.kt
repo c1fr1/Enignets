@@ -22,6 +22,7 @@ class ComputeProgram : GLResource {
 		val reader = getResource(path)
 		var line = reader.readLine()
 		val tempUniformList = ArrayList<ShaderUniform>()
+		val constArray = ArrayList<Pair<String, Int>>()
 
 		workGroupSize = Vector3i(1, 1, 1)
 
@@ -38,6 +39,11 @@ class ComputeProgram : GLResource {
 					line = br.readText()
 				}
 			} else if (line.contains("uniform ")) {
+				for (const in constArray) {
+					if (line.contains(const.first)) {
+						line = line.replace(const.first, "${const.second}")
+					}
+				}
 				tempUniformList.add(ShaderUniform(line.substring(line.indexOf("uniform"))))
 			} else if (line.startsWith("layout") && line.contains("local_size")) {
 				val woSpaces = line.replace(" ", "")
@@ -50,6 +56,10 @@ class ComputeProgram : GLResource {
 						"local_size_z" -> workGroupSize.z = property.substringAfter('=').toInt()
 					}
 				}
+			} else if (line.startsWith("const int")) {
+				val name = line.substringBefore('=').split(' ')[2]
+				val value = line.substringAfter('=').substringBefore(';').trim().toInt()
+				constArray.add(Pair(name, value))
 			}
 			shaderSource += "$line\n"
 			line = reader.readLine()

@@ -2,9 +2,10 @@ layout (local_size_x = 1) in;
 layout (std430) buffer;
 
 const int MAX_WEIGHTS = 4;
+const int MAX_JOINTS = 50;
 
 uniform mat4 matrix;
-uniform mat4 jointMatrix[50];
+uniform mat4 jointMatrix[MAX_JOINTS];
 
 layout (binding = 0) readonly buffer SourcePos { vec3 pos[]; };
 layout (binding = 1) readonly buffer SourceNormal { vec3 normal[]; };

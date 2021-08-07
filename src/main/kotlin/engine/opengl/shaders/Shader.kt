@@ -24,6 +24,7 @@ class Shader : GLResource {
 		val tempInAttribList = ArrayList<Attribute>()
 		val tempOutAttribList = ArrayList<Attribute>()
 		val tempUniformList = ArrayList<ShaderUniform>()
+		val constArray = ArrayList<Pair<String, Int>>()
 
 		var lastInAttribPos = -1
 		var lastOutAttribPos = -1
@@ -50,7 +51,16 @@ class Shader : GLResource {
 				lastOutAttribPos = attrib.pos
 			} else if (line.startsWith("uniform") ||
 				(line.startsWith("layout") && line.contains(" uniform "))) {
+				for (const in constArray) {
+					if (line.contains(const.first)) {
+						line = line.replace(const.first, "${const.second}")
+					}
+				}
 				tempUniformList.add(ShaderUniform(line))
+			} else if (line.startsWith("const int")) {
+				val name = line.substringBefore('=').split(' ')[2]
+				val value = line.substringAfter('=').substringBefore(';').trim().toInt()
+				constArray.add(Pair(name, value))
 			}
 
 			shaderSource += "$line\n"
