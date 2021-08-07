@@ -94,16 +94,9 @@ class Shader : GLResource {
 	 */
 	override fun destroy() {
 		glDeleteShader(id)
-		for (i in shaderIDs.indices) {
-			if (shaderIDs[i] == id) {
-				shaderIDs.removeAt(i)
-			}
-		}
 	}
 
 	companion object {
-		var shaderIDs = ArrayList<Int>()
-
 		val defaultShader = Shader()
 	}
 }

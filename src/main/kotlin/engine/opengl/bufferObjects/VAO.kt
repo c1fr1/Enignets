@@ -30,7 +30,6 @@ class VAO : GLResource {
 		glBindVertexArray(id)
 		vbos = arrayOf(VBO(vertices, 3, dynamic))
 		vbos[0].assignToVAO(0)
-		vaoIDs.add(id)
 		ibo = IBO(ind)
 		verticesPerShape = vps
 	}
@@ -41,7 +40,6 @@ class VAO : GLResource {
 		glBindVertexArray(id)
 		this.vbos = vbos
 		for (i in this.vbos.indices) this.vbos[i].assignToVAO(i)
-		vaoIDs.add(id)
 		ibo = ind
 		ibo.bind()
 		verticesPerShape = vps
@@ -122,7 +120,6 @@ class VAO : GLResource {
 			17, 14, 15,
 			17, 15, 16
 		))
-		vaoIDs.add(id)
 		vbos = arrayOf(VBO(vertices, 3, dynamic), VBO(textureCoordinates, 2, dynamic))
 		vbos[0].assignToVAO(0)
 		vbos[1].assignToVAO(1)
@@ -142,7 +139,6 @@ class VAO : GLResource {
 	 * @param mesh assimp mesh
 	 */
 	constructor(mesh : AIMesh, dynamic : Boolean = false) : super(glGenVertexArrays()) {
-		vaoIDs.add(id)
 		glBindVertexArray(id)
 		val tempVBOs = arrayListOf<VBO<*>>()
 		tempVBOs.add(VBO(mesh.mVertices(), dynamic, fuckBlender))
@@ -318,7 +314,6 @@ class VAO : GLResource {
 	 */
 	override fun destroy() {
 		glDeleteVertexArrays(id)
-		vaoIDs.removeIf { it == id }
 	}
 
 	/**
@@ -331,7 +326,6 @@ class VAO : GLResource {
 	}
 
 	companion object {
-		var vaoIDs = ArrayList<Int>()
 
 		operator fun invoke(path : String) = Companion(loadScene(path))
 		operator fun invoke(scene : AIScene) = Array(scene.mNumMeshes()) {VAO(scene, it)}

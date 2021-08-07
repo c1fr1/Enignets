@@ -23,7 +23,6 @@ class ShaderProgram : GLResource {
 	 * @param fragPath path of the fragment shader
 	 */
 	constructor(vertPath: String?, geomPath : String?, fragPath: String?) : super(glCreateProgram()) {
-		shaderProgramIDs.add(id)
 		if (vertPath != null) {
 			shaders[VERTEX_SHADER.index] = Shader(vertPath, VERTEX_SHADER)
 			glAttachShader(id, shaders[VERTEX_SHADER.index].id)
@@ -71,12 +70,6 @@ class ShaderProgram : GLResource {
 	 */
 	override fun destroy() {
 		glDeleteProgram(id)
-		for (i in shaderProgramIDs.indices) {
-			if (shaderProgramIDs[i] == id) {
-				shaderProgramIDs.removeAt(i)
-				return
-			}
-		}
 	}
 
 	operator fun get(type : Int, index : Int) = uniforms[type][index]
@@ -224,8 +217,6 @@ class ShaderProgram : GLResource {
 	operator fun set(type : ShaderType, index : Int, value : Array<Matrix4x3dc>) = this[type, index].set(value)
 
 	companion object {
-		var shaderProgramIDs = ArrayList<Int>()
-
 		/**
 		 * binds the default shader
 		 */
