@@ -7,8 +7,8 @@ class InputHandler(windowId: Long) {
 	val mouseButtons = Array(GLFW_MOUSE_BUTTON_LAST + 1) {KeyState.Up}
 	var glCursorX = 0f; private set
 	var glCursorY = 0f; private set
-	var cursorX = 0.0; private set
-	var cursorY = 0.0; private set
+	var cursorX = Double.NaN; private set
+	var cursorY = Double.NaN; private set
 
 	var cursorDelX = 0f; private set
 	var cursorDelY = 0f; private set
@@ -33,8 +33,10 @@ class InputHandler(windowId: Long) {
 			}
 		}
 		glfwSetCursorPosCallback(windowId) {_ : Long, xpos : Double, ypos : Double ->
-			cursorDelX = (xpos - cursorX).toFloat()
-			cursorDelY = (ypos - cursorY).toFloat()
+			if (cursorX.isFinite() && cursorY.isFinite()) {
+				cursorDelX = (xpos - cursorX).toFloat()
+				cursorDelY = (ypos - cursorY).toFloat()
+			}
 			cursorX = xpos
 			cursorY = ypos
 			val widthBuf = IntArray(1)

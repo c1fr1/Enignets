@@ -9,6 +9,7 @@ import engine.loadBoneData
 import engine.loadScene
 import engine.opengl.*
 import engine.opengl.bufferObjects.*
+import engine.opengl.jomlExtensions.xyz
 import engine.opengl.shaders.ComputeProgram
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
@@ -34,9 +35,12 @@ class MainView(window : EnigWindow) : EnigView() {
 	lateinit var colorShader : ShaderProgram
 
 	lateinit var positionBuffer : SSBO3f
+	lateinit var normalBuffer : SSBO3f
 	lateinit var boneIndexBuffer : SSBO4i
 	lateinit var boneWeightBuffer : SSBO4f
+
 	lateinit var outPosBuffer : SSBO4f
+	lateinit var outNormalBuffer : SSBO4f
 
 	lateinit var vao : VAO
 
@@ -60,14 +64,19 @@ class MainView(window : EnigWindow) : EnigView() {
 		val boneData = loadBoneData(mesh)
 
 		positionBuffer = SSBO3f(mesh.mVertices())
+		normalBuffer = SSBO3f(mesh.mNormals()!!)
 		boneIndexBuffer = SSBO4i(boneData.first)
 		boneWeightBuffer = SSBO4f(boneData.second)
-		outPosBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true, true)
 
-		vao = VAO(arrayOf(outPosBuffer), IBO(mesh.mFaces()))
+		outPosBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true)
+		outNormalBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true)
+
+		vao = VAO(arrayOf(outPosBuffer, outNormalBuffer), IBO(mesh.mFaces()))
 
 		computeShader = ComputeProgram("res/shaders/animComputeShader/compute.glsl")
 		colorShader = ShaderProgram("ssboColorShader")
+
+		cam.z = 5f
 
 		window.inputEnabled = true
 	}
@@ -88,9 +97,11 @@ class MainView(window : EnigWindow) : EnigView() {
 
 	fun renderVAO() {
 		colorShader.enable()
-		outPosBuffer.bindToPosition(3)
+
 		colorShader[ShaderType.VERTEX_SHADER, 0] = cam.getMatrix()
-		colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 0f, 0f)
+		colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 1f, 1f)
+		colorShader[ShaderType.VERTEX_SHADER, 1] = cam.normalize(Vector3f())
+
 		vao.fullRender()
 	}
 
@@ -100,9 +111,12 @@ class MainView(window : EnigWindow) : EnigView() {
 
 		computeShader.enable()
 		positionBuffer.bindToPosition(0)
-		boneIndexBuffer.bindToPosition(1)
-		boneWeightBuffer.bindToPosition(2)
-		outPosBuffer.bindToPosition(3)
+		normalBuffer.bindToPosition(1)
+		boneIndexBuffer.bindToPosition(2)
+		boneWeightBuffer.bindToPosition(3)
+
+		outPosBuffer.bindToPosition(4)
+		outNormalBuffer.bindToPosition(5)
 
 		computeShader[0] = Matrix4f()
 		computeShader[1] = skeleton.getMats(anim, frame)

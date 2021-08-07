@@ -12,7 +12,6 @@
  -e- clean up old resource arrays (lookin at you vao...)
  -e- figure out how vec3d[]/vec3i/vec3s are packed and if there needs to be any changes in the corresponding SSBO classes
  -e- add support for glsl array sizes to be defined by constants
- -e- figure out normal transformations for animations
 
  - TESTING
 	- Ray2f (?)
