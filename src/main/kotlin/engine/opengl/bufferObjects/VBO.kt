@@ -504,7 +504,17 @@ sealed class SSBOs(value : ShortArray, vectorSize : Int, dynamic : Boolean = fal
 
 class SSBO1d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 1, dynamic, readable)
 class SSBO2d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 2, dynamic, readable), Vertex2DBuffer
-class SSBO3d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 3, dynamic, readable), Vertex3DBuffer
+class SSBO3d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(DoubleArray(data.size * 4 / 3) {when (it % 4) {
+	0 -> data[it / 4 * 3]
+	1 -> data[it / 4 * 3 + 1]
+	2 -> data[it / 4 * 3 + 2]
+	else -> 0.0
+} }, 3, dynamic, readable), Vertex3DBuffer {
+	override fun assignToVAO(index: Int) {
+		glBindBuffer(GL_ARRAY_BUFFER, id)
+		glVertexAttribPointer(index, vectorSize, GL_FLOAT, false, 32, 0)
+	}
+}
 class SSBO4d(data : DoubleArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOd(data, 4, dynamic, readable), Vertex4DBuffer
 
 class SSBO1f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOf(data, 1, dynamic, readable)
@@ -528,12 +538,32 @@ class SSBO4f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = 
 
 class SSBO1i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 1, dynamic, readable)
 class SSBO2i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 2, dynamic, readable), Vertex2IBuffer
-class SSBO3i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 3, dynamic, readable), Vertex3IBuffer
+class SSBO3i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(IntArray(data.size * 4 / 3) {when (it % 4) {
+	0 -> data[it / 4 * 3]
+	1 -> data[it / 4 * 3 + 1]
+	2 -> data[it / 4 * 3 + 2]
+	else -> 0
+} }, 3, dynamic, readable), Vertex3IBuffer {
+	override fun assignToVAO(index: Int) {
+		glBindBuffer(GL_ARRAY_BUFFER, id)
+		glVertexAttribPointer(index, vectorSize, GL_FLOAT, false, 16, 0)
+	}
+}
 class SSBO4i(data : IntArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOi(data, 4, dynamic, readable), Vertex4IBuffer
 
 class SSBO1s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 1, dynamic, readable)
 class SSBO2s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 2, dynamic, readable)
-class SSBO3s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 3, dynamic, readable)
+class SSBO3s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(ShortArray(data.size * 4 / 3) {when (it % 4) {
+	0 -> data[it / 4 * 3]
+	1 -> data[it / 4 * 3 + 1]
+	2 -> data[it / 4 * 3 + 2]
+	else -> 0
+} }, 3, dynamic, readable) {
+	override fun assignToVAO(index: Int) {
+		glBindBuffer(GL_ARRAY_BUFFER, id)
+		glVertexAttribPointer(index, vectorSize, GL_FLOAT, false, 8, 0)
+	}
+}
 class SSBO4s(data : ShortArray, dynamic : Boolean = false, readable : Boolean = false) : SSBOs(data, 4, dynamic, readable)
 
 class InvalidVBOException : RuntimeException("invalid VBO storage class")

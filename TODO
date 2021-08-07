@@ -10,7 +10,6 @@
  -m- finish adding operators to ray classes
  -e- different implementations for rays, boxes
  -e- clean up old resource arrays (lookin at you vao...)
- -e- figure out how vec3d[]/vec3i/vec3s are packed and if there needs to be any changes in the corresponding SSBO classes
 
  - TESTING
 	- Ray2f (?)
