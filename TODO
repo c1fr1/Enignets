@@ -9,7 +9,7 @@
  -m- shader code from Shader and ComputeProgram
  -m- move gl object handling to the window
  -m- finish adding operators to ray classes
- -e- different implementations for rays, boxes
+ -e- different implementations for rays
 
  - TESTING
 	- Ray2f (?)

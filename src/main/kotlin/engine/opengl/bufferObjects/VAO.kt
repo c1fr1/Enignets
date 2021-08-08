@@ -4,8 +4,8 @@ import engine.entities.animations.fuckBlender
 import engine.loadBoneData
 import engine.loadScene
 import engine.opengl.GLResource
-import engine.shapes.Box2d
-import engine.shapes.Box3d
+import engine.shapes.Bound2f
+import engine.shapes.Bound3f
 import org.lwjgl.assimp.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL31.glDrawElementsInstanced
@@ -61,7 +61,7 @@ class VAO : GLResource {
 		addVBO(VBO(VBO.squareTC, 2))
 	}
 
-	constructor(box : Box2d, dynamic : Boolean = false) : this(box.x, box.y, box.width, box.height, dynamic)
+	constructor(box : Bound2f, dynamic : Boolean = false) : this(box.x, box.y, box.width, box.height, dynamic)
 
 	constructor(minx: Float, miny: Float, minz: Float, maxx: Float, maxy: Float, maxz: Float, dynamic : Boolean = false) :
 			super(glGenVertexArrays()) {
@@ -126,7 +126,7 @@ class VAO : GLResource {
 		verticesPerShape = 3
 	}
 
-	constructor(box : Box3d, dynamic : Boolean = false) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz, dynamic)
+	constructor(box : Bound3f, dynamic : Boolean = false) : this(box.minx, box.miny, box.minz, box.maxx, box.maxy, box.maxz, dynamic)
 
 	/**
 	 * creates a vao (and vbos) from a assimp mesh

@@ -1,6 +1,7 @@
 package engine.shapes
 
 import engine.mino
+import engine.opengl.bufferObjects.VAO
 import org.joml.Vector2f
 import org.joml.Vector2fc
 import org.joml.Vector3f
@@ -12,6 +13,13 @@ interface Bound3f {
 	val maxy : Float
 	val minz : Float
 	val maxz : Float
+
+	val x : Float
+		get() = minx
+	val y : Float
+		get() = miny
+	val z : Float
+		get() = minz
 
 	val width : Float
 		get() = maxx - minx
@@ -36,16 +44,19 @@ interface Bound3f {
 	val zRange
 		get() = minz..maxz
 
+	val center : Vector3f
+		get() = Vector3f(centerX, centerY, centerZ)
+
 	/**
 	 * checks if a point lies within the bounds of the box
 	 * @param point point to check
 	 * @return if the point is in the box
 	 */
-	fun contains(point: Vector3f) : Boolean {
+	fun contains(point : Vector3f) : Boolean {
 		return minx < point.x && maxx > point.x && miny < point.y && maxy > point.y && minz < point.z && maxz > point.z
 	}
 
-	fun contains(x: Float, y: Float, z: Float) : Boolean {
+	fun contains(x : Float, y : Float, z : Float) : Boolean {
 		return minx < x && maxx > x && miny < y && maxy > y && minz < z && maxz > z
 	}
 
@@ -54,7 +65,7 @@ interface Bound3f {
 	 * @param other the other box
 	 * @return true if the other box is in this box
 	 */
-	operator fun contains(other: Bound3f): Boolean {
+	operator fun contains(other : Bound3f) : Boolean {
 		return minx < other.minx && maxx > other.maxx && miny < other.miny && maxy > other.maxy && minz < other.minz && maxz > other.maxz
 	}
 
@@ -63,7 +74,7 @@ interface Bound3f {
 	 * @param other the other box
 	 * @return true if the box is touching the other box
 	 */
-	fun touches(other: Bound3f): Boolean {
+	fun touches(other : Bound3f) : Boolean {
 		return contains(other.minx, other.miny, other.minz) || contains(other.minx, other.miny, other.maxz) || contains(
 			other.minx,
 			other.maxy,
@@ -80,7 +91,7 @@ interface Bound3f {
 	 * @param points the points
 	 * @return true if any of the points are in the box
 	 */
-	fun touches(points: Array<Vector3f>): Boolean {
+	fun touches(points : Array<Vector3f>) : Boolean {
 		for (point in points) {
 			if (contains(point)) {
 				return true
@@ -94,7 +105,7 @@ interface Bound3f {
 	 * @param points formatted [x1, y1, z1, x2, y2, z2...]
 	 * @return true if any of the points are contained in the box
 	 */
-	fun touches(points: FloatArray): Boolean {
+	fun touches(points : FloatArray) : Boolean {
 		var i = 0
 		while (i < points.size) {
 			if (contains(points[i], points[i + 1], points[i + 2])) {
@@ -104,6 +115,22 @@ interface Bound3f {
 		}
 		return false
 	}
+
+	fun translate(x : Float, y : Float, z : Float, other : Box3d) : Box3d {
+		other.minx = minx + x
+		other.maxx = maxx + x
+		other.miny = miny + y
+		other.maxy = maxy + y
+		other.minz = minz + z
+		other.maxz = maxz + z
+		return other
+	}
+
+	/**
+	 * gets a VAO that represents the box
+	 * @return VAO representing the box
+	 */
+	fun makeVAO(dynamic : Boolean = false) = VAO(this, dynamic)
 
 	fun intersect(other : Bound3f) = Box3d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
 		miny.coerceAtMost(other.miny), maxy.coerceAtLeast(other.maxy),
@@ -116,6 +143,11 @@ interface Bound2f {
 	val miny : Float
 	val maxy : Float
 
+	val x : Float
+		get() = minx
+	val y : Float
+		get() = miny
+
 	val width : Float
 		get() = maxx - minx
 	val height : Float
@@ -125,6 +157,13 @@ interface Bound2f {
 		get() = (minx + maxx) / 2f
 	val centerY : Float
 		get() = (miny + maxy) / 2f
+
+	/**
+	 * returns the center of the rectangle
+	 * @return center of the triangle
+	 */
+	val center : Vector2f
+		get() = Vector2f(centerX, centerY)
 
 	/**
 	 * checks to see if a point is in a rectangle that is sligtly larger than
@@ -214,6 +253,12 @@ interface Bound2f {
 		other.maxy = maxy + y
 		return other
 	}
+
+	/**
+	 * creates a new VAO based on the coordinates
+	 * @return new VAO based on this object
+	 */
+	fun makeVAO(dynamic : Boolean = false) = VAO(this, dynamic)
 
 	fun translate(delta : Vector2fc, other : Box2d) = translate(delta.x(), delta.y(), other)
 

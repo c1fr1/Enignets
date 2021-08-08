@@ -2,14 +2,16 @@ package engine.shapes
 
 import org.joml.Vector3f
 import engine.opengl.bufferObjects.VAO
+import org.joml.Vector2fc
+import org.joml.Vector3fc
 
-class Box3d : Bound3f {
-	override var minx: Float
-	override var maxx: Float
-	override var miny: Float
-	override var maxy: Float
-	override var minz: Float
-	override var maxz: Float
+open class Box3d : Bound3f {
+	override var minx : Float = 0f
+	override var maxx : Float = 0f
+	override var miny : Float = 0f
+	override var maxy : Float = 0f
+	override var minz : Float = 0f
+	override var maxz : Float = 0f
 
 	override var width : Float
 		get() = maxx - minx
@@ -21,24 +23,26 @@ class Box3d : Bound3f {
 		get() = maxz - minz
 		set(value) {maxz = minz + value}
 
-	var x : Float
+	override var x : Float
 		get() = minx
 		set(value) {
 			maxx = value + width
 			minx = value
 		}
-	var y : Float
+	override var y : Float
 		get() = miny
 		set(value) {
 			maxy = value + height
 			miny = value
 		}
-	var z : Float
+	override var z : Float
 		get() = minz
 		set(value) {
 			maxz = value + depth
 			minz = value
 		}
+
+	constructor()
 
 	/**
 	 * creates a box based on the maximum and minimum coordinates
@@ -49,7 +53,7 @@ class Box3d : Bound3f {
 	 * @param ymax maximum y
 	 * @param zmax maximum z
 	 */
-	constructor(xmin: Float, ymin: Float, zmin: Float, xmax: Float, ymax: Float, zmax: Float) {
+	constructor(xmin : Float, ymin : Float, zmin : Float, xmax : Float, ymax : Float, zmax : Float) {
 		minx = xmin
 		maxx = xmax
 		miny = ymin
@@ -63,33 +67,16 @@ class Box3d : Bound3f {
 	 * @param a first corner
 	 * @param b opposing corner
 	 */
-	constructor(a: Vector3f, b: Vector3f) {
-		minx = a.x.coerceAtMost(b.x)
-		maxx = a.x.coerceAtLeast(b.x)
-		miny = a.y.coerceAtMost(b.y)
-		maxy = a.y.coerceAtLeast(b.y)
-		minz = a.z.coerceAtMost(b.z)
-		maxz = a.z.coerceAtLeast(b.z)
+	constructor(a : Vector3fc, b : Vector3fc) {
+		minx = a.x().coerceAtMost(b.x())
+		maxx = a.x().coerceAtLeast(b.x())
+		miny = a.y().coerceAtMost(b.y())
+		maxy = a.y().coerceAtLeast(b.y())
+		minz = a.z().coerceAtMost(b.z())
+		maxz = a.z().coerceAtLeast(b.z())
 	}
 
-	/**
-	 * returns the center of the box
-	 * @return center of the box
-	 */
-	val center: Vector3f
-		get() = Vector3f((minx + maxx) / 2, (miny + maxy) / 2, (minz + maxz) / 2)
+	open fun translate(delta : Vector3fc) = translate(delta.x(), delta.y(), delta.z())
 
-	/**
-	 * gets a VAO that represents the box
-	 * @return VAO representing the box
-	 */
-	fun makeVAO() = VAO(this)
-
-	/**
-	 * gets the string representation of the box
-	 * @return string representation of the box
-	 */
-	override fun toString(): String {
-		return "x ranges from $minx to $maxx\ny ranges from $miny to $maxy\nz ranges from $minz to $maxz"
-	}
+	open fun translate(x : Float, y : Float, z : Float) = translate(x, y, z, this)
 }

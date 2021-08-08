@@ -1,29 +1,36 @@
 package engine.shapes
 
-import org.joml.Vector2f
-import engine.opengl.bufferObjects.VAO
 import org.joml.Vector2fc
 
 typealias AABB = Box2d
 
-class Box2d : Bound2f {
-	override var minx: Float
-	override var maxx: Float
-	override var miny: Float
-	override var maxy: Float
+open class Box2d : Bound2f {
+	override var minx : Float = 0f
+	override var maxx : Float = 0f
+	override var miny : Float = 0f
+	override var maxy : Float = 0f
 
-	var x : Float
+	override var width : Float
+		get() = maxx - minx
+		set(value) {maxx = minx + value}
+	override var height : Float
+		get() = maxy - miny
+		set(value) {maxy = miny + value}
+
+	override var x : Float
 		get() = minx
 		set(value) {
 			maxx = value + width
 			minx = value
 		}
-	var y : Float
+	override var y : Float
 		get() = miny
 		set(value) {
 			maxy = value + height
 			miny = value
 		}
+
+	constructor()
 
 	/**
 	 * creates a new box given the minimums and maximum coordinates
@@ -32,7 +39,7 @@ class Box2d : Bound2f {
 	 * @param xmax maximum x
 	 * @param ymax maximum y
 	 */
-	constructor(xmin: Float, ymin: Float, xmax: Float, ymax: Float) {
+	constructor(xmin : Float, ymin : Float, xmax : Float, ymax : Float) {
 		minx = xmin
 		maxx = xmax
 		miny = ymin
@@ -44,29 +51,15 @@ class Box2d : Bound2f {
 	 * @param a first corner
 	 * @param b opposing corner
 	 */
-	constructor(a: Vector2f, b: Vector2f) {
-		minx = a.x.coerceAtMost(b.x)
-		maxx = a.x.coerceAtLeast(b.x)
-		miny = a.y.coerceAtMost(b.y)
-		maxy = a.y.coerceAtLeast(b.y)
+	constructor(a : Vector2fc, b : Vector2fc) {
+		minx = a.x().coerceAtMost(b.x())
+		maxx = a.x().coerceAtLeast(b.x())
+		miny = a.y().coerceAtMost(b.y())
+		maxy = a.y().coerceAtLeast(b.y())
 	}
 
-	constructor() : this(0f, 0f, 0f, 0f)
+	open fun translate(delta : Vector2fc) = translate(delta.x(), delta.y())
 
-	fun translate(delta : Vector2fc) = translate(delta.x(), delta.y())
+	open fun translate(x : Float, y : Float) = translate(x, y, this)
 
-	fun translate(x : Float, y : Float) = translate(x, y, this)
-
-	/**
-	 * returns the center of the rectangle
-	 * @return center of the triangle
-	 */
-	val center : Vector2f
-		get() = Vector2f((minx + maxx) / 2, (miny + maxy) / 2)
-
-	/**
-	 * creates a new VAO based on the coordinates
-	 * @return new VAO based on this object
-	 */
-	fun makeVAO() = VAO(x, y, width, height)
 }
