@@ -5,48 +5,56 @@ import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.dot
 import engine.opengl.jomlExtensions.cross
-import engine.opengl.jomlExtensions.times
 import org.joml.Math.sqrt
 import org.joml.Vector3f
 import org.joml.Vector3fc
 import kotlin.math.abs
 import java.lang.Math.fma
 
-class Ray3f : Vector3f, Bound3f {
-	var delta : Vector3f
+open class Ray3f : Vector3f, Bound3f {
+	open var delta : Vector3f = Vector3f()
 
-	var dx : Float
+	open var dx : Float
 		get() = delta.x
 		set(value) {delta.x = value}
-	var dy : Float
+	open var dy : Float
 		get() = delta.y
 		set(value) {delta.y = value}
-	var dz : Float
+	open var dz : Float
 		get() = delta.z
 		set(value) {delta.z = value}
 
-	var fx : Float
+	open var final : Vector3f
+		get() = Vector3f(fx, fy, fz)
+		set(value) {
+			fx = value.x
+			fy = value.y
+			fz = value.z
+		}
+	open var fx : Float
 		get() = x + dx
 		set(value) {delta.x = value - x}
-	var fy : Float
+	open var fy : Float
 		get() = y + dy
 		set(value) {delta.y = value - y}
-	var fz : Float
+	open var fz : Float
 		get() = z + dz
 		set(value) {delta.z = value - z}
 
-	override val minx: Float
-		get() = kotlin.math.min(x, x + dx)
-	override val maxx: Float
-		get() = kotlin.math.max(x, x + dx)
-	override val miny: Float
-		get() = kotlin.math.min(y, y + dy)
-	override val maxy: Float
-		get() = kotlin.math.max(y, y + dy)
-	override val minz: Float
-		get() = kotlin.math.min(z, z + dz)
-	override val maxz: Float
-		get() = kotlin.math.max(z, z + dz)
+	override val minx : Float
+		get() = x.coerceAtMost(fx)
+	override val maxx : Float
+		get() = x.coerceAtLeast(fx)
+	override val miny : Float
+		get() = y.coerceAtMost(fy)
+	override val maxy : Float
+		get() = y.coerceAtLeast(fy)
+	override val minz : Float
+		get() = z.coerceAtMost(fz)
+	override val maxz : Float
+		get() = z.coerceAtLeast(fz)
+
+	constructor() : super()
 
 	constructor(start : Vector3fc, delta : Vector3fc) : super(start) {
 		this.delta = Vector3f(delta)
@@ -59,6 +67,7 @@ class Ray3f : Vector3f, Bound3f {
 	constructor(other : Ray3f) : super(other) {
 		delta = Vector3f(other.delta)
 	}
+
 	fun xAt(t : Float) = fma(delta.x, t, x)
 
 	fun yAt(t : Float) = fma(delta.y, t, y)

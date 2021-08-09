@@ -6,10 +6,10 @@
  -h- clean examples
  -m- create a renderbuffer class (NOTE, there is a resource array in FBO that will need to be removed!)
  -m- compare Simplex2v2d with Dark Forest version
- -m- shader code from Shader and ComputeProgram
+ -m- share code from Shader and ComputeProgram
+ -m- add pose class
  -m- move gl object handling to the window
  -m- finish adding operators to ray classes
- -e- different implementations for rays
 
  - TESTING
 	- Ray2f (?)

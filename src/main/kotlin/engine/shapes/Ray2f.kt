@@ -5,27 +5,45 @@ import org.joml.Math
 import org.joml.Vector2f
 import org.joml.Vector2fc
 import java.lang.Math.fma
-import kotlin.math.min
-import kotlin.math.max
 
-class Ray2f(x : Float, y : Float, dx : Float, dy : Float) : Vector2f(x, y), Bound2f {
-	var delta = Vector2f(dx, dy)
+open class Ray2f : Vector2f, Bound2f {
+	open var delta = Vector2f(0f, 0f)
 
-	var dx : Float
+	open var dx : Float
 		get() = delta.x
 		set(value) {delta.x = value}
-	var dy : Float
+	open  var dy : Float
 		get() = delta.y
 		set(value) {delta.y = value}
 
-	override val minx: Float
-		get() = min(x, x + dx)
-	override val maxx: Float
-		get() = max(x, x + dx)
-	override val miny: Float
-		get() = min(y, y + dy)
-	override val maxy: Float
-		get() = max(y, y + dy)
+	open var final : Vector2f
+		get() = Vector2f(fx, fy)
+		set(value) {
+			fx = value.x
+			fy = value.y
+		}
+	open var fx : Float
+		get() = x + dx
+		set(value) {delta.x = value - x}
+	open var fy : Float
+		get() = y + dy
+		set(value) {delta.y = value - y}
+
+	override val minx : Float
+		get() = x.coerceAtMost(fx)
+	override val maxx : Float
+		get() = x.coerceAtLeast(fx)
+	override val miny : Float
+		get() = y.coerceAtMost(fy)
+	override val maxy : Float
+		get() = y.coerceAtLeast(fy)
+
+	constructor() : super()
+
+	constructor(x : Float, y : Float, dx : Float, dy : Float) : super(x, y) {
+		delta.x = dx
+		delta.y = dy
+	}
 
 	constructor(start : Vector2fc, delta : Vector2fc) : this(start.x(), start.y(), delta.x(), delta.y())
 
