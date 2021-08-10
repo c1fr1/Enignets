@@ -1,9 +1,13 @@
 package engine.shapes
 
+import engine.opengl.jomlExtensions.div
+import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
+import engine.opengl.jomlExtensions.times
 import org.joml.Math
 import org.joml.Vector2f
 import org.joml.Vector2fc
+import org.joml.Vector3fc
 import java.lang.Math.fma
 
 open class Ray2f : Vector2f, Bound2f {
@@ -111,6 +115,26 @@ open class Ray2f : Vector2f, Bound2f {
 
 	fun intersectionPoint(o : Ray2f) = getPointAt(intersectionT(o))
 
+	operator fun plus(inc : Vector2fc) = Ray2f((this as Vector2fc) + inc, delta)
+	operator fun plus(o : Ray2f) = Ray2f((this as Vector2fc) + o, delta + o.delta)
+	operator fun minus(inc : Vector2fc) = Ray2f((this as Vector2fc) - inc, delta)
+	operator fun minus(o : Ray2f) = Ray2f((this as Vector2fc) - o, delta + o.delta)
+	operator fun times(s : Float) = Ray2f((this as Vector2fc) * s, s * delta)
+	override operator fun div(s : Float) = Ray2f((this as Vector2fc) / s, delta / s)
+
+	operator fun plusAssign(inc : Vector2fc) {add(inc)}
+	operator fun plusAssign(o : Ray2f) {add(o);delta.add(o.delta)}
+	operator fun minusAssign(inc : Vector2fc) {sub(inc)}
+	operator fun minusAssign(o : Ray2f) {sub(o);delta.sub(o.delta)}
+	operator fun timesAssign(s : Float) {mul(s)}
+	operator fun divAssign(s : Float) {super.div(s);delta.div(s)}
+
+	override fun mul(scalar: Float) : Ray2f {
+		super.mul(scalar)
+		delta.mul(scalar)
+		return this
+	}
+
 	companion object {
 		fun intersectionT(x : Float, y : Float, dx : Float, dy : Float,
 		                  ox : Float, oy : Float, odx : Float, ody : Float) =
@@ -176,3 +200,7 @@ open class Ray2f : Vector2f, Bound2f {
 		}
 	}
 }
+
+operator fun Vector2fc.plus(r : Ray2f) = r + this
+operator fun Vector2fc.minus(r : Ray2f) = r - this
+operator fun Float.times(r : Ray2f) = r * this

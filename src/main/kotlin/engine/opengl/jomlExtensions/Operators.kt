@@ -8,6 +8,7 @@ import org.joml.Math.sin
 operator fun Vector2fc.plus(inc : Vector2fc) : Vector2f = add(inc, Vector2f())
 operator fun Vector2fc.minus(inc : Vector2fc) : Vector2f = sub(inc, Vector2f())
 operator fun Vector2fc.times(scalar : Float) : Vector2f = mul(scalar, Vector2f())
+operator fun Float.times(vec : Vector2fc) : Vector2f = vec * this
 operator fun Vector2fc.times(v : Vector2fc) : Vector2f = mul(v, Vector2f())
 operator fun Vector2fc.times(mat : Matrix2fc) : Vector2f = mul(mat, Vector2f())
 operator fun Vector2fc.times(mat : Matrix2dc) : Vector2f = mul(mat, Vector2f())

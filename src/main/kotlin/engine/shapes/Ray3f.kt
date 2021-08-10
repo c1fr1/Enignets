@@ -1,10 +1,7 @@
 package engine.shapes
 
 import engine.lerp
-import engine.opengl.jomlExtensions.minus
-import engine.opengl.jomlExtensions.plus
-import engine.opengl.jomlExtensions.dot
-import engine.opengl.jomlExtensions.cross
+import engine.opengl.jomlExtensions.*
 import org.joml.Math.sqrt
 import org.joml.Vector3f
 import org.joml.Vector3fc
@@ -233,8 +230,18 @@ open class Ray3f : Vector3f, Bound3f {
 	}
 
 	operator fun plus(inc : Vector3fc) = Ray3f((this as Vector3fc) + inc, delta)
-	//operator fun minus(inc : Vector3fc) = Ray3f((this as Vector3fc) - inc, delta)
+	operator fun plus(o : Ray3f) = Ray3f((this as Vector3fc) + o, delta + o.delta)
+	operator fun minus(inc : Vector3fc) = Ray3f((this as Vector3fc) - inc, delta)
+	operator fun minus(o : Ray3f) = Ray3f((this as Vector3fc) - o, delta + o.delta)
+	operator fun times(s : Float) = Ray3f((this as Vector3fc) * s, s * delta)
+	override operator fun div(s : Float) = Ray3f((this as Vector3fc) / s, delta / s)
+
+	operator fun plusAssign(inc : Vector3fc) {add(inc)}
+	operator fun plusAssign(o : Ray3f) {add(o);delta.add(o.delta)}
 	operator fun minusAssign(inc : Vector3fc) {sub(inc)}
+	operator fun minusAssign(o : Ray3f) {sub(o);delta.sub(o.delta)}
+	operator fun timesAssign(s : Float) {mul(s)}
+	operator fun divAssign(s : Float) {super.div(s);delta.div(s)}
 
 	override fun mul(scalar: Float) : Ray3f {
 		super.mul(scalar)
@@ -246,3 +253,7 @@ open class Ray3f : Vector3f, Bound3f {
 		fun between(a : Vector3f, b : Vector3f) = Ray3f(a, b - a)
 	}
 }
+
+operator fun Vector3fc.plus(r : Ray3f) = r + this
+operator fun Vector3fc.minus(r : Ray3f) = r - this
+operator fun Float.times(r : Ray3f) = r * this

@@ -9,7 +9,6 @@
  -m- share code from Shader and ComputeProgram
  -m- add pose class
  -m- move gl object handling to the window
- -m- finish adding operators to ray classes
 
  - TESTING
 	- Ray2f (?)
