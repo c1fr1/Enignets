@@ -1,6 +1,5 @@
-package engine.shapes
+package engine.shapes.bounds
 
-import org.joml.Vector2f
 import org.joml.Vector2fc
 
 class OriginDimBox2d : Box2d {

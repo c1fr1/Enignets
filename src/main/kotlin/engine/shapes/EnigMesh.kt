@@ -4,6 +4,10 @@ import engine.mino
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
+import engine.shapes.Rays.Ray2f
+import engine.shapes.Rays.Ray3f
+import engine.shapes.bounds.Box3d
+import engine.shapes.simplexes.Simplex2v3d
 import engine.solveCubic
 import org.joml.Vector3f
 import java.lang.Math.*
@@ -275,7 +279,7 @@ fun edgesIntersectionT(ea : Vector3f, ead : Vector3f, eb : Vector3f, ebd : Vecto
 		val ed = ead + t * (ead - ebd)
 		val os = oa + t * (ob - oa)
 		val od = oad + t * (oad - obd)
-		return t.takeIf {Ray2f.doesIntersectT(es.x, es.y, ed.x, ed.y, os.x, os.y, od.x, od.y) != null}
+		return t.takeIf { Ray2f.doesIntersectT(es.x, es.y, ed.x, ed.y, os.x, os.y, od.x, od.y) != null}
 	}
 
 	return solveCubic(zdiffA, zdiffB, zdiffC, zdiffD) {a, b, c ->

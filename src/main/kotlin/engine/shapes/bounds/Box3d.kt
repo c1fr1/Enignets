@@ -1,8 +1,6 @@
-package engine.shapes
+package engine.shapes.bounds
 
-import org.joml.Vector3f
-import engine.opengl.bufferObjects.VAO
-import org.joml.Vector2fc
+import engine.shapes.Bound3f
 import org.joml.Vector3fc
 
 open class Box3d : Bound3f {

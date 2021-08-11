@@ -1,4 +1,4 @@
-package engine.shapes
+package engine.shapes.bounds
 
 import org.joml.Vector3fc
 

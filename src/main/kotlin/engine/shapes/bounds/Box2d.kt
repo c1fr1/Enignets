@@ -1,5 +1,6 @@
-package engine.shapes
+package engine.shapes.bounds
 
+import engine.shapes.Bound2f
 import org.joml.Vector2fc
 
 typealias AABB = Box2d

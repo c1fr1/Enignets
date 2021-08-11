@@ -1,4 +1,4 @@
-package engine.shapes
+package engine.shapes.Rays
 
 import org.joml.Vector2f
 

@@ -1,8 +1,8 @@
-package engine.shapes
+package engine.shapes.simplexes
 
-import engine.opengl.jomlExtensions.minus
+import engine.shapes.Bound2f
+import engine.shapes.bounds.Box2d
 import org.joml.Vector2f
-import org.joml.Vector3f
 import kotlin.math.max
 import kotlin.math.min
 

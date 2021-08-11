@@ -1,14 +1,15 @@
-package engine.shapes
+package engine.shapes.simplexes
 
 import engine.mino
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
-import org.joml.Matrix4f
+import engine.shapes.Bound3f
+import engine.shapes.Rays.Ray2f
+import engine.shapes.Rays.Ray3f
 import org.joml.Vector3f
 import org.joml.Vector2fc
 import org.joml.Vector3fc
-import org.lwjgl.system.MemoryStack
 import java.lang.Float.max
 import java.lang.Float.min
 import java.lang.Math.fma
