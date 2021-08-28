@@ -329,9 +329,11 @@ class VBO2s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 2, dynami
 class VBO3s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 3, dynamic)
 class VBO4s(data : ShortArray, dynamic : Boolean = false) : VBOs(data, 4, dynamic)
 
+fun AIFace.Buffer.getArrayFast() = IntArray(this.limit() * 3) {this[it / 3].mIndices()[it % 3]}
+
 class IBO(data : IntArray) : VBOi(data, 1, false) {
 
-	constructor(faces : AIFace.Buffer) : this(IntArray(faces.limit() * 3) {faces[it / 3].mIndices()[it % 3]})
+	constructor(faces : AIFace.Buffer) : this(faces.getArrayFast())
 
 	override fun bind() {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)

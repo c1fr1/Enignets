@@ -1,6 +1,10 @@
 package engine.shapes
 
+import engine.entities.animations.fuckBlender
+import engine.loadScene
 import engine.mino
+import engine.opengl.bufferObjects.getArray
+import engine.opengl.bufferObjects.getArrayFast
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
@@ -10,12 +14,14 @@ import engine.shapes.bounds.Box3d
 import engine.shapes.simplexes.Simplex2v3d
 import engine.solveCubic
 import org.joml.Vector3f
+import org.lwjgl.assimp.AIMesh
+import org.lwjgl.assimp.AIScene
+import java.io.File
+import java.io.FileWriter
 import java.lang.Math.*
 import kotlin.collections.ArrayList
 
 interface EnigMesh : Bound3f {
-
-
 
 	val vertexCount : Int
 
@@ -55,6 +61,12 @@ interface EnigMesh : Bound3f {
 typealias Edge3f = Pair<Ray3f, Ray3f>
 
 class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
+
+	constructor(mesh : AIMesh) : this(mesh.mFaces().getArrayFast(), mesh.mVertices().getArray(fuckBlender))
+
+	constructor(scene : AIScene, index : Int) : this(AIMesh.create(scene.mMeshes()!![index]))
+
+	constructor(path : String, index : Int) : this(loadScene(path), index)
 
 	override val vertexCount = vdata.size / 3
 
@@ -236,6 +248,17 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 		}
 
 		return null
+	}
+
+	fun writeToOBJ(path : String) {
+		val writer = File(path).printWriter()
+		for (i in 0 until vertexCount) {
+			writer.println("v ${getX(i)} ${getY(i)} ${getZ(i)}")
+		}
+		for (i in 0 until indices.size / 3) {
+			writer.println("f ${indices[i * 3] + 1} ${indices[i * 3 + 1] + 1} ${indices[i * 3 + 2] + 1}")
+		}
+		writer.close()
 	}
 }
 
