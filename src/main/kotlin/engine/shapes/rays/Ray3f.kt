@@ -1,8 +1,8 @@
-package engine.shapes.Rays
+package engine.shapes.rays
 
 import engine.lerp
 import engine.opengl.jomlExtensions.*
-import engine.shapes.Bound3f
+import engine.shapes.bounds.Bound3f
 import engine.shapes.simplexes.Simplex2v2d
 import engine.shapes.simplexes.Simplex2v3d
 import org.joml.Math.sqrt
@@ -68,21 +68,21 @@ open class Ray3f : Vector3f, Bound3f {
 		delta = Vector3f(other.delta)
 	}
 
-	fun xAt(t : Float) = fma(delta.x, t, x)
+	open fun xAt(t : Float) = fma(delta.x, t, x)
 
-	fun yAt(t : Float) = fma(delta.y, t, y)
+	open fun yAt(t : Float) = fma(delta.y, t, y)
 
-	fun zAt(t : Float) = fma(delta.z, t, z)
+	open fun zAt(t : Float) = fma(delta.z, t, z)
 
-	fun getPointAt(t : Float) = Vector3f(xAt(t), yAt(t), zAt(t))
+	open fun getPointAt(t : Float) = Vector3f(xAt(t), yAt(t), zAt(t))
 
-	fun getIntersectionPoint(simplex : Simplex2v3d) : Vector3f? {
+	open fun getIntersectionPoint(simplex : Simplex2v3d) : Vector3f? {
 		return getPointAt(getIntersectionT(simplex)?: return null)
 	}
 
-	fun intersects(simplex : Simplex2v3d) = getIntersectionPoint(simplex) != null
+	open fun intersects(simplex : Simplex2v3d) = getIntersectionPoint(simplex) != null
 
-	fun getIntersectionT(simplex : Simplex2v3d) : Float? {
+	open fun getIntersectionT(simplex : Simplex2v3d) : Float? {
 		val t = simplex.getTIntersect(this)
 		if (t < 0 || t > 1) return null
 		val normal = simplex.normal
@@ -105,7 +105,7 @@ open class Ray3f : Vector3f, Bound3f {
 		return if (projected.containsPoint(ox, oy)) t else null
 	}
 
-	fun planeIntersectionPoint(simplex : Simplex2v3d) = getPointAt(simplex.getTIntersect(this))
+	open fun planeIntersectionPoint(simplex : Simplex2v3d) = getPointAt(simplex.getTIntersect(this))
 
 	override fun rotateX(theta : Float) : Ray3f {
 		super.rotateX(theta)
@@ -125,18 +125,18 @@ open class Ray3f : Vector3f, Bound3f {
 		return this
 	}
 
-	fun closestTTo(point : Vector3fc) : Float {
+	open fun closestTTo(point : Vector3fc) : Float {
 		//return -(dx * (x - point.x()) + dy * (y - point.y()) + dz * (z - point.z())) / delta.lengthSquared()
 		return (delta dot (point - this)) / delta.lengthSquared()
 	}
 
-	fun closestPointTo(other : Vector3fc) = getPointAt(closestTTo(other))
+	open fun closestPointTo(other : Vector3fc) = getPointAt(closestTTo(other))
 
-	fun closestDistanceSquared(other : Vector3fc) = closestPointTo(other).distanceSquared(other)
+	open fun closestDistanceSquared(other : Vector3fc) = closestPointTo(other).distanceSquared(other)
 
-	fun closestDistance(other : Vector3fc) = sqrt(closestDistanceSquared(other))
+	open fun closestDistance(other : Vector3fc) = sqrt(closestDistanceSquared(other))
 
-	fun closestPointInRangeTo(other : Vector3fc) : Vector3f {
+	open fun closestPointInRangeTo(other : Vector3fc) : Vector3f {
 		val tval = closestTTo(other)
 
 		return if (tval > 0 && tval < 1) {
@@ -151,7 +151,7 @@ open class Ray3f : Vector3f, Bound3f {
 		}
 	}
 
-	fun closestDistanceInRangeSquared(other : Vector3fc) : Float {
+	open fun closestDistanceInRangeSquared(other : Vector3fc) : Float {
 		val tval = closestTTo(other)
 		return if (tval > 0 && tval < 1) {
 			getPointAt(tval).distanceSquared(other)
@@ -160,9 +160,9 @@ open class Ray3f : Vector3f, Bound3f {
 		}
 	}
 
-	fun closestDistanceInRange(other : Vector3fc) = sqrt(closestDistanceInRangeSquared(other))
+	open fun closestDistanceInRange(other : Vector3fc) = sqrt(closestDistanceInRangeSquared(other))
 
-	fun closestTTo(o : Ray3f) : Float {
+	open fun closestTTo(o : Ray3f) : Float {
 		/*val deltadot = delta dot other.delta
 		val startDel = other - this
 		return ((startDel dot delta) * other.delta.lengthSquared() + deltadot * (deltadot - (startDel dot other.delta))) / delta.lengthSquared()*/
@@ -222,21 +222,21 @@ open class Ray3f : Vector3f, Bound3f {
 		return (o.delta.lengthSquared() * (sdel dot delta) - (sdel dot o.delta) * (delta dot o.delta)) / lower
 	}
 
-	fun closestPointTo(other : Ray3f) = getPointAt(closestTTo(other))
+	open fun closestPointTo(other : Ray3f) = getPointAt(closestTTo(other))
 
-	fun closestDistanceSquared(other : Ray3f) = other.closestDistanceSquared(closestPointTo(other))
+	open fun closestDistanceSquared(other : Ray3f) = other.closestDistanceSquared(closestPointTo(other))
 
-	fun closestDistance(other : Ray3f) = sqrt(closestDistanceSquared(other))
+	open fun closestDistance(other : Ray3f) = sqrt(closestDistanceSquared(other))
 
-	fun lerp(other : Ray3f, t : Float) : Ray3f {
+	open fun lerp(other : Ray3f, t : Float) : Ray3f {
 		return Ray3f(x.lerp(other.x, t), y.lerp(other.y, t), z.lerp(other.z, t), dx.lerp(other.dx, t), dy.lerp(other.dy, t), dz.lerp(other.dz, t))
 	}
 
-	operator fun plus(inc : Vector3fc) = Ray3f((this as Vector3fc) + inc, delta)
-	operator fun plus(o : Ray3f) = Ray3f((this as Vector3fc) + o, delta + o.delta)
-	operator fun minus(inc : Vector3fc) = Ray3f((this as Vector3fc) - inc, delta)
-	operator fun minus(o : Ray3f) = Ray3f((this as Vector3fc) - o, delta + o.delta)
-	operator fun times(s : Float) = Ray3f((this as Vector3fc) * s, s * delta)
+	open operator fun plus(inc : Vector3fc) = Ray3f((this as Vector3fc) + inc, delta)
+	open operator fun plus(o : Ray3f) = Ray3f((this as Vector3fc) + o, delta + o.delta)
+	open operator fun minus(inc : Vector3fc) = Ray3f((this as Vector3fc) - inc, delta)
+	open operator fun minus(o : Ray3f) = Ray3f((this as Vector3fc) - o, delta + o.delta)
+	open operator fun times(s : Float) = Ray3f((this as Vector3fc) * s, s * delta)
 	override operator fun div(s : Float) = Ray3f((this as Vector3fc) / s, delta / s)
 
 	override fun mul(scalar: Float) : Ray3f {

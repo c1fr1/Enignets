@@ -8,9 +8,7 @@ import java.lang.RuntimeException
 import org.joml.Vector2i
 import org.lwjgl.glfw.GLFWImage
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
 
 private fun getPrimaryMonitorDimensions() : Vector2i {
 	val vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor())
@@ -22,22 +20,22 @@ private fun getPrimaryMonitorDimensions() : Vector2i {
 }
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class EnigWindow {
-	val id: Long
+open class EnigWindow {
+	open val id: Long
 	var width = 0
 		private set
 	var height = 0
 		private set
-	val aspectRatio
+	open val aspectRatio
 		get() = width.toFloat() / height.toFloat()
-	var fps = 144
-	var inputEnabled = false
+	open var fps = 144
+	open var inputEnabled = false
 		set(value) {
 			glfwSetInputMode(id, GLFW_CURSOR, if (value) GLFW_CURSOR_DISABLED else GLFW_CURSOR_NORMAL)
 			field = value
 		}
 
-	val inputHandler : InputHandler
+	open val inputHandler : InputHandler
 
 	/**
 	 * creates a window
@@ -139,9 +137,9 @@ class EnigWindow {
 		setIcon(iconPath)
 	}
 
-	fun setContext() = glfwMakeContextCurrent(id)
+	open fun setContext() = glfwMakeContextCurrent(id)
 
-	fun<T, R> runFrame(runData : T, drawingFun : (T) -> R) : R {
+	open fun<T, R> runFrame(runData : T, drawingFun : (T) -> R) : R {
 		setContext()
 
 		val ret = drawingFun(runData)
@@ -150,7 +148,7 @@ class EnigWindow {
 		return ret
 	}
 
-	fun runView(drawingFun : (frameBirth : Long, dtime : Float) -> Boolean) {
+	open fun runView(drawingFun : (frameBirth : Long, dtime : Float) -> Boolean) {
 		setContext()
 		val startTime = System.nanoTime()
 		var birth = 0L
@@ -168,7 +166,7 @@ class EnigWindow {
 	/**
 	 * close the window, delete all resources, close openGL, openAL, and clean things up
 	 */
-	fun terminate() {
+	open fun terminate() {
 		// Free the window callbacks and destroy the window
 		Callbacks.glfwFreeCallbacks(id)
 		glfwDestroyWindow(id)
@@ -177,7 +175,7 @@ class EnigWindow {
 	/**
 	 * syncs the fps and
 	 */
-	fun update() {
+	open fun update() {
 		//sync(fps)
 		inputHandler.update()
 		ShaderProgram.disable()
@@ -230,18 +228,18 @@ class EnigWindow {
 		}
 	}
 
-	fun setViewport() {
+	open fun setViewport() {
 		val frameBufferWidth = IntArray(1)
 		val frameBufferHeight = IntArray(1)
 		glfwGetFramebufferSize(id, frameBufferWidth, frameBufferHeight)
 		setViewport(0, 0, frameBufferWidth[0], frameBufferHeight[0])
 	}
 
-	fun setViewport(x : Int, y : Int, width : Int, height : Int) {
+	open fun setViewport(x : Int, y : Int, width : Int, height : Int) {
 		glViewport(x, y, width, height)
 	}
 
-	fun setIcon(imagePath: String) {
+	open fun setIcon(imagePath: String) {
 		val image = makeGLFWImage(imagePath)
 		val buffer = GLFWImage.malloc(1)
 		buffer.put(0, image)

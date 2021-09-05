@@ -6,7 +6,7 @@ import org.joml.Math.cos
 import org.joml.Math.sin
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class Camera2D(var projectionMatrix : Matrix4f, rotation : Float = 0f, pos : Vector2f = Vector2f()) :
+open class Camera2D(open var projectionMatrix : Matrix4f, rotation : Float = 0f, pos : Vector2f = Vector2f()) :
 	Camera, Orientation2D(rotation, pos) {
 
 	constructor(aspectRatio : Float, totalHeight : Float = 100f) : this(Matrix4f().ortho(

@@ -9,13 +9,13 @@ import org.lwjgl.opengl.GL43.GL_COMPUTE_SHADER
 import org.lwjgl.opengl.GL43.glDispatchCompute
 import java.lang.RuntimeException
 
-class ComputeProgram : GLResource {
+open class ComputeProgram : GLResource {
 
-	val uniforms : Array<Uniform>
+	open val uniforms : Array<Uniform>
 
-	val shaderID = glCreateShader(GL_COMPUTE_SHADER)
+	open val shaderID = glCreateShader(GL_COMPUTE_SHADER)
 
-	val workGroupSize : Vector3i
+	open val workGroupSize : Vector3i
 
 	constructor(path : String) : super(glCreateProgram()) {
 		var shaderSource = ""
@@ -86,88 +86,88 @@ class ComputeProgram : GLResource {
 		uniforms = Array(tempUniformList.size) {Uniform(tempUniformList[it], id)}
 	}
 
-	fun enable() {
+	open fun enable() {
 		glUseProgram(id)
 	}
 
-	fun run(tasksX : Int, tasksY : Int = 1, tasksZ : Int = 1) {
+	open fun run(tasksX : Int, tasksY : Int = 1, tasksZ : Int = 1) {
 		glDispatchCompute(tasksX / workGroupSize.x, tasksY / workGroupSize.y, tasksZ / workGroupSize.z)
 	}
 
-	fun run(tasks : Vector3ic) = run(tasks.x(), tasks.y(), tasks.z())
+	open fun run(tasks : Vector3ic) = run(tasks.x(), tasks.y(), tasks.z())
 
 	override fun destroy() {
 		glDeleteProgram(id)
 		glDeleteShader(shaderID)
 	}
 
-	operator fun get(index : Int) = uniforms[index]
+	open operator fun get(index : Int) = uniforms[index]
 
-	operator fun set(index : Int, value : Float) = this[index].set(value)
-	operator fun set(index : Int, value : FloatArray) = this[index].set(value)
-	operator fun set(index : Int, value : Double) = this[index].set(value)
-	operator fun set(index : Int, value : DoubleArray) = this[index].set(value)
-	operator fun set(index : Int, value : Int) = this[index].set(value)
-	operator fun set(index : Int, value : IntArray) = this[index].set(value)
-	operator fun set(index : Int, value : UInt) = this[index].set(value)
-	operator fun set(index : Int, value : UIntArray) = this[index].set(value)
-	operator fun set(index : Int, value : Boolean) = this[index].set(value)
-	operator fun set(index : Int, value : BooleanArray) = this[index].set(value)
-	operator fun set(index : Int, value : Vector2fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector2dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector2ic) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2i>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector2ic>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector3fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector3dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector3ic) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3i>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector3ic>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector4fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector4dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Vector4ic) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4i>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Vector4ic>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix2fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix2f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix2fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix3fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix3x2fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3x2f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3x2fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix4fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix4x3fc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4x3f>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4x3fc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix2dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix2d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix2dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix3dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix3x2dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3x2d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix3x2dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix4dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4dc>) = this[index].set(value)
-	operator fun set(index : Int, value : Matrix4x3dc) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4x3d>) = this[index].set(value)
-	operator fun set(index : Int, value : Array<Matrix4x3dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Float) = this[index].set(value)
+	open operator fun set(index : Int, value : FloatArray) = this[index].set(value)
+	open operator fun set(index : Int, value : Double) = this[index].set(value)
+	open operator fun set(index : Int, value : DoubleArray) = this[index].set(value)
+	open operator fun set(index : Int, value : Int) = this[index].set(value)
+	open operator fun set(index : Int, value : IntArray) = this[index].set(value)
+	open operator fun set(index : Int, value : UInt) = this[index].set(value)
+	open operator fun set(index : Int, value : UIntArray) = this[index].set(value)
+	open operator fun set(index : Int, value : Boolean) = this[index].set(value)
+	open operator fun set(index : Int, value : BooleanArray) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector2fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector2dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector2ic) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2i>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector2ic>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector3fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector3dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector3ic) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3i>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector3ic>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector4fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector4dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Vector4ic) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4i>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Vector4ic>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix2fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix2f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix2fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix3fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix3x2fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3x2f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3x2fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix4fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix4x3fc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4x3f>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4x3fc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix2dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix2d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix2dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix3dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix3x2dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3x2d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix3x2dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix4dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4dc>) = this[index].set(value)
+	open operator fun set(index : Int, value : Matrix4x3dc) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4x3d>) = this[index].set(value)
+	open operator fun set(index : Int, value : Array<Matrix4x3dc>) = this[index].set(value)
 }

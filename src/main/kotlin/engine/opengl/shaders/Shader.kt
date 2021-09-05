@@ -6,11 +6,11 @@ import org.lwjgl.opengl.GL20.*
 import kotlin.collections.ArrayList
 
 @Suppress("ConvertSecondaryConstructorToPrimary", "unused", "MemberVisibilityCanBePrivate")
-class Shader : GLResource {
+open class Shader : GLResource {
 
-	val inAttributes: Array<Attribute>
-	val outAttributes: Array<Attribute>
-	val uniforms: Array<ShaderUniform>
+	open val inAttributes: Array<Attribute>
+	open val outAttributes: Array<Attribute>
+	open val uniforms: Array<ShaderUniform>
 
 	/**
 	 * creates a new shader
@@ -87,7 +87,7 @@ class Shader : GLResource {
 		uniforms = emptyArray()
 	}
 
-	val uniformCount : Int get() {return uniforms.size}
+	open val uniformCount : Int get() {return uniforms.size}
 
 	/**
 	 * deletes the shader
@@ -102,5 +102,5 @@ class Shader : GLResource {
 }
 
 @Suppress("unused")
-class GLShaderCompileException(identifier : String, glID : Int) :
+open class GLShaderCompileException(identifier : String, glID : Int) :
 		Exception("Failed to compile shader $identifier!\n${glGetShaderInfoLog(glID)}")

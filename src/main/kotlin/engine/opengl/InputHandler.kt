@@ -2,9 +2,9 @@ package engine.opengl
 
 import org.lwjgl.glfw.GLFW.*
 
-class InputHandler(windowId: Long) {
-	val keys = Array(GLFW_KEY_LAST + 1) {KeyState.Up}
-	val mouseButtons = Array(GLFW_MOUSE_BUTTON_LAST + 1) {KeyState.Up}
+open class InputHandler(windowId: Long) {
+	open val keys = Array(GLFW_KEY_LAST + 1) {KeyState.Up}
+	open val mouseButtons = Array(GLFW_MOUSE_BUTTON_LAST + 1) {KeyState.Up}
 	var glCursorX = 0f; private set
 	var glCursorY = 0f; private set
 	var cursorX = Double.NaN; private set
@@ -49,7 +49,7 @@ class InputHandler(windowId: Long) {
 		}
 	}
 
-	fun update() {
+	open fun update() {
 		for (i in keys.indices) {
 			keys[i] = keys[i].next()
 		}

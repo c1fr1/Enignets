@@ -1,13 +1,13 @@
 package engine.shapes.simplexes
 
-import engine.shapes.Bound2f
+import engine.shapes.bounds.Bound2f
 import engine.shapes.bounds.Box2d
 import org.joml.Vector2f
 import kotlin.math.max
 import kotlin.math.min
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
+open class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	var a : Vector2f = a
 	var b : Vector2f = b
 	var c : Vector2f = c
@@ -36,14 +36,14 @@ class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 				Vector2f(bx, by),
 				Vector2f(cx, cy))
 
-	fun calculateDoubleArea() = getDoubleArea(a.x, a.y, b.x, b.y, c.x, c.y)
+	open fun calculateDoubleArea() = getDoubleArea(a.x, a.y, b.x, b.y, c.x, c.y)
 
 	/**
 	 * checks to see if another point is inside this simplex
 	 * @param other point to check
 	 * @return if that point is in the simplex
 	 */
-	fun containsPoint(other: Vector2f): Boolean {
+	open fun containsPoint(other: Vector2f): Boolean {
 		return containsPoint(other.x, other.y)
 	}
 
@@ -53,7 +53,7 @@ class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	 * @param oy y of the point
 	 * @return if that point is in the simplex
 	 */
-	fun containsPoint(ox: Float, oy: Float): Boolean {
+	open fun containsPoint(ox: Float, oy: Float): Boolean {
 		val u = getBarycentricA(ox, oy)
 		val v = getBarycentricB(ox, oy)
 		return if (u + v > 1f) false else if (u < -0) false else v >= -0
@@ -66,20 +66,20 @@ class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	 * @param extra extra offset
 	 * @return if the point is in the largest simplex
 	 */
-	fun containsPoint(ox: Float, oy: Float, extra: Float): Boolean {
+	open fun containsPoint(ox: Float, oy: Float, extra: Float): Boolean {
 		val u = getBarycentricA(ox, oy)
 		if (u < -extra) return false
 		val v = getBarycentricB(ox, oy)
 		return if (u + v > 1f + extra) false else v >= -extra
 	}
 
-	fun getBarycentricA(ox : Float, oy : Float) =
+	open fun getBarycentricA(ox : Float, oy : Float) =
 		getDoubleArea(b.x, b.y, c.x, c.y, ox, oy) / calculateDoubleArea()
 
-	fun getBarycentricB(ox : Float, oy : Float) =
+	open fun getBarycentricB(ox : Float, oy : Float) =
 		getDoubleArea(a.x, a.y, c.x, c.y, ox, oy) / calculateDoubleArea()
 
-	fun getBarycentricC(ox : Float, oy : Float) =
+	open fun getBarycentricC(ox : Float, oy : Float) =
 		getDoubleArea(a.x, a.y, b.x, b.y, ox, oy) / calculateDoubleArea()
 
 	/**
@@ -87,7 +87,7 @@ class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	 * @param box box that could touch the simplex
 	 * @return true if the box is touching the simplex
 	 */
-	fun touches(box : Box2d) : Boolean {//TODO doesn't work
+	open fun touches(box : Box2d) : Boolean {//TODO doesn't work
 		if (box.contains(a)) return true
 		if (box.contains(b)) return true
 		if (box.contains(c)) return true
@@ -103,7 +103,7 @@ class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	 * @param extra extra offset
 	 * @return true if the larger box is touching the simplex
 	 */
-	fun touches(box: Box2d, extra: Float): Boolean {//TODO doesn't work
+	open fun touches(box: Box2d, extra: Float): Boolean {//TODO doesn't work
 		if (box.contains(a, extra)) return true
 		if (box.contains(b, extra)) return true
 		if (box.contains(c, extra)) return true

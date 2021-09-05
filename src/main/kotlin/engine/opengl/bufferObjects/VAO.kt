@@ -4,21 +4,21 @@ import engine.entities.animations.fuckBlender
 import engine.loadBoneData
 import engine.loadScene
 import engine.opengl.GLResource
-import engine.shapes.Bound2f
-import engine.shapes.Bound3f
+import engine.shapes.bounds.Bound2f
+import engine.shapes.bounds.Bound3f
 import org.lwjgl.assimp.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL31.glDrawElementsInstanced
 
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class VAO : GLResource {
+open class VAO : GLResource {
 
-	var ibo : IBO
+	open var ibo : IBO
 
-	var vbos : Array<VBO<*>>
+	open var vbos : Array<VBO<*>>
 
-	val verticesPerShape : Int
+	open val verticesPerShape : Int
 
 	/**
 	 * create a new VAO with vertices, and indices specifying the number of vertices per shape
@@ -176,7 +176,7 @@ class VAO : GLResource {
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this
 	 */
-	fun fullRender() {
+	open fun fullRender() {
 		prepareRender()
 		draw()
 		unbind()
@@ -185,7 +185,7 @@ class VAO : GLResource {
 	/**
 	 * binds the vao and enables all of the vbos, prepares the vao to be drawn
 	 */
-	fun prepareRender() {
+	open fun prepareRender() {
 		glBindVertexArray(id)
 		for (i in vbos.indices) {
 			glEnableVertexAttribArray(i)
@@ -195,40 +195,40 @@ class VAO : GLResource {
 	/**
 	 * draws the object, assuming that the VAO represents points
 	 */
-	fun drawPoints() {
+	open fun drawPoints() {
 		glDrawElements(GL_POINTS, ibo.size, GL_UNSIGNED_INT, 0)
 	}
 
-	fun drawPointsInstanced(count: Int) {
+	open fun drawPointsInstanced(count: Int) {
 		glDrawElementsInstanced(GL_POINTS, ibo.size, GL_UNSIGNED_INT, 0, count)
 	}
 
 	/**
 	 * draws the object, assuming that the VAO represents lines
 	 */
-	fun drawLines() {
+	open fun drawLines() {
 		glDrawElements(GL_LINES, ibo.size, GL_UNSIGNED_INT, 0)
 	}
 
-	fun drawLinesInstanced(count: Int) {
+	open fun drawLinesInstanced(count: Int) {
 		glDrawElementsInstanced(GL_LINES, ibo.size, GL_UNSIGNED_INT, 0, count)
 	}
 
 	/**
 	 * draws the object, assuming that the VAO represents triangles
 	 */
-	fun drawTriangles() {
+	open fun drawTriangles() {
 		glDrawElements(GL_TRIANGLES, ibo.size, GL_UNSIGNED_INT, 0)
 	}
 
-	fun drawTrianglesInstanced(count: Int) {
+	open fun drawTrianglesInstanced(count: Int) {
 		glDrawElementsInstanced(GL_TRIANGLES, ibo.size, GL_UNSIGNED_INT, 0, count)
 	}
 
 	/**
 	 * draws the object, checking how many vertices per shapes the vao holds
 	 */
-	fun draw() {
+	open fun draw() {
 		when (verticesPerShape) {
 			1 -> drawPoints()
 			2 -> drawLines()
@@ -236,7 +236,7 @@ class VAO : GLResource {
 		}
 	}
 
-	fun drawInstanced(count: Int) {
+	open fun drawInstanced(count: Int) {
 		when (verticesPerShape) {
 			1 -> drawPointsInstanced(count)
 			2 -> drawLinesInstanced(count)
@@ -247,7 +247,7 @@ class VAO : GLResource {
 	/**
 	 * disables the vbos then unbinds the vao, cleans up after rendering
 	 */
-	fun unbind() {
+	open fun unbind() {
 		for (i in vbos.indices) {
 			glDisableVertexAttribArray(i)
 		}
@@ -259,7 +259,7 @@ class VAO : GLResource {
 	 * @param vboset
 	 * the vbos to be enabled
 	 */
-	fun prepareRender(vboset: IntArray) {
+	open fun prepareRender(vboset: IntArray) {
 		glBindVertexArray(id)
 		for (i in vboset) {
 			glEnableVertexAttribArray(i)
@@ -271,7 +271,7 @@ class VAO : GLResource {
 	 * @param vboset
 	 * the vbos that should be disabled
 	 */
-	fun unbind(vboset: IntArray) {
+	open fun unbind(vboset: IntArray) {
 		for (i in vboset) {
 			glDisableVertexAttribArray(i)
 		}
@@ -282,7 +282,7 @@ class VAO : GLResource {
 	 * adds a vbo to the vao
 	 * @param newVBO new vbo
 	 */
-	fun addVBO(newVBO: VBO<*>) {
+	open fun addVBO(newVBO: VBO<*>) {
 		val tempVBOL = Array(vbos.size + 1) {i ->
 			when (i) {
 				vbos.size -> newVBO
@@ -299,15 +299,15 @@ class VAO : GLResource {
 	 * @param info information for the new vbo
 	 * @param size vector size of the vbo
 	 */
-	fun addVBO(info: FloatArray, size: Int) = addVBO(VBO(info, size))
+	open fun addVBO(info: FloatArray, size: Int) = addVBO(VBO(info, size))
 
 	/**
 	 * returns the number of vertices in the vao
 	 * @return number of vertices in the vao
 	 */
-	val vertexCount: Int get() = vbos[0].vertexCount
+	open val vertexCount: Int get() = vbos[0].vertexCount
 
-	operator fun get(i : Int) = vbos[i]
+	open operator fun get(i : Int) = vbos[i]
 
 	/**
 	 * deletes the vao
@@ -319,7 +319,7 @@ class VAO : GLResource {
 	/**
 	 * deletes all vbos in the vao
 	 */
-	fun deleteVBOS() {
+	open fun deleteVBOS() {
 		for (v in vbos) {
 			v.destroy()
 		}

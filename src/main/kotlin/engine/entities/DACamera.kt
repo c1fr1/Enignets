@@ -7,7 +7,7 @@ import kotlin.math.PI
 
 //Dynamic Axis Camera
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class DACamera(var projectionMatrix : Matrix4f, rotation : Quaternionf, var pos : Vector3fc) :
+open class DACamera(open var projectionMatrix : Matrix4f, rotation : Quaternionf, open var pos : Vector3fc) :
 	Camera, DAOrientation(rotation, pos) {
 
 	constructor(other : DACamera) : this(other.projectionMatrix, other.rotation, other)

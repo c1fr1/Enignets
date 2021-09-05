@@ -13,9 +13,9 @@ fun AIMatrix4x4.toJoml() = Matrix4f(
 	a4(), b4(), c4(), d4()
 )
 
-class Skeleton {
-	val nodes : Array<Node>
-	var rootNode : Int = 0
+open class Skeleton {
+	open val nodes : Array<Node>
+	open var rootNode : Int = 0
 	constructor(nodes : Array<Node>, rootNode : Int) {
 		this.nodes = nodes
 		this.rootNode = rootNode
@@ -78,6 +78,6 @@ class Skeleton {
 	}
 }
 
-class Node(val children : Array<Int>, val name : String, val transformation : Matrix4f, val id : Int, val parent : Int?, val totalTransform : Matrix4f) {
+open class Node(open val children : Array<Int>, open val name : String, open val transformation : Matrix4f, open val id : Int, open val parent : Int?, open val totalTransform : Matrix4f) {
 
 }

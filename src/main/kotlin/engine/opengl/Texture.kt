@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 import java.util.ArrayList
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class Texture : GLResource {
+open class Texture : GLResource {
 
 	@Suppress("JoinDeclarationAndAssignment")//idk why it gives this warning, it shouldn't be possible easily
 	val width : Int

@@ -4,11 +4,11 @@ import org.lwjgl.opengl.GL20.glDisableVertexAttribArray
 import org.lwjgl.opengl.GL20.glEnableVertexAttribArray
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class Attribute {
+open class Attribute {
 
-	val type : ShaderDataType
-	val name: String
-	val pos: Int
+	open val type : ShaderDataType
+	open val name: String
+	open val pos: Int
 
 	constructor(type : ShaderDataType, name : String, pos : Int) {
 		this.type = type
@@ -44,14 +44,14 @@ class Attribute {
 	/**
 	 * enables the vbo at the position of the attribute
 	 */
-	fun enable() {
+	open fun enable() {
 		glEnableVertexAttribArray(pos)
 	}
 
 	/**
 	 * disables the vbo at the position of the attribute
 	 */
-	fun disable() {
+	open fun disable() {
 		glDisableVertexAttribArray(pos)
 	}
 }

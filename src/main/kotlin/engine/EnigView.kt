@@ -23,7 +23,7 @@ abstract class EnigView {
 	 */
 	abstract fun loop(frameBirth : Long, dtime : Float) : Boolean
 
-	fun runIn(window : EnigWindow) {
+	open fun runIn(window : EnigWindow) {
 		generateResources(window)
 		window.runView { frameBirth, dtime ->
 			loop(frameBirth, dtime)
@@ -31,7 +31,7 @@ abstract class EnigView {
 		cleanUpResources()
 	}
 
-	fun runInGLSafe(window : EnigWindow) {
+	open fun runInGLSafe(window : EnigWindow) {
 		try {
 			runIn(window)
 		} catch (t : Throwable) {

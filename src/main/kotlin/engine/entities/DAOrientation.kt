@@ -14,17 +14,17 @@ open class DAOrientation(rotation : Quaternionfc = Quaternionf(), pos : Vector3f
 	override fun getRelativePosition(vec: Vector3fc, target: Vector3f) : Vector3f =
 		rotation.transformInverse(vec.sub(this, target))
 
-	fun pitch(angle : Float) : DAOrientation {
+	open fun pitch(angle : Float) : DAOrientation {
 		rotation.rotateX(angle)
 		return this
 	}
 
-	fun yaw(angle : Float) : DAOrientation {
+	open fun yaw(angle : Float) : DAOrientation {
 		rotation.rotateY(angle)
 		return this
 	}
 
-	fun roll(angle : Float) : DAOrientation {
+	open fun roll(angle : Float) : DAOrientation {
 		rotation.rotateZ(angle)
 		return this
 	}

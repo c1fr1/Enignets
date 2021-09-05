@@ -2,7 +2,7 @@ package engine.shapes.bounds
 
 import org.joml.Vector3fc
 
-class OriginDimBox3d : Box3d {
+open class OriginDimBox3d : Box3d {
 	override var minx : Float
 		get() = x
 		set(value) {

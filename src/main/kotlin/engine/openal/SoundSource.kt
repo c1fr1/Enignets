@@ -13,7 +13,7 @@ import java.nio.FloatBuffer
 import java.util.ArrayList
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class SoundSource : Vector3f, Resource {
+open class SoundSource : Vector3f, Resource {
 
 	private val id = alGenSources()
 
@@ -43,7 +43,7 @@ class SoundSource : Vector3f, Resource {
 	 * sets the volume of the sound
 	 * @param newValue new volume
 	 */
-	fun setVolume(newValue: Float) {
+	open fun setVolume(newValue: Float) {
 		volume = newValue
 		alSourcef(id, AL_GAIN, volume)
 	}
@@ -52,7 +52,7 @@ class SoundSource : Vector3f, Resource {
 	 * sets the pitch of the sound
 	 * @param newValue new pitch
 	 */
-	fun setPitch(newValue: Float) {
+	open fun setPitch(newValue: Float) {
 		pitch = newValue
 		alSourcef(id, AL_PITCH, pitch)
 	}
@@ -60,7 +60,7 @@ class SoundSource : Vector3f, Resource {
 	/**
 	 * updates the position of the source to the position of the object
 	 */
-	fun updateSourcePosition() {
+	open fun updateSourcePosition() {
 		alSource3f(id, AL_POSITION, x, y, z)
 	}
 
@@ -68,7 +68,7 @@ class SoundSource : Vector3f, Resource {
 	 * sets the position of the source so that it is in the right position relative to the listener
 	 * @param listener the orientation of the listener
 	 */
-	fun updateSourcePosition(listener : Orientation3D) {
+	open fun updateSourcePosition(listener : Orientation3D) {
 		val tempPos = listener.getRelativePosition(this)
 		alSource3f(id, AL_POSITION, tempPos.x, tempPos.y, tempPos.z)
 	}
@@ -77,7 +77,7 @@ class SoundSource : Vector3f, Resource {
 	 * sets the position of the source so that it is in the right position relative to the listener
 	 * @param listener the orientation of the listener
 	 */
-	fun updateSourcePosition(listener : Orientation2D) {
+	open fun updateSourcePosition(listener : Orientation2D) {
 		val tempPos = listener.getRelativePosition(this.xz)
 		alSource3f(id, AL_POSITION, tempPos.x, 0f, tempPos.y)
 	}
@@ -86,7 +86,7 @@ class SoundSource : Vector3f, Resource {
 	 * starts playing a sound
 	 * @param sound sound to play
 	 */
-	fun playSound(sound: Sound) {
+	open fun playSound(sound: Sound) {
 		alSourcei(id, AL_BUFFER, sound.id)
 		alSourcePlay(id)
 	}
@@ -94,35 +94,35 @@ class SoundSource : Vector3f, Resource {
 	/**
 	 * plays or resumes the last
 	 */
-	fun play() {
+	open fun play() {
 		alSourcePlay(id)
 	}
 
 	/**
 	 * pauses the current sound
 	 */
-	fun pause() {
+	open fun pause() {
 		alSourcePause(id)
 	}
 
 	/**
 	 * stops the current sound
 	 */
-	fun stop() {
+	open fun stop() {
 		alSourceStop(id)
 	}
 
 	/**
 	 * tells the source to loop when playing a sound
 	 */
-	fun setLoop() {
+	open fun setLoop() {
 		alSourcei(id, AL_LOOPING, 1)
 	}
 
 	/**
 	 * tells the source to not loop when playing a sound
 	 */
-	fun setNoLoop() {
+	open fun setNoLoop() {
 		alSourcei(id, AL_LOOPING, 0)
 	}
 

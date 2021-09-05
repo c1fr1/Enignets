@@ -502,5 +502,5 @@ data class ShaderDataType(val dataClass : ShaderDataClass, val arraySize : Int) 
 	}
 }
 
-class InvalidGLTypeException(expected : ShaderDataType, actual : ShaderDataType)
+open class InvalidGLTypeException(expected : ShaderDataType, actual : ShaderDataType)
 	: Exception("invalid GL type found, expected $expected, found $actual")

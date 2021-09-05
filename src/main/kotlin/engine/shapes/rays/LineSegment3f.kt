@@ -1,8 +1,8 @@
-package engine.shapes.Rays
+package engine.shapes.rays
 
 import org.joml.Vector3f
 
-class LineSegment3f : Ray3f {
+open class LineSegment3f : Ray3f {
 	override var final = Vector3f(0f, 0f, 0f)
 	override var fx : Float
 		get() = final.x

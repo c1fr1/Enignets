@@ -4,14 +4,14 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
 
-class GLContextPreset(private val settingsSetter : () -> Unit) {
+open class GLContextPreset(private val settingsSetter : () -> Unit) {
 
-	fun createContext() {
+	open fun createContext() {
 		GL.createCapabilities()
 		settingsSetter()
 	}
 
-	fun extended(additionalSettingsSetter : () -> Unit) = GLContextPreset {settingsSetter();additionalSettingsSetter()}
+	open fun extended(additionalSettingsSetter : () -> Unit) = GLContextPreset {settingsSetter();additionalSettingsSetter()}
 
 	companion object {
 		val minimal = GLContextPreset {glClearColor(0.0f, 0.0f, 0.0f, 0.0f)}

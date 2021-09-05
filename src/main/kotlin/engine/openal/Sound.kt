@@ -13,7 +13,7 @@ import javax.sound.sampled.UnsupportedAudioFileException
  * a lot of this is copied straight from the LWJGL github page, I couldn't find the WaveData class in the library that I had locally, so I went to the github page.
  * @param file file path to a .wav file
  */
-class Sound(file: String) : GLResource(alGenBuffers()) {
+open class Sound(file: String) : GLResource(alGenBuffers()) {
 
 	init {
 		try {

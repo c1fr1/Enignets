@@ -8,7 +8,7 @@ import org.joml.*
 typealias Camera3D = PRTCamera
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class PRTCamera(var projectionMatrix : Matrix4f, angles : Vector3f, pos : Vector3f) :
+open class PRTCamera(var projectionMatrix : Matrix4f, angles : Vector3f, pos : Vector3f) :
 	Camera, Orientation(angles, pos) {
 
 	constructor(other : PRTCamera) : this(other.projectionMatrix, other.angles, other)

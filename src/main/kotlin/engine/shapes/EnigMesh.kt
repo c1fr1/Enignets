@@ -8,8 +8,9 @@ import engine.opengl.bufferObjects.getArrayFast
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
-import engine.shapes.Rays.Ray2f
-import engine.shapes.Rays.Ray3f
+import engine.shapes.rays.Ray2f
+import engine.shapes.rays.Ray3f
+import engine.shapes.bounds.Bound3f
 import engine.shapes.bounds.Box3d
 import engine.shapes.simplexes.Simplex2v3d
 import engine.solveCubic
@@ -17,7 +18,6 @@ import org.joml.Vector3f
 import org.lwjgl.assimp.AIMesh
 import org.lwjgl.assimp.AIScene
 import java.io.File
-import java.io.FileWriter
 import java.lang.Math.*
 import kotlin.collections.ArrayList
 
@@ -60,7 +60,7 @@ interface EnigMesh : Bound3f {
 
 typealias Edge3f = Pair<Ray3f, Ray3f>
 
-class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
+open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 
 	constructor(mesh : AIMesh) : this(mesh.mFaces().getArrayFast(), mesh.mVertices().getArray(fuckBlender))
 
@@ -85,14 +85,14 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 	override val maxz: Float
 		get() = vdata.foldIndexed(Float.NEGATIVE_INFINITY) {i, ret, f -> if (i % 3 == 2) ret.coerceAtLeast(f) else ret}
 
-	fun getX(i : Int) = vdata[getXi(i)]
-	fun getY(i : Int) = vdata[getYi(i)]
-	fun getZ(i : Int) = vdata[getZi(i)]
-	fun getVertex(i : Int) = Vector3f(getX(i), getY(i), getZ(i))
+	open fun getX(i : Int) = vdata[getXi(i)]
+	open fun getY(i : Int) = vdata[getYi(i)]
+	open fun getZ(i : Int) = vdata[getZi(i)]
+	open fun getVertex(i : Int) = Vector3f(getX(i), getY(i), getZ(i))
 
-	fun getXi(i : Int) = i * 3
-	fun getYi(i : Int) = i * 3 + 1
-	fun getZi(i : Int) = i * 3 + 2
+	open fun getXi(i : Int) = i * 3
+	open fun getYi(i : Int) = i * 3 + 1
+	open fun getZi(i : Int) = i * 3 + 2
 
 	override fun getAX(i: Int) = getX(getAi(i))
 	override fun getAY(i: Int) = getY(getAi(i))
@@ -104,11 +104,11 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 	override fun getCY(i: Int) = getY(getCi(i))
 	override fun getCZ(i: Int) = getZ(getCi(i))
 
-	fun getAi(i : Int) = indices[i * 3]
-	fun getBi(i : Int) = indices[i * 3 + 1]
-	fun getCi(i : Int) = indices[i * 3 + 2]
+	open fun getAi(i : Int) = indices[i * 3]
+	open fun getBi(i : Int) = indices[i * 3 + 1]
+	open fun getCi(i : Int) = indices[i * 3 + 2]
 
-	fun intersectionT(other : Mesh, endBuffer : FloatArray, oEndBuffer : FloatArray) : Float? {
+	open fun intersectionT(other : Mesh, endBuffer : FloatArray, oEndBuffer : FloatArray) : Float? {
 
 		var minX = Float.MAX_VALUE
 		var maxX = Float.MIN_VALUE
@@ -250,7 +250,7 @@ class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 		return null
 	}
 
-	fun writeToOBJ(path : String) {
+	open fun writeToOBJ(path : String) {
 		val writer = File(path).printWriter()
 		for (i in 0 until vertexCount) {
 			writer.println("v ${getX(i)} ${getY(i)} ${getZ(i)}")

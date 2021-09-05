@@ -8,7 +8,7 @@ import engine.opengl.bufferObjects.*
 import engine.opengl.jomlExtensions.*
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
-import engine.shapes.Rays.Ray3f
+import engine.shapes.rays.Ray3f
 import engine.shapes.edgesIntersectionT
 import org.joml.Random
 import org.joml.Vector2f

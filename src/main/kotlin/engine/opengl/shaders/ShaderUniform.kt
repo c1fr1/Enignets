@@ -2,8 +2,8 @@ package engine.opengl.shaders
 
 open class ShaderUniform {
 
-	val name: String
-	val type : ShaderDataType
+	open val name: String
+	open val type : ShaderDataType
 
 	constructor(name : String, type : ShaderDataType) {
 		this.name = name

@@ -7,17 +7,17 @@ open class EnigScope {
 
 	open fun isLeaf() : Boolean = subScope == null
 
-	fun addResource(resource : Resource) {
+	open fun addResource(resource : Resource) {
 		if (isLeaf()) resources.add(resource) else subScope!!.addResource(resource)
 	}
 
-	fun removeResource(resource : Resource) {
+	open fun removeResource(resource : Resource) {
 		if (!resources.remove(resource)) {
 			subScope?.removeResource(resource)
 		}
 	}
 
-	fun exitScope() {
+	open fun exitScope() {
 		subScope?.exitScope()
 		when {
 			subScope == null -> for (r in resources) r.destroy()
@@ -25,7 +25,7 @@ open class EnigScope {
 		}
 	}
 
-	fun enterScope() {
+	open fun enterScope() {
 		if (subScope == null) subScope = EnigScope() else subScope!!.enterScope()
 	}
 }

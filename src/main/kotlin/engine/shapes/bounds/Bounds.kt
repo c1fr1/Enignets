@@ -1,10 +1,8 @@
-package engine.shapes
+package engine.shapes.bounds
 
 import engine.mino
 import engine.opengl.bufferObjects.VAO
-import engine.shapes.Rays.Ray2f
-import engine.shapes.bounds.Box2d
-import engine.shapes.bounds.Box3d
+import engine.shapes.rays.Ray2f
 import org.joml.Vector2f
 import org.joml.Vector2fc
 import org.joml.Vector3f

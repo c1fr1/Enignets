@@ -7,9 +7,9 @@ import org.lwjgl.opengl.GL32.glFramebufferTexture
 import java.util.ArrayList
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
-class FBO : GLResource {
+open class FBO : GLResource {
 
-	var depthRenderBufferID = 0
+	open var depthRenderBufferID = 0
 	set(id) {
 		bind()
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBufferID)
@@ -20,7 +20,7 @@ class FBO : GLResource {
 	 * returns the current texture bound to the fbo
 	 * @return current texture
 	 */
-	var boundTexture: Texture
+	open var boundTexture: Texture
 	set(tex) {
 		glBindFramebuffer(GL_FRAMEBUFFER, id)
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex.id, 0)
@@ -45,7 +45,7 @@ class FBO : GLResource {
 	 * @param w width of the render buffer
 	 * @param h height of the render buffer
 	 */
-	fun bindNewDepthRenderBuffer(w: Int, h: Int) {
+	open fun bindNewDepthRenderBuffer(w: Int, h: Int) {
 		val newID = glGenRenderbuffers()
 		renderBufferIDs.add(newID)
 		glBindRenderbuffer(GL_RENDERBUFFER, newID)
@@ -56,14 +56,14 @@ class FBO : GLResource {
 	/**
 	 * binds the render buffer
 	 */
-	fun bind() {
+	open fun bind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, id)
 	}
 
 	/**
 	 * prepares to render to the texture
 	 */
-	fun prepareForTexture() {
+	open fun prepareForTexture() {
 		glBindTexture(GL_TEXTURE_2D, 0)
 		bind()
 		glViewport(0, 0, boundTexture.width, boundTexture.height)

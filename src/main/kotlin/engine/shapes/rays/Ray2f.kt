@@ -1,10 +1,10 @@
-package engine.shapes.Rays
+package engine.shapes.rays
 
 import engine.opengl.jomlExtensions.div
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
-import engine.shapes.Bound2f
+import engine.shapes.bounds.Bound2f
 import org.joml.Math
 import org.joml.Vector2f
 import org.joml.Vector2fc
@@ -53,13 +53,13 @@ open class Ray2f : Vector2f, Bound2f {
 
 	constructor(other : Ray2f) : this(other, other.delta)
 
-	fun xAt(t : Float) = fma(dx, t, x)
+	open fun xAt(t : Float) = fma(dx, t, x)
 
-	fun yAt(t : Float) = fma(dy, t, y)
+	open fun yAt(t : Float) = fma(dy, t, y)
 
-	fun getPointAt(t : Float) = Vector2f(xAt(t), yAt(t))
+	open fun getPointAt(t : Float) = Vector2f(xAt(t), yAt(t))
 
-	fun rotate(theta : Float, target : Ray2f) : Ray2f {
+	open fun rotate(theta : Float, target : Ray2f) : Ray2f {
 		val sin = Math.sin(theta)
 		val cos = Math.cosFromSin(sin, theta)
 		target.x =  x * cos + y * sin
@@ -69,17 +69,17 @@ open class Ray2f : Vector2f, Bound2f {
 		return target
 	}
 
-	fun rotate(theta : Float) = rotate(theta, this)
+	open fun rotate(theta : Float) = rotate(theta, this)
 
-	fun closestTTo(point : Vector2fc) = -(dx * (x - point.x()) + dy * (y - point.y())) / delta.lengthSquared()
+	open fun closestTTo(point : Vector2fc) = -(dx * (x - point.x()) + dy * (y - point.y())) / delta.lengthSquared()
 
-	fun closestPointTo(other : Vector2fc) = getPointAt(closestTTo(other))
+	open fun closestPointTo(other : Vector2fc) = getPointAt(closestTTo(other))
 
-	fun closestDistanceSquared(other : Vector2fc) = closestPointTo(other).distanceSquared(other)
+	open fun closestDistanceSquared(other : Vector2fc) = closestPointTo(other).distanceSquared(other)
 
-	fun closestDistance(other : Vector2fc) = Math.sqrt(closestDistanceSquared(other))
+	open fun closestDistance(other : Vector2fc) = Math.sqrt(closestDistanceSquared(other))
 
-	fun closestPointInRangeTo(other : Vector2fc) : Vector2f {
+	open fun closestPointInRangeTo(other : Vector2fc) : Vector2f {
 		val tval = closestTTo(other)
 
 		return if (tval > 0 && tval < 1) {
@@ -94,7 +94,7 @@ open class Ray2f : Vector2f, Bound2f {
 		}
 	}
 
-	fun closestDistanceInRangeSquared(other : Vector2fc) : Float {
+	open fun closestDistanceInRangeSquared(other : Vector2fc) : Float {
 		val tval = closestTTo(other)
 		return if (tval > 0 && tval < 1) {
 			getPointAt(tval).distanceSquared(other)
@@ -103,17 +103,17 @@ open class Ray2f : Vector2f, Bound2f {
 		}
 	}
 
-	fun closestDistanceInRange(other : Vector2fc) = Math.sqrt(closestDistanceInRangeSquared(other))
+	open fun closestDistanceInRange(other : Vector2fc) = Math.sqrt(closestDistanceInRangeSquared(other))
 
-	fun intersectionT(ox : Float, oy : Float, odx : Float, ody : Float) =
+	open fun intersectionT(ox : Float, oy : Float, odx : Float, ody : Float) =
 		((x - ox) * ody - odx * (y - oy)) / (dy * odx - dx * ody)
 
-	fun intersectionT(o : Ray2f) = intersectionT(o.x, o.y, o.dx, o.dy)
+	open fun intersectionT(o : Ray2f) = intersectionT(o.x, o.y, o.dx, o.dy)
 
-	fun intersectionPoint(ox : Float, oy : Float, odx : Float, ody : Float) =
+	open fun intersectionPoint(ox : Float, oy : Float, odx : Float, ody : Float) =
 		getPointAt(intersectionT(ox, oy, odx, ody))
 
-	fun intersectionPoint(o : Ray2f) = getPointAt(intersectionT(o))
+	open fun intersectionPoint(o : Ray2f) = getPointAt(intersectionT(o))
 
 	operator fun plus(inc : Vector2fc) = Ray2f((this as Vector2fc) + inc, delta)
 	operator fun plus(o : Ray2f) = Ray2f((this as Vector2fc) + o, delta + o.delta)

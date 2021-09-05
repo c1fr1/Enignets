@@ -11,9 +11,10 @@
  -m- add pose class
  -m- move gl object handling to the window
  -m- fix operator get for VBOs with forced stride
+ -m- see if private set vars can be made open (see inputhandler and window)
  -e- add VAO function to ??? WHAT??? TO DO WHAT?? WHY DID YOU WRITE THIS???
- -e- make everything open
  -e- allow version to be specified in shaders
+ -e- move soundSource options to public variables
 
  - TESTING
 	- Ray2f (?)

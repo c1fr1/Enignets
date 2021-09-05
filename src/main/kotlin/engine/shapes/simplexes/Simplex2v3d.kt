@@ -4,9 +4,9 @@ import engine.mino
 import engine.opengl.jomlExtensions.minus
 import engine.opengl.jomlExtensions.plus
 import engine.opengl.jomlExtensions.times
-import engine.shapes.Bound3f
-import engine.shapes.Rays.Ray2f
-import engine.shapes.Rays.Ray3f
+import engine.shapes.bounds.Bound3f
+import engine.shapes.rays.Ray2f
+import engine.shapes.rays.Ray3f
 import org.joml.Vector3f
 import org.joml.Vector2fc
 import org.joml.Vector3fc
@@ -16,7 +16,7 @@ import java.lang.Math.fma
 import kotlin.math.abs
 
 @Suppress("JoinDeclarationAndAssignment", "unused", "MemberVisibilityCanBePrivate")
-class Simplex2v3d : Bound3f {
+open class Simplex2v3d : Bound3f {
 	var a : Vector3f
 	var b : Vector3f
 	var c : Vector3f
@@ -97,7 +97,7 @@ class Simplex2v3d : Bound3f {
 		Vector3f(1f + point.x(), xCoeff + zCoeff + point.y(), 1f + point.z()),
 		Vector3f(-1f + point.x(), -xCoeff - zCoeff + point.y(), -1f + point.z()))
 
-	operator fun plus(delta : Vector3f) = Simplex2v3d(a + delta, b + delta, c + delta)
+	open operator fun plus(delta : Vector3f) = Simplex2v3d(a + delta, b + delta, c + delta)
 
 	/**
 	 * gets the corresponding x of a y and z position
@@ -106,7 +106,7 @@ class Simplex2v3d : Bound3f {
 	 * @param z z position
 	 * @return x coordinate
 	 */
-	fun getx(y : Float, z : Float) = -(normal.y * (y - c.y) + normal.z * (z - c.z)) / normal.x + c.x
+	open fun getx(y : Float, z : Float) = -(normal.y * (y - c.y) + normal.z * (z - c.z)) / normal.x + c.x
 
 	/**
 	 * gets the corresponding x of a y and z position in a vector
@@ -114,7 +114,7 @@ class Simplex2v3d : Bound3f {
 	 * @param v vector holding the y and z position
 	 * @return x coordinate
 	 */
-	fun getx(v : Vector2fc) = getx(v.x(), v.y())
+	open fun getx(v : Vector2fc) = getx(v.x(), v.y())
 
 	/**
 	 * gets the corresponding y of a x and z position
@@ -123,7 +123,7 @@ class Simplex2v3d : Bound3f {
 	 * @param z z position
 	 * @return y coordinate
 	 */
-	fun gety(x : Float, z : Float) = -(normal.x * (x - c.x) + normal.z * (z - c.z)) / normal.y + c.y
+	open fun gety(x : Float, z : Float) = -(normal.x * (x - c.x) + normal.z * (z - c.z)) / normal.y + c.y
 
 	/**
 	 * gets the corresponding y of a x and z position in a vector
@@ -131,7 +131,7 @@ class Simplex2v3d : Bound3f {
 	 * @param v vector holding the x and z position
 	 * @return y coordinate
 	 */
-	fun gety(v : Vector2fc) = gety(v.x(), v.y())
+	open fun gety(v : Vector2fc) = gety(v.x(), v.y())
 
 	/**
 	 * gets the corresponding z of a x and y position
@@ -140,7 +140,7 @@ class Simplex2v3d : Bound3f {
 	 * @param y y position
 	 * @return z coordinate
 	 */
-	fun getz(x : Float, y : Float) = -(normal.x * (x - c.x) + normal.y * (y - c.y)) / normal.z + c.z
+	open fun getz(x : Float, y : Float) = -(normal.x * (x - c.x) + normal.y * (y - c.y)) / normal.z + c.z
 
 	/**
 	 * gets the corresponding z of a x and y position in a vector
@@ -150,18 +150,18 @@ class Simplex2v3d : Bound3f {
 	 */
 	fun getz(v : Vector2fc) = getz(v.x(), v.y())
 
-	fun getTIntersect(l: Ray3f) : Float {
+	open fun getTIntersect(l: Ray3f) : Float {
 		val k = l - a
 		return -k.dot(normal) / l.delta.dot(normal)
 	}
 
-	fun getIntersectionPoint(l : Ray3f) : Vector3f? = l.getIntersectionPoint(this)
+	open fun getIntersectionPoint(l : Ray3f) : Vector3f? = l.getIntersectionPoint(this)
 
-	fun getPlaneIntersectPoint(l : Ray3f) : Vector3f = l.planeIntersectionPoint(this)
+	open fun getPlaneIntersectPoint(l : Ray3f) : Vector3f = l.planeIntersectionPoint(this)
 
-	fun getIntersectT(d : Vector3fc, o : Simplex2v3d) = getIntersectT({it + d}, o)
+	open fun getIntersectT(d : Vector3fc, o : Simplex2v3d) = getIntersectT({it + d}, o)
 
-	fun getIntersectT(transformation : (Vector3fc) -> Vector3f , o : Simplex2v3d) : Float? {
+	open fun getIntersectT(transformation : (Vector3fc) -> Vector3f , o : Simplex2v3d) : Float? {
 		val aRay = Ray3f(a, transformation(a) - a)
 		val bRay = Ray3f(b, transformation(b) - b)
 		val cRay = Ray3f(c, transformation(c) - c)
@@ -233,7 +233,7 @@ class Simplex2v3d : Bound3f {
 		}
 	}
 
-	fun getReflected(ray : Ray3f) : Ray3f {
+	open fun getReflected(ray : Ray3f) : Ray3f {
 		val intersection = getPlaneIntersectPoint(ray)
 		return Ray3f(
 			intersection,
@@ -241,9 +241,9 @@ class Simplex2v3d : Bound3f {
 		)
 	}
 
-	fun collides(v : Vector3fc, other : Simplex2v3d, ov : Vector3fc) = collides(other, v - ov)
+	open fun collides(v : Vector3fc, other : Simplex2v3d, ov : Vector3fc) = collides(other, v - ov)
 
-	fun collides(other : Simplex2v3d, vdel : Vector3fc) : Float? {
+	open fun collides(other : Simplex2v3d, vdel : Vector3fc) : Float? {
 		var t = Ray3f(a, vdel).getIntersectionT(other) ?: 2f
 		t = min(t, Ray3f(b, vdel).getIntersectionT(other) ?: 2f)
 		t = min(t, Ray3f(c, vdel).getIntersectionT(other) ?: 2f)
@@ -254,14 +254,14 @@ class Simplex2v3d : Bound3f {
 		return if (t > 1f) null else t
 	}
 
-	fun lerp(other : Simplex2v3d, t : Float, dest : Simplex2v3d) : Simplex2v3d {
+	open fun lerp(other : Simplex2v3d, t : Float, dest : Simplex2v3d) : Simplex2v3d {
 		a.lerp(other.a, t, dest.a)
 		b.lerp(other.b, t, dest.b)
 		c.lerp(other.c, t, dest.c)
 		return dest
 	}
 
-	fun lerp(other : Simplex2v3d, t : Float) = lerp(other, t, this)
+	open fun lerp(other : Simplex2v3d, t : Float) = lerp(other, t, this)
 }
 
 private fun lerp(a : Float, b : Float, t : Float) = fma(t, b - a, a)
