@@ -6,14 +6,8 @@ import org.lwjgl.glfw.GLFW.glfwTerminate
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.openal.AL
 import org.lwjgl.openal.ALC
-import org.lwjgl.openal.ALC10
 import org.lwjgl.openal.ALC10.*
 import org.lwjgl.openal.ALCCapabilities
-import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11
-import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL13
-import org.lwjgl.opengl.GL13.GL_MULTISAMPLE
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 

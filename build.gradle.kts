@@ -39,6 +39,7 @@ repositories {
 
 application {
     mainClass.set("example.ExampleMainViewKt")
+    mainClassName = "example.ExampleMainViewKt"
 }
 
 tasks.withType<KotlinCompile> {
