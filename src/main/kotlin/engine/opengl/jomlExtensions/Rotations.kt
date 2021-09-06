@@ -32,8 +32,10 @@ fun Vector4f.rotateZYX(x : Float, y : Float, z : Float) : Vector4f = rotateZYX(x
 fun Vector2fc.rotate(angle : Float, target : Vector2f) : Vector2f {
 	val sin = sin(angle)
 	val cos = cosFromSin(sin, angle)
-	target.x =  x() * cos + y() * sin
-	target.y = -x() * sin + y() * cos
+	val rx = x() * cos - y() * sin
+	val ry = x() * sin + y() * cos
+	target.x = rx
+	target.y = ry
 	return target
 }
 fun Vector2f.rotate(angle : Float) = rotate(angle, this)
