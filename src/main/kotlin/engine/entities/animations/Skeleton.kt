@@ -2,9 +2,7 @@ package engine.entities.animations
 
 import engine.opengl.jomlExtensions.times
 import org.joml.Matrix4f
-import org.lwjgl.assimp.AIMatrix4x4
-import org.lwjgl.assimp.AINode
-import org.lwjgl.assimp.AIScene
+import org.lwjgl.assimp.*
 
 fun AIMatrix4x4.toJoml() = Matrix4f(
 	a1(), b1(), c1(), d1(),
@@ -20,8 +18,10 @@ open class Skeleton {
 		this.nodes = nodes
 		this.rootNode = rootNode
 	}
+
 	constructor(obj : AIScene, names : Array<String>) {
 		val tmpNodes = Array<Node?>(names.size) {null}
+		val globalTransform = obj.mRootNode()!!.mTransformation().toJoml()
 		var rootNodeSet = false
 
 		fun addNamed(node : AINode, parent : Int?) {
@@ -34,16 +34,9 @@ open class Skeleton {
 				val children = Array(node.mNumChildren()) {
 					names.indexOf(AINode.create(node.mChildren()!![it]).mName().dataString())
 				}
-				val transform = node.mTransformation().toJoml()
+				var transform = node.mTransformation().toJoml()
 
-				if (parent == null && fuckBlender) {
-					transform.mul(
-						1f,  0f, 0f, 0f,
-						0f,  0f, 1f, 0f,
-						0f, -1f, 0f, 0f,
-						0f,  0f, 0f, 1f)
-				}
-				val totalTransform = if (parent != null) transform * tmpNodes[parent]!!.totalTransform else transform
+				val totalTransform = if (parent != null) tmpNodes[parent]!!.totalTransform * transform else transform
 				tmpNodes[id] = Node(children, node.mName().dataString(), transform, id, parent, totalTransform)
 				id
 			} else {
@@ -59,8 +52,23 @@ open class Skeleton {
 		nodes = Array(tmpNodes.size) {tmpNodes[it]!!}
 	}
 
-	fun getMats(animation: Animation, frame : Int) : Array<Matrix4f> {
-		val ret = animation.getMats(frame)
+	constructor(obj : AIScene, mesh : AIMesh) : this(obj, Array(mesh.mNumBones()) { AIBone.create(mesh.mBones()!![it]).mName().dataString()})
+	constructor(obj : AIScene, meshi : Int) : this(obj, AIMesh.create(obj.mMeshes()!![meshi]))
+
+	fun getMats(animation : Animation, frame : Int) : Array<Matrix4f> {
+		val ret = getAnimMats(animation, frame)
+		for (i in ret.indices) {
+			ret[i] = ret[i] * nodes[i].totalTransform.invertAffine(Matrix4f())
+		}
+
+		return ret
+	}
+
+	fun getAnimMats(animation : Animation, frame : Int) : Array<Matrix4f> {
+		val ret = Array(nodes.size) { nodes[it].transformation }
+		for (nanim in animation.nodeChannels) {
+			ret[nodes.indexOfFirst { it.name == nanim.nodeName }] = nanim.mats[frame]
+		}
 
 		fun setMats(nodeID : Int) {
 			for (child in nodes[nodeID].children) {
@@ -70,14 +78,9 @@ open class Skeleton {
 			}
 		}
 		setMats(rootNode)
-		for (i in ret.indices) {
-			ret[i] = ret[i] * nodes[i].totalTransform
-		}
 
 		return ret
 	}
 }
 
-open class Node(open val children : Array<Int>, open val name : String, open val transformation : Matrix4f, open val id : Int, open val parent : Int?, open val totalTransform : Matrix4f) {
-
-}
+open class Node(open val children : Array<Int>, open val name : String, open val transformation : Matrix4f, open val id : Int, open val parent : Int?, open val totalTransform : Matrix4f)

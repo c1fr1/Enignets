@@ -2,11 +2,9 @@
 
 package engine.opengl.bufferObjects
 
-import engine.entities.animations.fuckBlender
 import engine.opengl.GLResource
 import org.joml.*
 import org.lwjgl.assimp.AIFace
-import org.lwjgl.assimp.AIMesh
 import org.lwjgl.assimp.AIVector2D
 import org.lwjgl.assimp.AIVector3D
 import org.lwjgl.opengl.GL20.glGenBuffers
@@ -133,94 +131,94 @@ interface VertexBuffer<T> {
 
 interface Vertex2DBuffer : VertexBuffer<Double> {
 	operator fun get(i : Int) : Vector2d {
-		return Vector2d(internalGet(i / 2), internalGet(i / 2 + 1))
+		return Vector2d(internalGet(i * 2), internalGet(i * 2 + 1))
 	}
 	operator fun set(i : Int, value : Vector2dc) {
-		internalSet(i / 2, value.x())
-		internalSet(i / 2 + 1, value.y())
+		internalSet(i * 2, value.x())
+		internalSet(i * 2 + 1, value.y())
 	}
 }
 interface Vertex3DBuffer : VertexBuffer<Double> {
 	operator fun get(i : Int) : Vector3d {
-		return Vector3d(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+		return Vector3d(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
 	}
 	operator fun set(i : Int, value : Vector3dc) {
-		internalSet(i / 3, value.x())
-		internalSet(i / 3 + 1, value.y())
-		internalSet(i / 3 + 2, value.z())
+		internalSet(i * 3, value.x())
+		internalSet(i * 3 + 1, value.y())
+		internalSet(i * 3 + 2, value.z())
 	}
 }
 interface Vertex4DBuffer : VertexBuffer<Double> {
 	operator fun get(i : Int) : Vector4d {
-		return Vector4d(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+		return Vector4d(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2), internalGet(i * 4 + 3))
 	}
 	operator fun set(i : Int, value : Vector4dc) {
-		internalSet(i / 4, value.x())
-		internalSet(i / 4 + 1, value.y())
-		internalSet(i / 4 + 2, value.z())
-		internalSet(i / 4 + 3, value.w())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
+		internalSet(i * 4 + 3, value.w())
 	}
 }
 
 interface Vertex2FBuffer : VertexBuffer<Float> {
 	operator fun get(i : Int) : Vector2f {
-		return Vector2f(internalGet(i / 2), internalGet(i / 2 + 1))
+		return Vector2f(internalGet(i * 2), internalGet(i * 2 + 1))
 	}
 	operator fun set(i : Int, value : Vector2fc) {
-		internalSet(i / 2, value.x())
-		internalSet(i / 2 + 1, value.y())
+		internalSet(i * 2, value.x())
+		internalSet(i * 2 + 1, value.y())
 	}
 }
 interface Vertex3FBuffer : VertexBuffer<Float> {
 	operator fun get(i : Int) : Vector3f {
-		return Vector3f(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+		return Vector3f(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
 	}
 	operator fun set(i : Int, value : Vector3fc) {
-		internalSet(i / 3, value.x())
-		internalSet(i / 3 + 1, value.y())
-		internalSet(i / 3 + 2, value.z())
+		internalSet(i * 3, value.x())
+		internalSet(i * 3 + 1, value.y())
+		internalSet(i * 3 + 2, value.z())
 	}
 }
 interface Vertex4FBuffer : VertexBuffer<Float> {
 	operator fun get(i : Int) : Vector4f {
-		return Vector4f(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+		return Vector4f(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2), internalGet(i * 4 + 3))
 	}
 	operator fun set(i : Int, value : Vector4fc) {
-		internalSet(i / 4, value.x())
-		internalSet(i / 4 + 1, value.y())
-		internalSet(i / 4 + 2, value.z())
-		internalSet(i / 4 + 3, value.w())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
+		internalSet(i * 4 + 3, value.w())
 	}
 }
 
 interface Vertex2IBuffer : VertexBuffer<Int> {
 	operator fun get(i : Int) : Vector2i {
-		return Vector2i(internalGet(i / 2), internalGet(i / 2 + 1))
+		return Vector2i(internalGet(i * 2), internalGet(i * 2 + 1))
 	}
 	operator fun set(i : Int, value : Vector2ic) {
-		internalSet(i / 2, value.x())
-		internalSet(i / 2 + 1, value.y())
+		internalSet(i * 2, value.x())
+		internalSet(i * 2 + 1, value.y())
 	}
 }
 interface Vertex3IBuffer : VertexBuffer<Int> {
 	operator fun get(i : Int) : Vector3i {
-		return Vector3i(internalGet(i / 3), internalGet(i / 3 + 1), internalGet(i / 3 + 2))
+		return Vector3i(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
 	}
 	operator fun set(i : Int, value : Vector3ic) {
-		internalSet(i / 3, value.x())
-		internalSet(i / 3 + 1, value.y())
-		internalSet(i / 3 + 2, value.z())
+		internalSet(i * 3, value.x())
+		internalSet(i * 3 + 1, value.y())
+		internalSet(i * 3 + 2, value.z())
 	}
 }
 interface Vertex4IBuffer : VertexBuffer<Int> {
 	operator fun get(i : Int) : Vector4i {
-		return Vector4i(internalGet(i / 4), internalGet(i / 4 + 1), internalGet(i / 4 + 2), internalGet(i / 4 + 3))
+		return Vector4i(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2), internalGet(i * 4 + 3))
 	}
 	operator fun set(i : Int, value : Vector4ic) {
-		internalSet(i / 4, value.x())
-		internalSet(i / 4 + 1, value.y())
-		internalSet(i / 4 + 2, value.z())
-		internalSet(i / 4 + 3, value.w())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
+		internalSet(i * 4 + 3, value.w())
 	}
 }
 
@@ -384,7 +382,7 @@ sealed class SSBO<T>(value : T, vectorSize : Int, type : Int, dynamic : Boolean 
 			}
 		}
 		operator fun invoke(value : AIVector2D.Buffer, dynamic : Boolean = false, readable : Boolean = false) = SSBO2f(value, dynamic, readable)
-		operator fun invoke(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = fuckBlender) = SSBO3f(value, dynamic, readable, rotate)
+		operator fun invoke(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) = SSBO3f(value, dynamic, readable, rotate)
 
 		operator fun invoke(data : IntArray, vectorSize : Int, dynamic : Boolean = false, readable : Boolean = false) : SSBOi {
 			return when(vectorSize) {
@@ -529,7 +527,7 @@ class SSBO3f(data : FloatArray, dynamic : Boolean = false, readable : Boolean = 
 	2 -> data[it / 4 * 3 + 2]
 	else -> 0f
 } }, 3, dynamic, readable), Vertex3FBuffer {
-	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = fuckBlender) : this(value.getArray(rotate), dynamic, readable)
+	constructor(value : AIVector3D.Buffer, dynamic : Boolean = false, readable : Boolean = false, rotate : Boolean = false) : this(value.getArray(rotate), dynamic, readable)
 
 	override fun assignToVAO(index: Int) {
 		glBindBuffer(GL_ARRAY_BUFFER, id)

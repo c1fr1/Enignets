@@ -17,9 +17,9 @@ import kotlin.math.abs
 
 @Suppress("JoinDeclarationAndAssignment", "unused", "MemberVisibilityCanBePrivate")
 open class Simplex2v3d : Bound3f {
-	var a : Vector3f
-	var b : Vector3f
-	var c : Vector3f
+	open var a : Vector3f
+	open var b : Vector3f
+	open var c : Vector3f
 
 	override val minx: Float
 		get() = min(a.x, min(b.x, c.x))

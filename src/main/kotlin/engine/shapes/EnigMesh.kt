@@ -1,6 +1,5 @@
 package engine.shapes
 
-import engine.entities.animations.fuckBlender
 import engine.loadScene
 import engine.mino
 import engine.opengl.bufferObjects.getArray
@@ -62,7 +61,7 @@ typealias Edge3f = Pair<Ray3f, Ray3f>
 
 open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 
-	constructor(mesh : AIMesh) : this(mesh.mFaces().getArrayFast(), mesh.mVertices().getArray(fuckBlender))
+	constructor(mesh : AIMesh, counterRotate : Boolean = false) : this(mesh.mFaces().getArrayFast(), mesh.mVertices().getArray(counterRotate))
 
 	constructor(scene : AIScene, index : Int) : this(AIMesh.create(scene.mMeshes()!![index]))
 

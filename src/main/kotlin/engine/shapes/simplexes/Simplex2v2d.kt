@@ -8,9 +8,9 @@ import kotlin.math.min
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 open class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
-	var a : Vector2f = a
-	var b : Vector2f = b
-	var c : Vector2f = c
+	open var a : Vector2f = a
+	open var b : Vector2f = b
+	open var c : Vector2f = c
 
 	override val minx: Float
 		get() = min(a.x, min(b.x, c.x))
@@ -66,7 +66,7 @@ open class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	 * @param extra extra offset
 	 * @return if the point is in the largest simplex
 	 */
-	open fun containsPoint(ox: Float, oy: Float, extra: Float): Boolean {
+	open fun containsPoint(ox : Float, oy : Float, extra : Float) : Boolean {
 		val u = getBarycentricA(ox, oy)
 		if (u < -extra) return false
 		val v = getBarycentricB(ox, oy)
@@ -74,10 +74,10 @@ open class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	}
 
 	open fun getBarycentricA(ox : Float, oy : Float) =
-		getDoubleArea(b.x, b.y, c.x, c.y, ox, oy) / calculateDoubleArea()
+		getDoubleArea(ox, oy, b.x, b.y, c.x, c.y) / calculateDoubleArea()
 
 	open fun getBarycentricB(ox : Float, oy : Float) =
-		getDoubleArea(a.x, a.y, c.x, c.y, ox, oy) / calculateDoubleArea()
+		getDoubleArea(a.x, a.y, ox, oy, c.x, c.y) / calculateDoubleArea()
 
 	open fun getBarycentricC(ox : Float, oy : Float) =
 		getDoubleArea(a.x, a.y, b.x, b.y, ox, oy) / calculateDoubleArea()
@@ -114,21 +114,21 @@ open class Simplex2v2d(a : Vector2f, b : Vector2f, c : Vector2f) : Bound2f {
 	}
 }
 
-
+//clockwise simplexes will return a positive area
 private fun getDoubleArea(ax : Float, ay : Float, bx : Float, by : Float, cx : Float, cy : Float) =
-	(bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
-
+	(by - ay) * (cx - ax) - (bx - ax) * (cy - ay)
+//abs(a.x * b.y - a.x * c.y - b.x * a.y + b.x * c.y + c.x * a.y - c.x * b.y)
 fun getBarycentricA(bx : Float, by : Float, cx : Float, cy : Float, ox : Float, oy : Float,
-                    doubleArea : Float) = getDoubleArea(bx, by, cx, cy, ox, oy) / doubleArea
+                    doubleArea : Float) = getDoubleArea(ox, oy, bx, by, cx, cy) / doubleArea
 
 fun getBarycentricA(ax : Float, ay : Float, bx : Float, by : Float, cx : Float, cy : Float, ox : Float, oy : Float) =
-	getBarycentricA(bx, by, cx, cy, ox, oy, getDoubleArea(ax, ay, bx, by, cx, cy))
+	getBarycentricA(ox, oy, bx, by, cx, cy, getDoubleArea(ax, ay, bx, by, cx, cy))
 
 fun getBarycentricB(ax : Float, ay : Float, cx : Float, cy : Float, ox : Float, oy : Float,
-                    doubleArea : Float) = getDoubleArea(cx, cy, ax, ay, ox, oy) / doubleArea
+                    doubleArea : Float) = getDoubleArea(ax, ay, ox, oy, cx, cy) / doubleArea
 
 fun getBarycentricB(ax : Float, ay : Float, bx : Float, by : Float, cx : Float, cy : Float, ox : Float, oy : Float) =
-	getBarycentricB(ax, ay, cx, cy, ox, oy, getDoubleArea(ax, ay, bx, by, cx, cy))
+	getBarycentricB(ax, ay, ox, oy, cx, cy, getDoubleArea(ax, ay, bx, by, cx, cy))
 
 fun getBarycentricC(ax : Float, ay : Float, bx : Float, by : Float, ox : Float, oy : Float,
                     doubleArea : Float) = getDoubleArea(ax, ay, bx, by, ox, oy) / doubleArea

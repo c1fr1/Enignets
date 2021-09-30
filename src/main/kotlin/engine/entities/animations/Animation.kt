@@ -7,25 +7,37 @@ import org.joml.Vector3f
 import org.lwjgl.assimp.*
 import kotlin.math.sqrt
 
-var fuckBlender = true
-
 open class Animation(obj : AIAnimation) {
 
-	constructor(scene : AIScene, index : Int) : this(AIAnimation.create(scene.mAnimations()!![index]))
+	constructor(scene : AIScene, index : Int) : this(AIAnimation.create(scene.mAnimations()!![index])) {
+		val globalRotation = scene.mRootNode()!!.mTransformation().toJoml().getNormalizedRotation(Quaternionf())
+		for (rotation in nodeChannels[0].rotationKeys) {
+			rotation.mul(globalRotation)
+		}
+		for (translation in nodeChannels[0].positionKeys) {
+			translation.rotate(globalRotation)
+		}
+		for (i in nodeChannels[0].mats.indices) {
+			nodeChannels[0].mats[i] = Matrix4f()
+				.translate(nodeChannels[0].positionKeys[i.coerceAtMost(nodeChannels[0].positionKeys.size - 1)])
+				.rotate(nodeChannels[0].rotationKeys[i.coerceAtMost(nodeChannels[0].rotationKeys.size - 1)])
+				.scale(nodeChannels[0].scalingKeys[i.coerceAtMost(nodeChannels[0].scalingKeys.size - 1)])
+		}
+	}
 
 	open var name = obj.mName().dataString()
 	open var duration = obj.mDuration()
 	open var ticksPerSecond = obj.mTicksPerSecond()
 
-	open var nodeChannels : Array<NodeAnim> = Array(obj.mNumChannels()) {if (fuckBlender && it == 0) NodeAnim(AINodeAnim.create(obj.mChannels()!![it]), true) else NodeAnim(AINodeAnim.create(obj.mChannels()!![it]))}
-
-	open fun getMats(frame : Int) = Array(nodeChannels.size) {nodeChannels[it].mats[frame]}
+	open var nodeChannels : Array<NodeAnim> = Array(obj.mNumChannels()) {NodeAnim(AINodeAnim.create(obj.mChannels()!![it]))}
 
 	open var meshChannels : Array<MeshAnim> = Array(obj.mNumMeshChannels()) { MeshAnim(AIMeshAnim.create(obj.mMeshChannels()!![it])) }
 
+	open val numFrames = nodeChannels.maxOf { it.mats.size }
+
 	companion object {
 		operator fun invoke(path : String) = Companion(loadScene(path))
-		operator fun invoke(scene : AIScene) = Array(scene.mNumAnimations()) { Animation(AIAnimation.create(scene.mAnimations()!![it])) }
+		operator fun invoke(scene : AIScene) = Array(scene.mNumAnimations()) { Animation(scene, it) }
 	}
 }
 
@@ -50,7 +62,8 @@ open class NodeAnim(obj : AINodeAnim, antiRotate : Boolean = false) {
 
 	open val mats : Array<Matrix4f> =
 		Array(obj.mNumPositionKeys().coerceAtLeast(obj.mNumRotationKeys()).coerceAtLeast(obj.mNumScalingKeys())) {
-			Matrix4f().translate(positionKeys[it.coerceAtMost(obj.mNumPositionKeys() - 1)].negate())
+			Matrix4f()
+				.translate(positionKeys[it.coerceAtMost(obj.mNumPositionKeys() - 1)])
 				.rotate(rotationKeys[it.coerceAtMost(obj.mNumRotationKeys() - 1)])
 				.scale(scalingKeys[it.coerceAtMost(obj.mNumScalingKeys() - 1)])
 		}

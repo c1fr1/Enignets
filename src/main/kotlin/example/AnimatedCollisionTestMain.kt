@@ -1,15 +1,12 @@
 package example
 
-import engine.EnigView
-import engine.PIf
+import engine.*
 import engine.entities.Camera3D
 import engine.entities.animations.Animation
 import engine.entities.animations.Skeleton
-import engine.loadBoneData
-import engine.loadScene
 import engine.opengl.*
 import engine.opengl.bufferObjects.*
-import engine.opengl.jomlExtensions.xyz
+import engine.opengl.jomlExtensions.times
 import engine.opengl.shaders.ComputeProgram
 import engine.opengl.shaders.ShaderProgram
 import engine.opengl.shaders.ShaderType
@@ -17,7 +14,7 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.assimp.AIMesh
 import org.lwjgl.glfw.GLFW
-import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
+import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
 
 fun main() {
@@ -43,6 +40,7 @@ class MainView(window : EnigWindow) : EnigView() {
 	lateinit var outNormalBuffer : SSBO4f
 
 	lateinit var vao : VAO
+	lateinit var sphere : VAO
 
 	lateinit var skeleton : Skeleton
 	lateinit var anim : Animation
@@ -54,22 +52,25 @@ class MainView(window : EnigWindow) : EnigView() {
 	var frame = 0
 
 	override fun generateResources(window: EnigWindow) {
+
 		super.generateResources(window)
 
-		val scene = loadScene("dfgod.dae")
+		val scene = loadScene("humanoid.dae")
 		val mesh = AIMesh.create(scene.mMeshes()!![0])
 		anim = Animation(scene, 0)
-		skeleton = Skeleton(scene, arrayOf("body_Bone", "body_Bone_001", "body_Bone_002", "body_Bone_003"))
+		skeleton = Skeleton(scene, 0)
 
 		val boneData = loadBoneData(mesh)
+
+		sphere = VAO(loadScene("s peer.dae"), 0)
 
 		positionBuffer = SSBO3f(mesh.mVertices())
 		normalBuffer = SSBO3f(mesh.mNormals()!!)
 		boneIndexBuffer = SSBO4i(boneData.first)
 		boneWeightBuffer = SSBO4f(boneData.second)
 
-		outPosBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true)
-		outNormalBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * 4), true)
+		outPosBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * skeleton.nodes.size), true)
+		outNormalBuffer = SSBO4f(FloatArray(mesh.mNumVertices() * skeleton.nodes.size), true)
 
 		vao = VAO(arrayOf(outPosBuffer, outNormalBuffer), IBO(mesh.mFaces()))
 
@@ -99,15 +100,32 @@ class MainView(window : EnigWindow) : EnigView() {
 		colorShader.enable()
 
 		colorShader[ShaderType.VERTEX_SHADER, 0] = cam.getMatrix()
-		colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 1f, 1f)
 		colorShader[ShaderType.VERTEX_SHADER, 1] = cam.normalize(Vector3f())
+		colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 1f, 1f)
 
 		vao.fullRender()
+		sphere.prepareRender()
+
+		for (node in skeleton.nodes) {
+			colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 0f, 0f)
+			colorShader[ShaderType.VERTEX_SHADER, 0] = (cam.getMatrix() * node.totalTransform.invertAffine(Matrix4f())).scale(0.03f)
+			sphere.drawTriangles()
+		}
+
+		val mats = skeleton.getAnimMats(anim, frame / 3)
+
+		for (m in mats) {
+
+			colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(0f, 1f, 0f)
+			colorShader[ShaderType.VERTEX_SHADER, 0] = (cam.getMatrix() * m).scale(0.03f)
+			sphere.drawTriangles()
+		}
+		sphere.unbind()
 	}
 
 	fun computeAnimationPos() {
 
-		frame = (frame + 1) % 60
+		frame = (frame + 1) % (anim.numFrames * 3)
 
 		computeShader.enable()
 		positionBuffer.bindToPosition(0)
@@ -119,7 +137,8 @@ class MainView(window : EnigWindow) : EnigView() {
 		outNormalBuffer.bindToPosition(5)
 
 		computeShader[0] = Matrix4f()
-		computeShader[1] = skeleton.getMats(anim, frame)
+		val mats = skeleton.getMats(anim, frame / 3)
+		computeShader[1] = mats
 
 		computeShader.run(positionBuffer.vertexCount)
 	}

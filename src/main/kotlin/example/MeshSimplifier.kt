@@ -3,7 +3,6 @@ package example
 import engine.EnigView
 import engine.PIf
 import engine.entities.Camera3D
-import engine.entities.animations.fuckBlender
 import engine.opengl.*
 import engine.opengl.bufferObjects.FBO
 import engine.opengl.bufferObjects.VAO
@@ -38,7 +37,6 @@ class MeshSimplifier(window : EnigWindow) : EnigView() {
 	override fun generateResources(window: EnigWindow) {
 		super.generateResources(window)
 
-		fuckBlender = false
 		val mesh = Mesh("humanoid.dae", 0)
 
 		val map = IntArray(mesh.vertexCount) {-1}

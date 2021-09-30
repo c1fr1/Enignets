@@ -1,6 +1,6 @@
 package engine.opengl.bufferObjects
 
-import engine.entities.animations.fuckBlender
+import engine.loadBoneData
 import engine.loadBoneData
 import engine.loadScene
 import engine.opengl.GLResource
@@ -138,17 +138,17 @@ open class VAO : GLResource {
 	 * 4 | bone weights
 	 * @param mesh assimp mesh
 	 */
-	constructor(mesh : AIMesh, dynamic : Boolean = false) : super(glGenVertexArrays()) {
+	constructor(mesh : AIMesh, dynamic : Boolean = false, counterRotate : Boolean = false) : super(glGenVertexArrays()) {
 		glBindVertexArray(id)
 		val tempVBOs = arrayListOf<VBO<*>>()
-		tempVBOs.add(VBO(mesh.mVertices(), dynamic, fuckBlender))
+		tempVBOs.add(VBO(mesh.mVertices(), dynamic, counterRotate))
 		var textureIndex = 0
 		while (mesh.mTextureCoords(textureIndex) != null) {
 			tempVBOs.add(VBO(mesh.mTextureCoords(textureIndex)!!))
 			++textureIndex
 		}
 		if (mesh.mNormals() != null) {
-			tempVBOs.add(VBO(mesh.mNormals()!!, dynamic, fuckBlender))
+			tempVBOs.add(VBO(mesh.mNormals()!!, dynamic, counterRotate))
 		}
 
 		if (mesh.mBones() != null) {
@@ -168,7 +168,9 @@ open class VAO : GLResource {
 			tempIBO.add(f.mIndices()[2])
 		}
 		ibo = IBO(tempIBO.toIntArray())
+		ibo.bind()
 		verticesPerShape = 3
+		glBindVertexArray(0);
 	}
 
 	constructor(scene : AIScene, index : Int, dynamic : Boolean = false) : this(AIMesh.create(scene.mMeshes()!![index]), dynamic)
