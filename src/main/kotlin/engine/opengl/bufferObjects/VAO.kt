@@ -32,6 +32,7 @@ open class VAO : GLResource {
 		vbos[0].assignToVAO(0)
 		ibo = IBO(ind)
 		verticesPerShape = vps
+		glBindVertexArray(0)
 	}
 
 	constructor(vbos : Array<VBO<*>>, ind : IntArray, vps : Int = 3) : this(vbos, IBO(ind), vps)
@@ -43,6 +44,7 @@ open class VAO : GLResource {
 		ibo = ind
 		ibo.bind()
 		verticesPerShape = vps
+		glBindVertexArray(0)
 	}
 
 	/**
@@ -174,6 +176,8 @@ open class VAO : GLResource {
 	}
 
 	constructor(scene : AIScene, index : Int, dynamic : Boolean = false) : this(AIMesh.create(scene.mMeshes()!![index]), dynamic)
+
+	constructor(file : String, index : Int, dynamic : Boolean = false) : this(loadScene(file), index, dynamic)
 
 	/**
 	 * fully prepares and renders the object, only use this if rendering a single object that looks like this
