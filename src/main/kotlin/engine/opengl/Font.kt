@@ -55,8 +55,8 @@ open class Font : Texture {
 }
 
 @Throws(IOException::class)
-private fun ioResourceToByteBuffer(resource: String?): ByteBuffer? {
-	var buffer: ByteBuffer
+private fun ioResourceToByteBuffer(resource : String?) : ByteBuffer? {
+	var buffer : ByteBuffer
 	val path = Paths.get(resource)
 	Files.newByteChannel(path).use { fc ->
 		buffer = createByteBuffer(fc.size().toInt() + 1)

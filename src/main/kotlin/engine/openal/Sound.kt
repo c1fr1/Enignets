@@ -3,6 +3,7 @@ package engine.openal
 import engine.getResourceStream
 import engine.opengl.GLResource
 import org.lwjgl.openal.AL10.*
+import java.io.BufferedInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -17,7 +18,7 @@ open class Sound(file: String) : GLResource(alGenBuffers()) {
 
 	init {
 		try {
-			val url = getResourceStream(file)
+			val url = BufferedInputStream(getResourceStream(file))
 			val ais = AudioSystem.getAudioInputStream(url)
 			val format = ais.format
 			var channels = 0
