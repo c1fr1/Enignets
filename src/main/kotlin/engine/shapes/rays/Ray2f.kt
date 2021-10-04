@@ -8,7 +8,7 @@ import engine.shapes.bounds.Bound2f
 import org.joml.Math
 import org.joml.Vector2f
 import org.joml.Vector2fc
-import java.lang.Math.fma
+import org.joml.Math.fma
 
 open class Ray2f : Vector2f, Bound2f {
 	open var delta = Vector2f(0f, 0f)

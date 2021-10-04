@@ -13,6 +13,7 @@ import engine.shapes.bounds.Bound3f
 import engine.shapes.bounds.Box3d
 import engine.shapes.simplexes.Simplex2v3d
 import engine.solveCubic
+import org.joml.Math.fma
 import org.joml.Vector3f
 import org.lwjgl.assimp.AIMesh
 import org.lwjgl.assimp.AIScene

@@ -12,7 +12,7 @@ import org.joml.Vector2fc
 import org.joml.Vector3fc
 import java.lang.Float.max
 import java.lang.Float.min
-import java.lang.Math.fma
+import org.joml.Math.fma
 import kotlin.math.abs
 
 @Suppress("JoinDeclarationAndAssignment", "unused", "MemberVisibilityCanBePrivate")

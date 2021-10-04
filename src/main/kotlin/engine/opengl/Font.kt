@@ -1,10 +1,12 @@
 package engine.opengl
 
+import engine.getResourceStream
 import org.joml.Matrix4f
 import org.lwjgl.BufferUtils.createByteBuffer
 import org.lwjgl.opengl.GL11.GL_RED
 import org.lwjgl.stb.STBTTBakedChar
 import org.lwjgl.stb.STBTruetype
+import org.lwjgl.system.MemoryUtil
 import org.lwjgl.system.MemoryUtil.memSlice
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -24,11 +26,15 @@ open class Font : Texture {
 	}
 
 	companion object {
-		operator fun invoke(path : Path, fontSize : Float, width : Int, height : Int) : Font {
-			val fontData = ioResourceToByteBuffer(path.toString())//ByteBuffer.wrap(Files.readAllBytes(path))
+		operator fun invoke(path : String, fontSize : Float, width : Int, height : Int) : Font {
+			val allBytes = getResourceStream(path).readBytes()
+			val fontData = MemoryUtil.memCalloc(allBytes.size)
+			fontData.put(allBytes)
+			fontData.flip()
 			val imageBuffer = createByteBuffer(width * height)
 			val charData = STBTTBakedChar.malloc(96)
 			STBTruetype.stbtt_BakeFontBitmap(fontData, fontSize, imageBuffer, width, height, 32, charData)
+			MemoryUtil.memFree(fontData)
 			return Font(width, height, imageBuffer, charData, fontSize)
 		}
 	}
@@ -52,16 +58,4 @@ open class Font : Texture {
 		}
 		ret(worldMats, tcMats)
 	}
-}
-
-@Throws(IOException::class)
-private fun ioResourceToByteBuffer(resource : String?) : ByteBuffer? {
-	var buffer : ByteBuffer
-	val path = Paths.get(resource)
-	Files.newByteChannel(path).use { fc ->
-		buffer = createByteBuffer(fc.size().toInt() + 1)
-		while (fc.read(buffer) != -1);
-		buffer.flip()
-	}
-	return memSlice(buffer)
 }

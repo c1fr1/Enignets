@@ -280,7 +280,7 @@ fun Double.lerp(other : Float, t : Float) = this + t * (other - this)
 
 fun loadScene(path : String) : AIScene {
 
-	val allBytes = getResourceStream(path).readAllBytes()
+	val allBytes = getResourceStream(path).readBytes()
 	val buffer = MemoryUtil.memCalloc(allBytes.size)
 	buffer.put(allBytes)
 	buffer.flip()

@@ -31,7 +31,7 @@ class TextTestMain(window : EnigWindow) : EnigView() {
 	lateinit var shader : ShaderProgram
 
 	override fun generateResources(window: EnigWindow) {
-		font = Font(Paths.get("C:/Windows/Fonts/Times.ttf"), 64f, 512, 512)
+		font = Font("times.ttf", 64f, 512, 512)
 		vao = VAO(0f, 0f, 1f, 1f)
 		shader = ShaderProgram("textShader")
 	}

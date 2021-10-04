@@ -9,7 +9,7 @@ import org.joml.Math.sqrt
 import org.joml.Vector3f
 import org.joml.Vector3fc
 import kotlin.math.abs
-import java.lang.Math.fma
+import org.joml.Math.fma
 
 open class Ray3f : Vector3f, Bound3f {
 	open var delta : Vector3f = Vector3f()
