@@ -44,12 +44,11 @@ class MainView(window : EnigWindow) : EnigView() {
 	lateinit var outPosBuffer : SSBO4f
 	lateinit var outNormalBuffer : SSBO4f
 
-	lateinit var outSwordPosBuffer : SSBO4f
-	lateinit var outSwordNormBuffer : SSBO4f
+	lateinit var outSSBOs : Array<SSBO4f>
 
 	lateinit var vao : VAO
 	lateinit var sphere : VAO
-	lateinit var swordVAO : VAO
+	lateinit var swordVAOs : Array<VAO>
 
 	lateinit var skeleton : Skeleton
 	lateinit var anim : Animation
@@ -61,6 +60,9 @@ class MainView(window : EnigWindow) : EnigView() {
 	val input = window.inputHandler
 
 	var frame = 0
+
+	var beforeTransform = Matrix4f().scale(0.3f)
+	var afterTransform = Matrix4f().scale(0.3f).translate(0.5f, 0f, 0f)
 
 	override fun generateResources(window: EnigWindow) {
 
@@ -80,10 +82,13 @@ class MainView(window : EnigWindow) : EnigView() {
 		swordPosBuf = SSBO3f(swordMesh.vdata)
 		swordNormBuf = SSBO3f(swordAIMesh.mNormals()!!)
 
-		outSwordPosBuffer = SSBO4f(FloatArray(swordPosBuf.vertexCount * 4), true)
-		outSwordNormBuffer = SSBO4f(FloatArray(swordNormBuf.vertexCount * 4), true)
 
-		swordVAO = VAO(arrayOf(outSwordPosBuffer, outSwordNormBuffer), IBO(swordMesh.indices))
+		outSSBOs = Array(6) {SSBO4f(FloatArray(swordPosBuf.vertexCount * 4), true)}
+		//outSSBOs[0].delete()
+
+		val swordMeshIBO = IBO(swordMesh.indices)
+
+		swordVAOs = Array(3) {VAO(arrayOf(outSSBOs[it * 2], outSSBOs[it * 2 + 1]), swordMeshIBO)}
 
 		positionBuffer = SSBO3f(mesh.mVertices())
 		normalBuffer = SSBO3f(mesh.mNormals()!!)
@@ -108,7 +113,16 @@ class MainView(window : EnigWindow) : EnigView() {
 		FBO.prepareDefaultRender()
 
 		computeAnimationPos()
-		computeSwordPos()
+		computeSwordPos(outSSBOs[0], outSSBOs[1], beforeTransform)
+		computeSwordPos(outSSBOs[2], outSSBOs[3], afterTransform)
+		computeSwordPos(outSSBOs[4], outSSBOs[5], beforeTransform.lerp(afterTransform, frame / (3 * anim.numFrames).toFloat(), Matrix4f()))
+
+		if (input.mouseButtons[GLFW_MOUSE_BUTTON_LEFT].isDown) {
+			beforeTransform = Matrix4f().translate(cam).rotateY(-cam.angles.y).rotateX(-cam.angles.x - PIf/2).scale(0.3f)
+		}
+		if (input.mouseButtons[GLFW_MOUSE_BUTTON_RIGHT].isDown) {
+			afterTransform = Matrix4f().translate(cam).rotateY(-cam.angles.y).rotateX(-cam.angles.x - PIf/2).scale(0.3f)
+		}
 
 		SSBO.syncSSBOs()
 
@@ -126,15 +140,11 @@ class MainView(window : EnigWindow) : EnigView() {
 		colorShader[ShaderType.VERTEX_SHADER, 1] = cam.normalize(Vector3f())
 		colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 1f, 1f)
 
-		swordVAO.fullRender()
+		for (svao in swordVAOs) {
+			svao.fullRender()
+		}
 		vao.fullRender()
 		sphere.prepareRender()
-
-		for (node in skeleton.nodes) {
-			colorShader[ShaderType.FRAGMENT_SHADER, 0] = Vector3f(1f, 0f, 0f)
-			colorShader[ShaderType.VERTEX_SHADER, 0] = (cam.getMatrix() * node.totalTransform.invertAffine(Matrix4f())).scale(0.03f)
-			sphere.drawTriangles()
-		}
 
 		val mats = skeleton.getAnimMats(anim, frame / 3)
 
@@ -167,14 +177,14 @@ class MainView(window : EnigWindow) : EnigView() {
 		computeShader.run(positionBuffer.vertexCount)
 	}
 
-	fun computeSwordPos() {
+	fun computeSwordPos(oPosBuffer : SSBO4f, oNormBuffer : SSBO4f, mat : Matrix4f) {
 		vertCompShader.enable()
-		vertCompShader[0] = Matrix4f().scale(0.3f)
+		vertCompShader[0] = mat
 		swordPosBuf.bindToPosition(0)
 		swordNormBuf.bindToPosition(1)
 
-		outSwordPosBuffer.bindToPosition(2)
-		outSwordNormBuffer.bindToPosition(3)
+		oPosBuffer.bindToPosition(2)
+		oNormBuffer.bindToPosition(3)
 
 		computeShader.run(positionBuffer.vertexCount)
 	}
