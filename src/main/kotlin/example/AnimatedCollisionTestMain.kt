@@ -14,9 +14,9 @@ import engine.shapes.Mesh
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.assimp.AIMesh
-import org.lwjgl.glfw.GLFW
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
+import kotlin.math.min
 
 fun main() {
 	EnigContext.init()
@@ -63,6 +63,8 @@ class MainView(window : EnigWindow) : EnigView() {
 
 	var beforeTransform = Matrix4f().scale(0.3f)
 	var afterTransform = Matrix4f().scale(0.3f).translate(0.5f, 0f, 0f)
+
+	var collisionT = 1f
 
 	override fun generateResources(window: EnigWindow) {
 
@@ -112,10 +114,14 @@ class MainView(window : EnigWindow) : EnigView() {
 	override fun loop(frameBirth: Long, dtime: Float) : Boolean {
 		FBO.prepareDefaultRender()
 
+		val beforeToolMesh = Mesh(swordVAOs[0].ibo.data, outSSBOs[0].data)
+		val beforeHumanoidMesh = Mesh(vao.ibo.data, outPosBuffer.data)
+		collisionT = 1f
+
 		computeAnimationPos()
 		computeSwordPos(outSSBOs[0], outSSBOs[1], beforeTransform)
 		computeSwordPos(outSSBOs[2], outSSBOs[3], afterTransform)
-		computeSwordPos(outSSBOs[4], outSSBOs[5], beforeTransform.lerp(afterTransform, frame / (3 * anim.numFrames).toFloat(), Matrix4f()))
+		computeSwordPos(outSSBOs[4], outSSBOs[5], beforeTransform.lerp(afterTransform, min(frame / (3 * anim.numFrames).toFloat(), collisionT), Matrix4f()))
 
 		if (input.mouseButtons[GLFW_MOUSE_BUTTON_LEFT].isDown) {
 			beforeTransform = Matrix4f().translate(cam).rotateY(-cam.angles.y).rotateX(-cam.angles.x - PIf/2).scale(0.3f)
@@ -171,7 +177,7 @@ class MainView(window : EnigWindow) : EnigView() {
 		outNormalBuffer.bindToPosition(5)
 
 		computeShader[0] = Matrix4f()
-		val mats = skeleton.getMats(anim, frame / 3)
+		val mats = skeleton.getMats(anim,  min(frame / 3, (collisionT * anim.numFrames).toInt()))
 		computeShader[1] = mats
 
 		computeShader.run(positionBuffer.vertexCount)
@@ -191,14 +197,14 @@ class MainView(window : EnigWindow) : EnigView() {
 
 	private fun handleMovement(dtime : Float) {
 
-		val ms = if (input.keys[GLFW.GLFW_KEY_LEFT_CONTROL].isDown) 0.5f else 2f
+		val ms = if (input.keys[GLFW_KEY_LEFT_CONTROL].isDown) 0.5f else 2f
 
-		if (input.keys[GLFW.GLFW_KEY_SPACE].isDown) cam.y += dtime * ms
-		if (input.keys[GLFW.GLFW_KEY_LEFT_SHIFT].isDown) cam.y -= dtime * ms
-		if (input.keys[GLFW.GLFW_KEY_D].isDown) cam.moveRelativeRight(dtime * ms)
-		if (input.keys[GLFW.GLFW_KEY_A].isDown) cam.moveRelativeLeft(dtime * ms)
-		if (input.keys[GLFW.GLFW_KEY_W].isDown) cam.moveRelativeForward(dtime * ms)
-		if (input.keys[GLFW.GLFW_KEY_S].isDown) cam.moveRelativeBackward(dtime * ms)
+		if (input.keys[GLFW_KEY_SPACE].isDown) cam.y += dtime * ms
+		if (input.keys[GLFW_KEY_LEFT_SHIFT].isDown) cam.y -= dtime * ms
+		if (input.keys[GLFW_KEY_D].isDown) cam.moveRelativeRight(dtime * ms)
+		if (input.keys[GLFW_KEY_A].isDown) cam.moveRelativeLeft(dtime * ms)
+		if (input.keys[GLFW_KEY_W].isDown) cam.moveRelativeForward(dtime * ms)
+		if (input.keys[GLFW_KEY_S].isDown) cam.moveRelativeBackward(dtime * ms)
 		cam.updateAngles(input, dtime / 10f)
 		cam.angles.x = cam.angles.x.coerceIn(-PIf / 2, PIf / 2)
 	}

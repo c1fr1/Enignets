@@ -1,7 +1,10 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-group = "c1fr1"
-version = "1.0.0"
+val projectGroup = "c1fr1"
+val projectVersion = "1.0.1a"
+
+group = projectGroup
+version = projectVersion
 
 val lwjglVersion = "3.2.3"
 val jomlVersion = "1.10.1"
@@ -27,9 +30,11 @@ dependencies {
 }
 
 plugins {
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm") version "1.6.0"
     application
     id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("java-library")
+    id("maven-publish")
 }
 
 repositories {
@@ -44,5 +49,14 @@ application {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-    kotlinOptions.useIR = true
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = projectGroup
+            artifactId = "enignets"
+            version = projectVersion
+        }
+    }
 }
