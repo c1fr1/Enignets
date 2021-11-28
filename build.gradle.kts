@@ -32,19 +32,17 @@ dependencies {
 plugins {
     kotlin("jvm") version "1.6.0"
     application
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
     java
     id("maven-publish")
 }
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 application {
     mainClass.set("example.ExampleMainViewKt")
-    mainClassName = "example.ExampleMainViewKt"
 }
 
 tasks.withType<KotlinCompile> {
