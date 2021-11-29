@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val projectGroup = "c1fr1"
-val projectVersion = "1.0.1a"
+val projectVersion = "1.0.1a_2"
 
 group = projectGroup
 version = projectVersion
@@ -20,29 +20,24 @@ dependencies {
     implementation("org.lwjgl", "lwjgl-opengl")
     implementation("org.lwjgl", "lwjgl-stb")
     implementation("org.lwjgl", "lwjgl-opencl")
+    implementation("org.joml", "joml", jomlVersion)
+
     runtimeOnly("org.lwjgl", "lwjgl", classifier = lwjglNatives)
     runtimeOnly("org.lwjgl", "lwjgl-assimp", classifier = lwjglNatives)
     runtimeOnly("org.lwjgl", "lwjgl-glfw", classifier = lwjglNatives)
     runtimeOnly("org.lwjgl", "lwjgl-openal", classifier = lwjglNatives)
     runtimeOnly("org.lwjgl", "lwjgl-opengl", classifier = lwjglNatives)
     runtimeOnly("org.lwjgl", "lwjgl-stb", classifier = lwjglNatives)
-    implementation("org.joml", "joml", jomlVersion)
 }
 
 plugins {
     kotlin("jvm") version "1.6.0"
-    application
-    id("com.github.johnrengelman.shadow") version "7.1.0"
     java
     id("maven-publish")
 }
 
 repositories {
     mavenCentral()
-}
-
-application {
-    mainClass.set("example.ExampleMainViewKt")
 }
 
 tasks.withType<KotlinCompile> {
