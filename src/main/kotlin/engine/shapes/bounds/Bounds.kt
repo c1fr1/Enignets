@@ -66,26 +66,20 @@ interface Bound3f {
 	 * @param other the other box
 	 * @return true if the other box is in this box
 	 */
-	operator fun contains(other : Bound3f) : Boolean {
-		return minx < other.minx && maxx > other.maxx && miny < other.miny && maxy > other.maxy && minz < other.minz && maxz > other.maxz
-	}
+	operator fun contains(other : Bound3f) : Boolean =
+				minx < other.minx && maxx > other.maxx &&
+				miny < other.miny && maxy > other.maxy &&
+				minz < other.minz && maxz > other.maxz
 
 	/**
 	 * returns true if any of the vertices of the other box are touching the box;
 	 * @param other the other box
 	 * @return true if the box is touching the other box
 	 */
-	fun touches(other : Bound3f) : Boolean {
-		return contains(other.minx, other.miny, other.minz) || contains(other.minx, other.miny, other.maxz) || contains(
-			other.minx,
-			other.maxy,
-			other.maxz
-		) || contains(other.minx, other.maxy, other.minz) || contains(other.maxx, other.miny, other.minz) || contains(
-			other.maxx,
-			other.miny,
-			other.maxz
-		) || contains(other.maxx, other.maxy, other.maxz) || contains(other.maxx, other.maxy, other.minz)
-	}
+	fun touches(other : Bound3f) : Boolean =
+				other.minx <= maxx && other.maxx >= minx &&
+				other.miny <= maxy && other.maxy >= miny &&
+				other.minz <= maxz && other.maxz >= minz
 
 	/**
 	 * returns true if the box contains any of the points
