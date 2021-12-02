@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val projectGroup = "c1fr1"
-val projectVersion = "1.0.1a_2"
+val projectVersion = "1.0.1a_3"
 
 group = projectGroup
 version = projectVersion
@@ -52,6 +52,18 @@ publishing {
             version = projectVersion
 
             from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "github"
+            url = uri("https://maven.pkg.github.com/c1fr1/Enignets")
+            credentials {
+                username = project.property("githubUsername").toString()
+                password = project.property("githubPAT").toString()
+
+            }
         }
     }
 }

@@ -247,7 +247,7 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			}
 		}
 
-		return null
+		return t
 	}
 
 	open fun writeToOBJ(path : String) {
