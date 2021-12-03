@@ -142,11 +142,14 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			oMaxZ = oMaxZ.coerceAtLeast(other.getZ(i).coerceAtLeast(oEndBuffer[getZi(i)]))
 		}
 
-		if (!Box3d(minX, minY, minZ, maxX, maxY, maxZ).touches(Box3d(oMinX, oMinY, oMinZ, oMaxX, oMaxY, oMaxZ))) {
+		val box = Box3d(minX, minY, minZ, maxX, maxY, maxZ)
+		val oBox = Box3d(oMinX, oMinY, oMinZ, oMaxX, oMaxY, oMaxZ)
+
+		if (!box.touches(oBox)) {
 			return null
 		}
 
-		val bounds = Box3d(minX.coerceAtLeast(oMinX), maxX.coerceAtMost(oMaxX), minY.coerceAtLeast(oMinY), maxY.coerceAtMost(oMaxY), minZ.coerceAtLeast(oMinZ), maxZ.coerceAtMost(oMaxZ))
+		val bounds = box.intersect(oBox)
 
 		val rays : ArrayList<Ray3f> = ArrayList()
 		val simplices : ArrayList<Pair<Simplex2v3d, Simplex2v3d>> = ArrayList()

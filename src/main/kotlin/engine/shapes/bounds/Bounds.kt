@@ -127,9 +127,9 @@ interface Bound3f {
 	 */
 	fun makeVAO(dynamic : Boolean = false) = VAO(this, dynamic)
 
-	fun intersect(other : Bound3f) = Box3d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
-		miny.coerceAtMost(other.miny), maxy.coerceAtLeast(other.maxy),
-		minz.coerceAtMost(other.minz), maxz.coerceAtLeast(other.maxz))
+	fun intersect(other : Bound3f) = Box3d(
+		minx.coerceAtLeast(other.minx), miny.coerceAtLeast(other.miny), minz.coerceAtLeast(other.minz),
+		maxx.coerceAtMost(other.maxx), maxy.coerceAtMost(other.maxy), maxz.coerceAtMost(other.maxz))
 }
 
 interface Bound2f {
