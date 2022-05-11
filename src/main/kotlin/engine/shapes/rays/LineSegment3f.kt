@@ -34,8 +34,10 @@ open class LineSegment3f : Ray3f {
 	constructor(startX : Float, startY : Float, startZ : Float, finalX : Float, finalY : Float, finalZ : Float) {
 		x = startX
 		y = startY
+		z = startZ
 		fx = finalX
 		fy = finalY
+		fz = finalZ
 	}
 
 	constructor(start : Vector3f, final : Vector3f) : this(start.x, start.y, start.z, final.x, final.y, final.z)

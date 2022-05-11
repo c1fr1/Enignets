@@ -11,6 +11,7 @@ import engine.shapes.rays.Ray2f
 import engine.shapes.rays.Ray3f
 import engine.shapes.bounds.Bound3f
 import engine.shapes.bounds.Box3d
+import engine.shapes.bounds.calcBounds
 import engine.shapes.simplexes.Simplex2v3d
 import engine.solveCubic
 import org.joml.Math.fma
@@ -57,8 +58,6 @@ interface EnigMesh : Bound3f {
 	fun getYZDoubleArea(i : Int) =
 		fma(getAZ(i), getBY(i) - getCY(i), getCZ(i) * (getAY(i) - getBY(i))) - getBZ(i) * (getAY(i) + getCY(i))
 }
-
-typealias Edge3f = Pair<Ray3f, Ray3f>
 
 open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 
@@ -109,7 +108,8 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 	open fun getCi(i : Int) = indices[i * 3 + 2]
 
 	open fun intersectionT(other : Mesh, endBuffer : FloatArray, oEndBuffer : FloatArray) : Float? {
-
+		COLLISION_COMPARISONS_PT = 0
+		COLLISION_COMPARISONS_EE = 0
 		var minX = Float.MAX_VALUE
 		var maxX = Float.MIN_VALUE
 		var minY = Float.MAX_VALUE
@@ -152,17 +152,14 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 		val bounds = box.intersect(oBox)
 
 		val rays : ArrayList<Ray3f> = ArrayList()
-		val simplices : ArrayList<Pair<Simplex2v3d, Simplex2v3d>> = ArrayList()
+		val simplices : ArrayList<SimpPair> = ArrayList()
 		val oRays : ArrayList<Ray3f> = ArrayList()
-		val oSimplices : ArrayList<Pair<Simplex2v3d, Simplex2v3d>> = ArrayList()
+		val oSimplices : ArrayList<SimpPair> = ArrayList()
 		val edges : ArrayList<Edge3f> = ArrayList()
 		val oEdges : ArrayList<Edge3f> = ArrayList()
 
 		val addedEdges = Array(vertexCount) {Array(it) {false}}
 		val oAddedEdges = Array(vertexCount) {Array(it) {false}}
-
-		fun Edge3f.inBounds() = bounds().touches(bounds)
-		fun Pair<Simplex2v3d, Simplex2v3d>.inBounds() = first.intersect(second).touches(bounds)
 
 		fun endPoint(i : Int) = Vector3f(endBuffer[getXi(i)], endBuffer[getYi(i)], endBuffer[getZi(i)])
 		fun oEndPoint(i : Int) = Vector3f(oEndBuffer[other.getXi(i)], oEndBuffer[other.getYi(i)], oEndBuffer[other.getZi(i)])
@@ -171,8 +168,8 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			val max = a.coerceAtLeast(b)
 			val min = a.coerceAtMost(b)
 			if (!addedEdges[max][min]) {
-				val edge = Pair(Ray3f.between(getVertex(a), getVertex(b)), Ray3f.between(endPoint(a), endPoint(b)))
-				if (edge.inBounds()) {
+				val edge = Edge3f(Ray3f.between(getVertex(a), getVertex(b)), Ray3f.between(endPoint(a), endPoint(b)))
+				if (edge.touches(bounds)) {
 					edges.add(edge)
 					addedEdges[max][min] = true
 				}
@@ -182,8 +179,8 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			val max = a.coerceAtLeast(b)
 			val min = a.coerceAtMost(b)
 			if (!oAddedEdges[max][min]) {
-				val edge = Pair(Ray3f.between(other.getVertex(a), other.getVertex(b)), Ray3f.between(oEndPoint(a), oEndPoint(b)))
-				if (edge.inBounds()) {
+				val edge = Edge3f(Ray3f.between(other.getVertex(a), other.getVertex(b)), Ray3f.between(oEndPoint(a), oEndPoint(b)))
+				if (edge.touches(bounds)) {
 					oEdges.add(edge)
 					oAddedEdges[max][min] = true
 				}
@@ -197,7 +194,7 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			val ra = Ray3f.between(getVertex(ai), endPoint(ai))
 			val rb = Ray3f.between(getVertex(bi), endPoint(bi))
 			val rc = Ray3f.between(getVertex(ci), endPoint(ci))
-			val simplexPair = Pair(getSimplex(triangle), Simplex2v3d(endPoint(ai), endPoint(bi), endPoint(ci)))
+			val simplexPair = SimpPair(getSimplex(triangle), Simplex2v3d(endPoint(ai), endPoint(bi), endPoint(ci)))
 			addEdge(ai, bi)
 			addEdge(bi, ci)
 			addEdge(ci, ai)
@@ -205,7 +202,7 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			if (bounds.touches(rb)) rays.add(rb)
 			if (bounds.touches(rc)) rays.add(rc)
 
-			if (simplexPair.inBounds()) simplices.add(simplexPair)
+			if (simplexPair.touches(bounds)) simplices.add(simplexPair)
 		}
 
 		for (triangle in 0 until other.triangleCount) {
@@ -215,7 +212,7 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			val ra = Ray3f.between(other.getVertex(ai), oEndPoint(ai))
 			val rb = Ray3f.between(other.getVertex(bi), oEndPoint(bi))
 			val rc = Ray3f.between(other.getVertex(ci), oEndPoint(ci))
-			val simplexPair = Pair(other.getSimplex(triangle), Simplex2v3d(oEndPoint(ai), oEndPoint(bi), oEndPoint(ci)))
+			val simplexPair = SimpPair(other.getSimplex(triangle), Simplex2v3d(oEndPoint(ai), oEndPoint(bi), oEndPoint(ci)))
 			addOEdge(ai, bi)
 			addOEdge(bi, ci)
 			addOEdge(ci, ai)
@@ -223,7 +220,7 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 			if (bounds.touches(rb)) oRays.add(rb)
 			if (bounds.touches(rc)) oRays.add(rc)
 
-			if (simplexPair.inBounds()) oSimplices.add(simplexPair)
+			if (simplexPair.touches(bounds)) oSimplices.add(simplexPair)
 		}
 		//val rays
 		//val simplices
@@ -232,23 +229,88 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 		//val edges
 		//val oEdges
 
-		var t : Float? = null
-		for (ray in rays) {
-			for (simpPair in oSimplices) {
-				t = mino(t, triangleIntersectionT(simpPair.first, ray, simpPair.second))
+		fun collisionTPT(rays : List<Ray3f>, simps : List<SimpPair>) : Float? {
+			COLLISION_COMPARISONS_PT += rays.size * simps.size
+			var t : Float? = null
+			for (ray in rays) {
+				for (simpPair in simps) {
+					val tempT = triangleIntersectionT(simpPair.a, ray, simpPair.b)
+					if (tempT != null && !ray.touches(simpPair)) println("failure of a meat sack")
+					t = mino(t, tempT)
+					if (t != null) if (t == 0f) return 0f
+				}
 			}
+			return t
 		}
-		for (ray in oRays) {
-			for (simpPair in simplices) {
-				t = mino(t, triangleIntersectionT(simpPair.first, ray, simpPair.second))
+
+		fun collisionTEE(a : List<Edge3f>, b : List<Edge3f>) : Float? {
+			COLLISION_COMPARISONS_EE += a.size * b.size
+			var t : Float? = null
+			for (ae in a) {
+				for (be in b) {
+					val tempT = edgesIntersectionT(ae, be)
+					if (tempT != null && !ae.touches(be)) {
+						println("${ae.a.x} ${ae.a.y} ${ae.a.z} ${ae.a.dx} ${ae.a.dy} ${ae.a.dz}")
+						println("${ae.b.x} ${ae.b.y} ${ae.b.z} ${ae.b.dx} ${ae.b.dy} ${ae.b.dz}")
+						println("${be.a.x} ${be.a.y} ${be.a.z} ${be.a.dx} ${be.a.dy} ${be.a.dz}")
+						println("${be.b.x} ${be.b.y} ${be.b.z} ${be.b.dx} ${be.b.dy} ${be.b.dz}\n")
+					}
+					t = mino(t, tempT)
+					if (t != null) if (t!! < 0.001) return 0f
+				}
+			}
+			return t
+		}
+
+		fun<T : Bound3f> cubeSplit(ts : List<T>) : ArrayList<List<T>> {
+			val segments = arrayListOf(
+				ts.filter { it.maxx < bounds.centerX },
+				ts.filter { it.minx > bounds.centerX }
+			).map { s ->
+				arrayListOf(
+					s.filter { it.maxy < bounds.centerY },
+					s.filter { it.miny > bounds.centerY }
+				).map { fs ->
+					arrayListOf(
+						fs.filter { it.maxz < bounds.centerZ },
+						fs.filter { it.minz > bounds.centerZ }
+					)
+				}
+			}
+			val ret = ArrayList<List<T>>()
+			segments.forEach { ylists -> ylists.forEach { ret.addAll(it) } }
+			return ret
+		}
+
+		fun<A : Bound3f, B : Bound3f> cubeTreeCollision(a : List<A>, b : List<B>, bounds : Bound3f,
+		                                                collisionFun : (List<A>, List<B>) -> Float?,
+		                                                min : Int = 16) : Float? {
+			if (a.size * b.size <= min) return collisionFun(a, b)
+
+			val aSplits = cubeSplit(a)
+			val bSplits = cubeSplit(b)
+
+			if (aSplits.indices.any {i -> a.size == aSplits[i].size && b.size == bSplits[i].size})
+				return collisionFun(a, b)
+			return aSplits.indices.fold(null as Float?) {t, i ->
+				val minx = if (i and 4 == 0) bounds.minx else bounds.centerX
+				val miny = if (i and 2 == 0) bounds.miny else bounds.centerY
+				val minz = if (i and 1 == 0) bounds.minz else bounds.centerZ
+				val nw = bounds.width / 2
+				val nh = bounds.height / 2
+				val nd = bounds.depth / 2
+				val smallerBounds = Box3d(minx, miny, minz, minx + nw, miny + nh, minz + nd)
+				mino(t, cubeTreeCollision(aSplits[i], bSplits[i], smallerBounds, collisionFun))
 			}
 		}
 
-		for (edge in edges) {
-			for (oEdge in oEdges) {
-				t = mino(t, edgesIntersectionT(edge, oEdge))
-			}
-		}
+		/*var t : Float? = mino(cubeTreeCollision(rays, oSimplices, bounds, {a, b -> collisionTPT(a, b)}),
+			cubeTreeCollision(oRays, simplices, bounds, {a, b -> collisionTPT(a, b)}))
+
+		t = mino(t, cubeTreeCollision(edges, oEdges, bounds, {a, b -> collisionTEE(a, b)}))*/
+		var t : Float? = mino(collisionTPT(rays, oSimplices), collisionTPT(oRays, simplices))
+
+		t = mino(t, collisionTEE(edges, oEdges))
 
 		return t
 	}
@@ -265,7 +327,38 @@ open class Mesh(val indices : IntArray, val vdata : FloatArray) : EnigMesh {
 	}
 }
 
-private fun Edge3f.bounds() = first.intersect(second)
+var COLLISION_COMPARISONS_PT = 0
+var COLLISION_COMPARISONS_EE = 0
+
+private class SimpPair(val a : Simplex2v3d, val b : Simplex2v3d) : Bound3f {
+	override val minx: Float
+		get() = a.minx.coerceAtMost(b.minx)
+	override val maxx: Float
+		get() = a.maxx.coerceAtLeast(b.maxx)
+	override val miny: Float
+		get() = a.miny.coerceAtMost(b.miny)
+	override val maxy: Float
+		get() = a.maxy.coerceAtLeast(b.maxy)
+	override val minz: Float
+		get() = a.minz.coerceAtMost(b.minz)
+	override val maxz: Float
+		get() = a.maxz.coerceAtLeast(b.maxz)
+}
+
+class Edge3f(val a : Ray3f, val b : Ray3f) : Bound3f {
+	override val minx: Float
+		get() = a.minx.coerceAtMost(b.minx)
+	override val maxx: Float
+		get() = a.maxx.coerceAtLeast(b.maxx)
+	override val miny: Float
+		get() = a.miny.coerceAtMost(b.miny)
+	override val maxy: Float
+		get() = a.maxy.coerceAtLeast(b.maxy)
+	override val minz: Float
+		get() = a.minz.coerceAtMost(b.minz)
+	override val maxz: Float
+		get() = a.maxz.coerceAtLeast(b.maxz)
+}
 
 fun edgesIntersectionT(ea : Vector3f, ead : Vector3f, eb : Vector3f, ebd : Vector3f, oa : Vector3f, oad : Vector3f, ob : Vector3f, obd : Vector3f) : Float? {
 	val edA = ebd - ead
@@ -305,7 +398,8 @@ fun edgesIntersectionT(ea : Vector3f, ead : Vector3f, eb : Vector3f, ebd : Vecto
 		val ed = ead + t * (ead - ebd)
 		val os = oa + t * (ob - oa)
 		val od = oad + t * (oad - obd)
-		return t.takeIf { Ray2f.doesIntersectT(es.x, es.y, ed.x, ed.y, os.x, os.y, od.x, od.y) != null}
+		val a = Ray3f(es, ed).closestDistance(Ray3f(os, od))//ABSOLUTELY NOT IDEAL
+		return t.takeIf { kotlin.math.abs(a) > 0.01f && Ray2f.doesIntersectT(es.x, es.y, ed.x, ed.y, os.x, os.y, od.x, od.y) != null}
 	}
 
 	return solveCubic(zdiffA, zdiffB, zdiffC, zdiffD) {a, b, c ->
@@ -313,15 +407,15 @@ fun edgesIntersectionT(ea : Vector3f, ead : Vector3f, eb : Vector3f, ebd : Vecto
 	}
 }
 
-fun edgesIntersectionT(e : Pair<Ray3f, Ray3f>, o : Pair<Ray3f, Ray3f>) : Float? {
-	val ea : Vector3f = e.first
-	val ead = e.first.delta
-	val eb : Vector3f = e.second
-	val ebd = e.second.delta
-	val oa : Vector3f = o.first
-	val oad = o.first.delta
-	val ob : Vector3f = o.second
-	val obd = o.second.delta
+fun edgesIntersectionT(e : Edge3f, o : Edge3f) : Float? {
+	val ea : Vector3f = e.a
+	val ead = e.a.delta
+	val eb : Vector3f = e.b
+	val ebd = e.b.delta
+	val oa : Vector3f = o.a
+	val oad = o.a.delta
+	val ob : Vector3f = o.b
+	val obd = o.b.delta
 	return edgesIntersectionT(ea, ead, eb, ebd, oa, oad, ob, obd)
 }
 
@@ -338,45 +432,6 @@ fun triangleIntersectionT(s : Simplex2v3d, l : Ray3f, e : Simplex2v3d) : Float? 
 	val cdx = e.c.x - s.c.x
 	val cdy = e.c.y - s.c.y
 	val cdz = e.c.z - s.c.z
-	/*
-        float rx = y * v.z() - z * v.y()
-        float ry = z * v.x() - x * v.z()
-        float rz = x * v.y() - y * v.x()
-	 */
-	//this.x * v.x() + this.y * v.y() + this.z * v.z()
-	//rx = (s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)
-	//rx = ((s.a.y + t * ady - s.c.y - t * cdy) * (s.b.z + t * bdz - s.c.z - t * cdz) - (s.a.z + t * adz - s.c.z - t * cdz) * (s.b.y + t * bdy - s.c.y - t * cdy))
-	//ry = ((s.a.z + t * adz - s.c.z - t * cdz) * (s.b.x + t * bdx - s.c.x - t * cdx) - (s.a.x + t * adx - s.c.x - t * cdx) * (s.b.z + t * bdz - s.c.z - t * cdz))
-	//rz = ((s.a.x + t * adx - s.c.x - t * cdx) * (s.b.y + t * bdy - s.c.y - t * cdy) - (s.a.y + t * ady - s.c.y - t * cdy) * (s.b.x + t * bdx - s.c.x - t * cdx))
-	//0 =
-	//(p.x - s.a.x - t * adx) * rx + (p.y - s.a.y - t * ady) * ry + (p.z - s.a.z - t * adz) * rz
-
-	/*
-	(p.x - s.a.x - t * adx) * ((s.a.y + t * ady - s.c.y - t * cdy) * (s.b.z + t * bdz - s.c.z - t * cdz) - (s.a.z + t * adz - s.c.z - t * cdz) * (s.b.y + t * bdy - s.c.y - t * cdy)) +
-			(p.y - s.a.y - t * ady) * ((s.a.z + t * adz - s.c.z - t * cdz) * (s.b.x + t * bdx - s.c.x - t * cdx) - (s.a.x + t * adx - s.c.x - t * cdx) * (s.b.z + t * bdz - s.c.z - t * cdz)) +
-			(p.z - s.a.z - t * adz) * ((s.a.x + t * adx - s.c.x - t * cdx) * (s.b.y + t * bdy - s.c.y - t * cdy) - (s.a.y + t * ady - s.c.y - t * cdy) * (s.b.x + t * bdx - s.c.x - t * cdx))
-*/
-/*
-	(p.x - s.a.x - t * adx) * ((s.a.y - s.c.y + t * (ady - cdy)) * (s.b.z - s.c.z + t * (bdz - cdz)) - (s.a.z - s.c.z + t * (adz - cdz)) * (s.b.y - s.c.y + t * (bdy - cdy)))
-	(p.x - s.a.x - t * adx) * (((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz)) - ((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy)))
-	((p.x - s.a.x) - t * adx) * (((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz)) - ((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy)))
-
-	((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz))
-	t * t * (ady - cdy) * (bdz - cdz) + t * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y)) + (s.a.y - s.c.y) * (s.b.z - s.c.z)
-
-	((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy))
-	t * t * (adz - cdz) * (bdy - cdy) + t * ((adz - cdz) * (s.b.y - s.c.y) + (bdy - cdy) * (s.a.z - s.c.z)) + (s.a.z - s.c.z) * (s.b.y - s.c.y)
-*/
-	/*
-	t * t * ((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) +
-			t * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z)) +
-			(s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)
-*/
-	//- t * t * t * ((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) * adx +
-	//		t * t * (((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) * (p.x - s.a.x) - adx * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z))) +
-	//		t * (((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z)) * (p.x - s.a.x) - adx * ((s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)))
-	//		((s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)) * (p.x - s.a.x)
-
 
 	val quadax = (ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)
 	val quaday = (adz - cdz) * (bdx - cdx) - (adx - cdx) * (bdz - cdz)
@@ -407,3 +462,41 @@ fun triangleIntersectionT(s : Simplex2v3d, l : Ray3f, e : Simplex2v3d) : Float? 
 		mino(ansao, mino(ansbo, ansco))
 	}
 }
+/*
+	float rx = y * v.z() - z * v.y()
+	float ry = z * v.x() - x * v.z()
+	float rz = x * v.y() - y * v.x()
+
+this.x * v.x() + this.y * v.y() + this.z * v.z()
+rx = (s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)
+rx = ((s.a.y + t * ady - s.c.y - t * cdy) * (s.b.z + t * bdz - s.c.z - t * cdz) - (s.a.z + t * adz - s.c.z - t * cdz) * (s.b.y + t * bdy - s.c.y - t * cdy))
+ry = ((s.a.z + t * adz - s.c.z - t * cdz) * (s.b.x + t * bdx - s.c.x - t * cdx) - (s.a.x + t * adx - s.c.x - t * cdx) * (s.b.z + t * bdz - s.c.z - t * cdz))
+rz = ((s.a.x + t * adx - s.c.x - t * cdx) * (s.b.y + t * bdy - s.c.y - t * cdy) - (s.a.y + t * ady - s.c.y - t * cdy) * (s.b.x + t * bdx - s.c.x - t * cdx))
+0 =
+(p.x - s.a.x - t * adx) * rx + (p.y - s.a.y - t * ady) * ry + (p.z - s.a.z - t * adz) * rz
+
+(p.x - s.a.x - t * adx) * ((s.a.y + t * ady - s.c.y - t * cdy) * (s.b.z + t * bdz - s.c.z - t * cdz) - (s.a.z + t * adz - s.c.z - t * cdz) * (s.b.y + t * bdy - s.c.y - t * cdy)) +
+		(p.y - s.a.y - t * ady) * ((s.a.z + t * adz - s.c.z - t * cdz) * (s.b.x + t * bdx - s.c.x - t * cdx) - (s.a.x + t * adx - s.c.x - t * cdx) * (s.b.z + t * bdz - s.c.z - t * cdz)) +
+		(p.z - s.a.z - t * adz) * ((s.a.x + t * adx - s.c.x - t * cdx) * (s.b.y + t * bdy - s.c.y - t * cdy) - (s.a.y + t * ady - s.c.y - t * cdy) * (s.b.x + t * bdx - s.c.x - t * cdx))
+
+
+(p.x - s.a.x - t * adx) * ((s.a.y - s.c.y + t * (ady - cdy)) * (s.b.z - s.c.z + t * (bdz - cdz)) - (s.a.z - s.c.z + t * (adz - cdz)) * (s.b.y - s.c.y + t * (bdy - cdy)))
+(p.x - s.a.x - t * adx) * (((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz)) - ((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy)))
+((p.x - s.a.x) - t * adx) * (((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz)) - ((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy)))
+
+((s.a.y - s.c.y) + t * (ady - cdy)) * ((s.b.z - s.c.z) + t * (bdz - cdz))
+t * t * (ady - cdy) * (bdz - cdz) + t * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y)) + (s.a.y - s.c.y) * (s.b.z - s.c.z)
+
+((s.a.z - s.c.z) + t * (adz - cdz)) * ((s.b.y - s.c.y) + t * (bdy - cdy))
+t * t * (adz - cdz) * (bdy - cdy) + t * ((adz - cdz) * (s.b.y - s.c.y) + (bdy - cdy) * (s.a.z - s.c.z)) + (s.a.z - s.c.z) * (s.b.y - s.c.y)
+
+
+t * t * ((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) +
+		t * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z)) +
+		(s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)
+
+- t * t * t * ((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) * adx +
+		t * t * (((ady - cdy) * (bdz - cdz) - (adz - cdz) * (bdy - cdy)) * (p.x - s.a.x) - adx * ((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z))) +
+		t * (((ady - cdy) * (s.b.z - s.c.z) + (bdz - cdz) * (s.a.y - s.c.y) - (adz - cdz) * (s.b.y - s.c.y) - (bdy - cdy) * (s.a.z - s.c.z)) * (p.x - s.a.x) - adx * ((s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)))
+		((s.a.y - s.c.y) * (s.b.z - s.c.z) - (s.a.z - s.c.z) * (s.b.y - s.c.y)) * (p.x - s.a.x)
+*/

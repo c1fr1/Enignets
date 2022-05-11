@@ -17,9 +17,25 @@ open class SoundSource : Vector3f, Resource {
 
 	private val id = alGenSources()
 
-	private var volume = 0f
-	private var pitch = 0f
+	open var volume = 0f
+		set(value) {
+			alSourcef(id, AL_GAIN, value)
+			field = value
+		}
 
+	var pitch = 0f
+		set(value) {
+			alSourcef(id, AL_PITCH, value)
+			field = value
+		}
+
+	var looping = false
+		set(value) {
+			alSourcei(id, AL_LOOPING, if (value) 1 else 0)
+			field = value
+		}
+
+	constructor() : super()
 	constructor(d : Float) : super(d)
 	constructor(x : Float, y : Float, z : Float) : super(x, y, z)
 	constructor(v : Vector3fc) : super(v)
@@ -34,27 +50,9 @@ open class SoundSource : Vector3f, Resource {
 
 	init {
 		EnigContext.addResource(this)
-		setVolume(1f)
-		setPitch(1f)
+		volume = 1f
+		pitch = 1f
 		updateSourcePosition()
-	}
-
-	/**
-	 * sets the volume of the sound
-	 * @param newValue new volume
-	 */
-	open fun setVolume(newValue: Float) {
-		volume = newValue
-		alSourcef(id, AL_GAIN, volume)
-	}
-
-	/**
-	 * sets the pitch of the sound
-	 * @param newValue new pitch
-	 */
-	open fun setPitch(newValue: Float) {
-		pitch = newValue
-		alSourcef(id, AL_PITCH, pitch)
 	}
 
 	/**
@@ -115,6 +113,7 @@ open class SoundSource : Vector3f, Resource {
 	/**
 	 * tells the source to loop when playing a sound
 	 */
+	@Deprecated("set looping property")
 	open fun setLoop() {
 		alSourcei(id, AL_LOOPING, 1)
 	}
@@ -122,6 +121,7 @@ open class SoundSource : Vector3f, Resource {
 	/**
 	 * tells the source to not loop when playing a sound
 	 */
+	@Deprecated("set looping property")
 	open fun setNoLoop() {
 		alSourcei(id, AL_LOOPING, 0)
 	}

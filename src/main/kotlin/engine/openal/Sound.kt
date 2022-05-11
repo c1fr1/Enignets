@@ -4,11 +4,11 @@ import engine.getResourceStream
 import engine.opengl.GLResource
 import org.lwjgl.openal.AL10.*
 import org.lwjgl.stb.STBVorbis.*
-import org.lwjgl.stb.STBVorbisAlloc
 import org.lwjgl.stb.STBVorbisInfo
 import org.lwjgl.system.MemoryUtil
 import java.io.BufferedInputStream
 import java.io.IOException
+import java.io.InputStream
 import java.nio.*
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.UnsupportedAudioFileException
@@ -18,12 +18,11 @@ import javax.sound.sampled.UnsupportedAudioFileException
  * a lot of this is copied straight from the LWJGL github page, I couldn't find the WaveData class in the library that I had locally, so I went to the github page.
  * @param file file path to a .wav file
  */
-open class Sound(file: String) : GLResource(alGenBuffers()) {
+open class Sound : GLResource {
 
-	init {
+	constructor(stream : InputStream) : super(alGenBuffers()) {
 		try {
-			val url = BufferedInputStream(getResourceStream(file))
-			val ais = AudioSystem.getAudioInputStream(url)
+			val ais = AudioSystem.getAudioInputStream(stream)
 			val format = ais.format
 			var channels = 0
 			when (format.channels) {
@@ -67,7 +66,6 @@ open class Sound(file: String) : GLResource(alGenBuffers()) {
 				throw ioe
 			}
 
-
 			//create our result
 			alBufferData(id, channels, buffer, format.sampleRate.toInt())
 			buffer.clear()
@@ -77,7 +75,7 @@ open class Sound(file: String) : GLResource(alGenBuffers()) {
 				ais.close()
 			} catch (ioe: IOException) {}
 		} catch (e: UnsupportedAudioFileException) {
-			val oggBytes = getResourceStream(file).readBytes()
+			val oggBytes = stream.readBytes()
 			val oggFile = MemoryUtil.memCalloc(oggBytes.size)
 			oggFile.put(oggBytes)
 			oggFile.flip()
@@ -103,6 +101,12 @@ open class Sound(file: String) : GLResource(alGenBuffers()) {
 		} catch (e: IOException) {
 			e.printStackTrace()
 		}
+	}
+
+	constructor(file : String) : this(BufferedInputStream(getResourceStream(file)))
+
+	constructor(format : Int, buffer : ByteBuffer, sampleRate : Int) : super(alGenBuffers()) {
+		alBufferData(id, format, buffer, sampleRate)
 	}
 
 	override fun destroy() {

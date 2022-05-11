@@ -130,6 +130,10 @@ interface Bound3f {
 	fun intersect(other : Bound3f) = Box3d(
 		minx.coerceAtLeast(other.minx), miny.coerceAtLeast(other.miny), minz.coerceAtLeast(other.minz),
 		maxx.coerceAtMost(other.maxx), maxy.coerceAtMost(other.maxy), maxz.coerceAtMost(other.maxz))
+
+	fun union(other : Bound3f) = Box3d(
+		minx.coerceAtMost(other.minx), miny.coerceAtMost(other.miny), minz.coerceAtMost(other.minz),
+		maxx.coerceAtLeast(other.maxx), maxy.coerceAtLeast(other.maxy), maxz.coerceAtLeast(other.maxz))
 }
 
 interface Bound2f {
@@ -303,4 +307,23 @@ interface Bound2f {
 
 	fun intersect(other : Bound2f) = Box2d(minx.coerceAtMost(other.minx), maxx.coerceAtLeast(other.maxx),
 		miny.coerceAtMost(other.miny), maxy.coerceAtLeast(other.maxy))
+}
+
+fun<T : Bound3f> Collection<T>.calcBounds() : Box3d {
+	var minX = Float.MAX_VALUE
+	var maxX = Float.MIN_VALUE
+	var minY = Float.MAX_VALUE
+	var maxY = Float.MIN_VALUE
+	var minZ = Float.MAX_VALUE
+	var maxZ = Float.MIN_VALUE
+
+	for (item in this) {
+		minX = minX.coerceAtMost(item.minx)
+		maxX = maxX.coerceAtLeast(item.maxx)
+		minY = minY.coerceAtMost(item.miny)
+		maxY = maxY.coerceAtLeast(item.maxy)
+		minZ = minZ.coerceAtMost(item.minz)
+		maxZ = maxZ.coerceAtLeast(item.maxz)
+	}
+	return Box3d(minX, minY, minZ, maxX, maxY, maxZ)
 }
