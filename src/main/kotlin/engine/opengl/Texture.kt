@@ -7,6 +7,7 @@ import javax.imageio.ImageIO
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL13.GL_TEXTURE0
 import org.lwjgl.opengl.GL13.glActiveTexture
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.util.ArrayList
 
@@ -31,13 +32,19 @@ open class Texture : GLResource {
 	 * Creates a new texture object from an image
 	 * @param path path to the texture
 	 */
-	constructor(path: String) : this(ImageIO.read(getResourceStream(path)))
+	constructor(path : String) : this(getResourceStream(path))
+
+	/**
+	 * Creates a new texture object from a resource stream
+	 * @param stream input stream of a resource that has a file
+	 */
+	constructor(stream : InputStream) : this(ImageIO.read(stream))
 
 	/**
 	 * creates a new texture from a buffered image
 	 * @param bi image
 	 */
-	constructor(bi: BufferedImage) : this(bi.width, bi.height, bi.toByteBuffer())
+	constructor(bi : BufferedImage) : this(bi.width, bi.height, bi.toByteBuffer())
 
 	/**
 	 * creates a new empty texture given a width and height

@@ -13,10 +13,6 @@
  -m- fix operator get for VBOs with forced stride
  -m- see if private set vars can be made open (see inputhandler and window)
  -e- add VAO function to ??? WHAT??? TO DO WHAT?? WHY DID YOU WRITE THIS???
- -e- allow version to be specified in shaders
- -e- move soundSource options to public variables
- -e- add window resizeable property
- -e- make resource representations able to load resources that are outside of the jar
 
  - TESTING
 	- Ray2f (?)

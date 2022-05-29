@@ -1,8 +1,12 @@
 package engine.opengl.shaders
 
 import engine.getResource
+import engine.getResourceStream
 import engine.opengl.GLResource
 import org.lwjgl.opengl.GL20.*
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import kotlin.collections.ArrayList
 
 @Suppress("ConvertSecondaryConstructorToPrimary", "unused", "MemberVisibilityCanBePrivate")
@@ -17,9 +21,11 @@ open class Shader : GLResource {
 	 * @param path path to the shader
 	 * @param shaderType type of shader
 	 */
-	constructor(path : String, shaderType : ShaderType) : super(glCreateShader(shaderType.glID)) {
+	constructor(path : String, shaderType : ShaderType) : this(getResourceStream(path), shaderType)
+
+	constructor(stream : InputStream, shaderType : ShaderType) : super(glCreateShader(shaderType.glID)) {
 		var shaderSource = ""
-		val reader = getResource(path)
+		val reader = BufferedReader(InputStreamReader(stream))
 		var line = reader.readLine()
 		val tempInAttribList = ArrayList<Attribute>()
 		val tempOutAttribList = ArrayList<Attribute>()
@@ -29,7 +35,9 @@ open class Shader : GLResource {
 		var lastInAttribPos = -1
 		var lastOutAttribPos = -1
 
-		shaderSource += "#version 430 core\nlayout (std430) buffer;\n"
+		if (!line.startsWith("#version")) {
+			shaderSource += "#version 430 core\nlayout (std430) buffer;\n"
+		}
 
 		while (line != null) {
 			if (line.startsWith("#")) {
@@ -72,7 +80,7 @@ open class Shader : GLResource {
 		glShaderSource(id, shaderSource)
 		glCompileShader(id)
 
-		checkCompileStatus(path)
+		checkCompileStatus(shaderType.name)
 	}
 
 	private fun checkCompileStatus(path : String) {
@@ -103,4 +111,4 @@ open class Shader : GLResource {
 
 @Suppress("unused")
 open class GLShaderCompileException(identifier : String, glID : Int) :
-		Exception("Failed to compile shader $identifier!\n${glGetShaderInfoLog(glID)}")
+		Exception("Failed to compile $identifier shader!\n${glGetShaderInfoLog(glID)}")

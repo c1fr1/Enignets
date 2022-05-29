@@ -278,9 +278,11 @@ fun<T> solveDepressedCubic(p : Float, q : Float, callback : (Float, Float?, Floa
 fun Float.lerp(other : Float, t : Float) = this + t * (other - this)
 fun Double.lerp(other : Float, t : Float) = this + t * (other - this)
 
-fun loadScene(path : String) : AIScene {
+fun loadScene(path : String) = loadScene(getResourceStream(path))
 
-	val allBytes = getResourceStream(path).readBytes()
+fun loadScene(stream : InputStream) : AIScene {
+
+	val allBytes = stream.readBytes()
 	val buffer = MemoryUtil.memCalloc(allBytes.size)
 	buffer.put(allBytes)
 	buffer.flip()

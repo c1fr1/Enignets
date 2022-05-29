@@ -9,6 +9,7 @@ import engine.shapes.bounds.Bound3f
 import org.lwjgl.assimp.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL31.glDrawElementsInstanced
+import java.io.InputStream
 
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
@@ -176,6 +177,8 @@ open class VAO : GLResource {
 	}
 
 	constructor(scene : AIScene, index : Int, dynamic : Boolean = false) : this(AIMesh.create(scene.mMeshes()!![index]), dynamic)
+
+	constructor(stream : InputStream, index : Int, dynamic : Boolean = false) : this(loadScene(stream), index, dynamic)
 
 	constructor(file : String, index : Int, dynamic : Boolean = false) : this(loadScene(file), index, dynamic)
 

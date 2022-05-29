@@ -9,6 +9,7 @@ import org.lwjgl.stb.STBTruetype
 import org.lwjgl.system.MemoryUtil
 import org.lwjgl.system.MemoryUtil.memSlice
 import java.io.IOException
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
@@ -26,8 +27,12 @@ open class Font : Texture {
 	}
 
 	companion object {
-		operator fun invoke(path : String, fontSize : Float, width : Int, height : Int) : Font {
-			val allBytes = getResourceStream(path).readBytes()
+
+		operator fun invoke(path : String, fontSize : Float, width : Int, height : Int) =
+			invoke(getResourceStream(path), fontSize, width, height)
+
+		operator fun invoke(stream : InputStream, fontSize : Float, width : Int, height : Int) : Font {
+			val allBytes = stream.readBytes()
 			val fontData = MemoryUtil.memCalloc(allBytes.size)
 			fontData.put(allBytes)
 			fontData.flip()
