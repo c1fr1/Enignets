@@ -1,5 +1,6 @@
 package engine.opengl
 
+import engine.input.InputHandler
 import engine.makeGLFWImage
 import engine.opengl.shaders.ShaderProgram
 import org.lwjgl.glfw.Callbacks

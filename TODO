@@ -15,7 +15,6 @@
  -e- add VAO function to ??? WHAT??? TO DO WHAT?? WHY DID YOU WRITE THIS???
  -e- allow version to be specified in shaders
  -e- move soundSource options to public variables
- -e- make input easier to use
  -e- add window resizeable property
  -e- make resource representations able to load resources that are outside of the jar
 

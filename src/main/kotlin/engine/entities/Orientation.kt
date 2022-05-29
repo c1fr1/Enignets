@@ -1,6 +1,6 @@
 package engine.entities
 
-import engine.opengl.InputHandler
+import engine.input.InputHandler
 import engine.opengl.jomlExtensions.rotateXYZ
 import org.joml.Math.*
 import org.joml.Vector3f
