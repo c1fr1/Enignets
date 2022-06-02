@@ -4,16 +4,15 @@
  -h- take another look at buffers (and maybe redesign?)
  -h- clean collision
  -h- clean examples
- -h- turn into actual lib lul
  -m- create a renderbuffer class (NOTE, there is a resource array in FBO that will need to be removed!)
  -m- compare Simplex2v2d with Dark Forest version
  -m- share code from Shader and ComputeProgram
  -m- add pose class
  -m- move gl object handling to the window
- -m- fix operator get for VBOs with forced stride
  -m- see if private set vars can be made open (see inputhandler and window)
  -e- add VAO function to ??? WHAT??? TO DO WHAT?? WHY DID YOU WRITE THIS???
 
  - TESTING
 	- Ray2f (?)
 	- Mesh collision
+	- behaviour of VBO3s of various types (specifically get/set/init)

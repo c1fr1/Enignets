@@ -140,12 +140,12 @@ interface Vertex2DBuffer : VertexBuffer<Double> {
 }
 interface Vertex3DBuffer : VertexBuffer<Double> {
 	operator fun get(i : Int) : Vector3d {
-		return Vector3d(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
+		return Vector3d(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2))
 	}
 	operator fun set(i : Int, value : Vector3dc) {
-		internalSet(i * 3, value.x())
-		internalSet(i * 3 + 1, value.y())
-		internalSet(i * 3 + 2, value.z())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
 	}
 }
 interface Vertex4DBuffer : VertexBuffer<Double> {
@@ -171,12 +171,12 @@ interface Vertex2FBuffer : VertexBuffer<Float> {
 }
 interface Vertex3FBuffer : VertexBuffer<Float> {
 	operator fun get(i : Int) : Vector3f {
-		return Vector3f(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
+		return Vector3f(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2))
 	}
 	operator fun set(i : Int, value : Vector3fc) {
-		internalSet(i * 3, value.x())
-		internalSet(i * 3 + 1, value.y())
-		internalSet(i * 3 + 2, value.z())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
 	}
 }
 interface Vertex4FBuffer : VertexBuffer<Float> {
@@ -202,12 +202,12 @@ interface Vertex2IBuffer : VertexBuffer<Int> {
 }
 interface Vertex3IBuffer : VertexBuffer<Int> {
 	operator fun get(i : Int) : Vector3i {
-		return Vector3i(internalGet(i * 3), internalGet(i * 3 + 1), internalGet(i * 3 + 2))
+		return Vector3i(internalGet(i * 4), internalGet(i * 4 + 1), internalGet(i * 4 + 2))
 	}
 	operator fun set(i : Int, value : Vector3ic) {
-		internalSet(i * 3, value.x())
-		internalSet(i * 3 + 1, value.y())
-		internalSet(i * 3 + 2, value.z())
+		internalSet(i * 4, value.x())
+		internalSet(i * 4 + 1, value.y())
+		internalSet(i * 4 + 2, value.z())
 	}
 }
 interface Vertex4IBuffer : VertexBuffer<Int> {

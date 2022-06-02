@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val projectGroup = "c1fr1"
-val projectVersion = "1.0.1a_6"
+val projectVersion = "1.0.2"
 
 group = projectGroup
 version = projectVersion
