@@ -48,7 +48,7 @@ enum class KeyState(val isDown : Boolean, val intermediateState : Boolean) {
 	Pressed(true, true),
 	Down(true, false),
 	Released(false, true),
-	Up(false, true);
+	Up(false, false);
 
 	fun next() = when (intermediateState) {
 		true -> when (isDown) {
