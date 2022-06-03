@@ -235,7 +235,7 @@ open class Ray3f : Vector3f, Bound3f {
 	open operator fun plus(inc : Vector3fc) = Ray3f((this as Vector3fc) + inc, delta)
 	open operator fun plus(o : Ray3f) = Ray3f((this as Vector3fc) + o, delta + o.delta)
 	open operator fun minus(inc : Vector3fc) = Ray3f((this as Vector3fc) - inc, delta)
-	open operator fun minus(o : Ray3f) = Ray3f((this as Vector3fc) - o, delta + o.delta)
+	open operator fun minus(o : Ray3f) = Ray3f((this as Vector3fc) - o, delta - o.delta)
 	open operator fun times(s : Float) = Ray3f((this as Vector3fc) * s, s * delta)
 	override operator fun div(s : Float) = Ray3f((this as Vector3fc) / s, delta / s)
 
@@ -251,5 +251,5 @@ open class Ray3f : Vector3f, Bound3f {
 }
 
 operator fun Vector3fc.plus(r : Ray3f) = r + this
-operator fun Vector3fc.minus(r : Ray3f) = r - this
+operator fun Vector3fc.minus(r : Ray3f) = Ray3f(x() - r.x, y() - r.y, z() - r.z, -r.dx, -r.dy, -r.dz)
 operator fun Float.times(r : Ray3f) = r * this
